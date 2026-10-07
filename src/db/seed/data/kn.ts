@@ -16,18 +16,19 @@ export const kn: ExerciseSeed[] = [
     standardBereich: "8–12",
     steigerungsart: ["wdh", "tempo", "stufe"],
     ausfuehrung: [
-      "Stell dich vor einen stabilen Stuhl oder eine Box, die Füße hüftbreit, die Zehen leicht nach außen.",
+      "Stelle dich vor einen stabilen Stuhl oder eine Box, die Füße hüftbreit, die Zehen leicht nach außen.",
       "Schiebe das Gesäß nach hinten und beuge die Knie, der Oberkörper neigt sich dabei leicht nach vorn.",
       "Setze dich kontrolliert ab, ohne dich fallen zu lassen.",
       "Drücke dich über die ganze Fußsohle wieder nach oben, bis Hüfte und Knie gestreckt sind.",
     ],
     fehler: [
       "Knie fallen nach innen",
-      "Man plumpst auf den Sitz",
+      "Plumpsen auf den Sitz",
       "Fersen heben ab",
       "Rücken wird rund",
     ],
-    hinweise: "Stelle den Stuhl so ein, dass die Knie im Sitzen etwa im rechten Winkel stehen; eine höhere Sitzfläche macht es leichter. Zu leicht: KN-03 Kniebeuge mit Körpergewicht.",
+    hinweise:
+      "Wähle einen Stuhl so, dass die Knie im Sitzen etwa im rechten Winkel stehen; eine höhere Sitzfläche macht es leichter. Der Stuhl darf nicht wegrutschen, stelle ihn z. B. an die Wand. Zu leicht: KN-03 Kniebeuge mit Körpergewicht.",
   },
   {
     id: "KN-02",
@@ -45,9 +46,10 @@ export const kn: ExerciseSeed[] = [
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
       "Setze dich so hin, dass Rücken und Gesäß flach anliegen, und stelle die Füße etwa hüftbreit auf die Platte.",
-      "Löse die Sicherung und senke die Platte kontrolliert, bis die Knie etwa 90 Grad gebeugt sind.",
+      "Löse die Sicherung und senke die Platte kontrolliert, bis die Knie etwa 90° gebeugt sind.",
       "Drücke die Platte über die ganze Fußsohle weg, ohne die Knie durchzudrücken.",
       "Halte Gesäß und unteren Rücken die ganze Zeit am Polster.",
+      "Raste die Sicherung nach dem Satz wieder ein.",
     ],
     fehler: [
       "Knie werden am Ende ganz durchgestreckt",
@@ -55,7 +57,8 @@ export const kn: ExerciseSeed[] = [
       "Knie fallen nach innen",
       "Gewicht ist so hoch, dass die Bewegung nur sehr kurz ist",
     ],
-    hinweise: "Stelle den Sitz so ein, dass das Becken beim Beugen am Polster bleibt. Ohne Gerät: KN-03 Kniebeuge mit Körpergewicht oder KN-04 Goblet Squat.",
+    hinweise:
+      "Stelle den Sitz so ein, dass das Becken beim Beugen am Polster bleibt. Ohne Gerät: KN-03 Kniebeuge mit Körpergewicht.",
   },
   {
     id: "KN-03",
@@ -72,7 +75,7 @@ export const kn: ExerciseSeed[] = [
     standardBereich: "8–12",
     steigerungsart: ["wdh", "tempo", "stufe"],
     ausfuehrung: [
-      "Stell dich hüftbreit hin, die Zehen zeigen leicht nach außen, die Arme hältst du vor der Brust.",
+      "Stelle dich hüftbreit hin, die Zehen zeigen leicht nach außen, die Arme hältst du vor der Brust.",
       "Schiebe das Gesäß nach hinten und beuge dabei die Knie, der Rücken bleibt gerade.",
       "Gehe so tief, wie du den Rücken gerade und die Fersen am Boden halten kannst.",
       "Drücke dich über die ganze Fußsohle wieder nach oben.",
@@ -83,7 +86,8 @@ export const kn: ExerciseSeed[] = [
       "Rücken wird rund",
       "Oberkörper kippt weit nach vorn",
     ],
-    hinweise: "Die Knie dürfen leicht über die Zehen hinausgehen, wenn die Fersen am Boden bleiben. Zu schwer: KN-01 Kniebeuge auf Stuhl/Box. Zu leicht: KN-05 Split Squat (stationärer Ausfallschritt).",
+    hinweise:
+      "Die Knie dürfen leicht über die Zehen hinausgehen, wenn die Fersen am Boden bleiben. Zu schwer: KN-01 Kniebeuge auf Stuhl/Box. Zu leicht: KN-05 Split Squat (stationärer Ausfallschritt).",
   },
   {
     id: "KN-04",
@@ -101,7 +105,7 @@ export const kn: ExerciseSeed[] = [
     steigerungsart: ["wdh", "gewicht", "tempo", "stufe"],
     ausfuehrung: [
       "Halte die Kurzhantel senkrecht oder die Kettlebell am Horn mit beiden Händen vor der Brust, die Ellbogen zeigen nach unten.",
-      "Stell dich etwas mehr als hüftbreit hin, die Zehen zeigen leicht nach außen.",
+      "Stelle dich etwas mehr als hüftbreit hin, die Zehen zeigen leicht nach außen.",
       "Beuge Hüfte und Knie und gehe zwischen die Beine nach unten, der Oberkörper bleibt aufrecht.",
       "Drücke dich über die ganze Fußsohle wieder nach oben.",
     ],
@@ -111,7 +115,8 @@ export const kn: ExerciseSeed[] = [
       "Fersen heben ab",
       "Ellbogen sinken ab und der Rücken wird rund",
     ],
-    hinweise: "Das Gewicht vor der Brust hilft, den Oberkörper aufrecht zu halten. Ohne Gewicht: KN-03 Kniebeuge mit Körpergewicht. Zu leicht: KN-06 Ausfallschritt rückwärts.",
+    hinweise:
+      "Das Gewicht vor der Brust hilft, den Oberkörper aufrecht zu halten. Ohne Gewicht: KN-03 Kniebeuge mit Körpergewicht. Zu leicht: KN-06 Ausfallschritt rückwärts.",
   },
   {
     id: "KN-05",
@@ -128,7 +133,7 @@ export const kn: ExerciseSeed[] = [
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo", "stufe"],
     ausfuehrung: [
-      "Stell dich in eine weite Schrittstellung, das hintere Bein steht auf dem Fußballen, beide Füße zeigen nach vorn.",
+      "Stelle dich in eine weite Schrittstellung, das hintere Bein steht auf dem Fußballen, beide Füße zeigen nach vorn.",
       "Halte den Oberkörper aufrecht und senke das hintere Knie kontrolliert Richtung Boden.",
       "Das vordere Knie bleibt über dem Fuß, die vordere Ferse bleibt am Boden.",
       "Drücke dich über das vordere Bein wieder nach oben. Die Füße bleiben dabei an ihrem Platz.",
@@ -137,9 +142,10 @@ export const kn: ExerciseSeed[] = [
       "Schrittstellung ist zu kurz, das Knie schiebt weit über die Zehen",
       "Vorderes Knie fällt nach innen",
       "Oberkörper kippt nach vorn",
-      "Fuß steht auf einer schmalen Linie und man verliert das Gleichgewicht",
+      "Fuß steht auf einer schmalen Linie und das Gleichgewicht geht verloren",
     ],
-    hinweise: "Halte dich bei Bedarf an einer Wand oder Stuhllehne fest. Zu schwer: KN-03 Kniebeuge mit Körpergewicht. Zu leicht: KN-07 Bulgarian Split Squat.",
+    hinweise:
+      "Halte dich bei Bedarf an einer Wand oder Stuhllehne fest. Zu schwer: KN-03 Kniebeuge mit Körpergewicht. Zu leicht: KN-07 Bulgarian Split Squat.",
   },
   {
     id: "KN-06",
@@ -156,7 +162,7 @@ export const kn: ExerciseSeed[] = [
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
-      "Halte in jeder Hand eine Kurzhantel (oder eine Kettlebell vor der Brust) und stell dich aufrecht hin.",
+      "Halte in jeder Hand eine Kurzhantel (oder eine Kettlebell vor der Brust) und stelle dich aufrecht hin.",
       "Mache mit einem Bein einen großen Schritt nach hinten und setze den Fußballen auf.",
       "Senke das hintere Knie kontrolliert Richtung Boden, das vordere Knie bleibt über dem Fuß.",
       "Drücke dich über das vordere Bein zurück in den Stand.",
@@ -165,9 +171,10 @@ export const kn: ExerciseSeed[] = [
       "Schritt nach hinten ist zu klein",
       "Vorderes Knie fällt nach innen",
       "Oberkörper kippt nach vorn",
-      "Man schwingt mit Schwung aus dem Stand hoch",
+      "Schwung statt Kraft beim Hochkommen",
     ],
-    hinweise: "Der Schritt nach hinten ist für die Knie meist angenehmer als nach vorn. Zu schwer: KN-04 Goblet Squat. Ohne Hantel kannst du KN-05 Split Squat (stationärer Ausfallschritt) machen.",
+    hinweise:
+      "Der Schritt nach hinten ist für die Knie meist angenehmer als nach vorn. Zu schwer: KN-04 Goblet Squat. Ohne Hantel: KN-05 Split Squat (stationärer Ausfallschritt).",
   },
   {
     id: "KN-07",
@@ -184,7 +191,7 @@ export const kn: ExerciseSeed[] = [
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
-      "Stell dich etwa eine große Schrittlänge vor einen Stuhl oder eine Bank und lege den Fuß des hinteren Beins mit dem Spann darauf.",
+      "Stelle dich etwa eine große Schrittlänge vor einen Stuhl oder eine Bank und lege den Fuß des hinteren Beins mit dem Spann darauf.",
       "Halte den Oberkörper aufrecht und beuge das vordere Knie, bis der Oberschenkel etwa waagerecht ist.",
       "Das vordere Knie bleibt über dem Fuß, das Gewicht liegt auf der ganzen vorderen Fußsohle.",
       "Drücke dich über das vordere Bein wieder nach oben.",
@@ -193,9 +200,10 @@ export const kn: ExerciseSeed[] = [
       "Fuß steht zu nah am Stuhl, das Knie schiebt weit über die Zehen",
       "Vorderes Knie fällt nach innen",
       "Das hintere Bein drückt mit, statt nur zu stützen",
-      "Man wackelt, weil die Unterlage zu hoch oder instabil ist",
+      "Wackeln, weil die Unterlage zu hoch oder instabil ist",
     ],
-    hinweise: "Nutze einen stabilen Stuhl, der nicht wegrutscht; die Unterlage etwa in Kniehöhe. Zu schwer: KN-05 Split Squat (stationärer Ausfallschritt).",
+    hinweise:
+      "Wähle einen Stuhl so, dass die Unterlage etwa Kniehöhe hat und er nicht wegrutscht, z. B. an die Wand gestellt. Zu schwer: KN-05 Split Squat (stationärer Ausfallschritt).",
   },
   {
     id: "KN-08",
@@ -207,13 +215,13 @@ export const kn: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["Oberschenkelvorderseite", "Gesäß", "Rumpf", "unterer Rücken"],
+    hauptmuskeln: ["Oberschenkelvorderseite", "Gesäß", "Rumpf", "Rückenstrecker"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
       "Stelle die Stange im Rack auf etwa Schulterhöhe, lege sie auf den oberen Rücken und hebe sie aus der Halterung.",
-      "Gehe ein bis zwei Schritte zurück und stell dich etwas mehr als hüftbreit hin, die Zehen zeigen leicht nach außen.",
+      "Gehe ein bis zwei Schritte zurück und stelle dich etwas mehr als hüftbreit hin, die Zehen zeigen leicht nach außen.",
       "Spanne den Rumpf an, schiebe das Gesäß nach hinten und beuge die Knie, der Rücken bleibt gerade.",
       "Gehe so tief, wie du den Rücken gerade halten kannst, und drücke dich dann über die ganze Fußsohle nach oben.",
     ],
@@ -223,6 +231,7 @@ export const kn: ExerciseSeed[] = [
       "Oberkörper kippt nach vorn",
       "Fersen heben ab",
     ],
-    hinweise: "Stelle die Sicherheitsstreben im Rack so ein, dass du die Stange im Notfall absetzen kannst, oder trainiere mit Spotter. Zu schwer: KN-04 Goblet Squat oder KN-02 Beinpresse.",
+    hinweise:
+      "Stelle die Sicherheitsstreben knapp unter die tiefste Position. Lerne die Technik mit der leeren Stange. Zu schwer: KN-04 Goblet Squat oder KN-02 Beinpresse.",
   },
 ];

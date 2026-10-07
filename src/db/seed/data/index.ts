@@ -8,4 +8,13 @@ import { zv } from "./zv";
 import { tr } from "./tr";
 import { ru } from "./ru";
 
-export const uebungenSeed: ExerciseSeed[] = [...kn, ...hb, ...dh, ...dv, ...zh, ...zv, ...tr, ...ru];
+export const uebungenSeed: ExerciseSeed[] = [
+  ...kn,
+  ...hb,
+  ...dh,
+  ...dv,
+  ...zh,
+  ...zv,
+  ...tr,
+  ...ru,
+];

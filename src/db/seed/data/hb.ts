@@ -11,10 +11,10 @@ export const hb: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: "HB-03",
-    hauptmuskeln: ["Gesäß","Rückseite Oberschenkel","unterer Rücken"],
+    hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rückenstrecker"],
     belastungsart: "wdh",
     standardBereich: "10–15",
-    steigerungsart: ["wdh","tempo","stufe"],
+    steigerungsart: ["wdh", "tempo", "stufe"],
     ausfuehrung: [
       "Lege dich auf den Rücken, die Knie sind gebeugt, die Füße stehen hüftbreit nah am Gesäß.",
       "Spanne den Bauch leicht an und drücke die Fersen in den Boden.",
@@ -27,7 +27,8 @@ export const hb: ExerciseSeed[] = [
       "Füße stehen zu weit vom Gesäß entfernt, der Oberschenkel wird stärker belastet",
       "Becken fällt schnell nach unten",
     ],
-    hinweise: "Der Rücken bleibt in der Endposition gerade, das Becken wird nicht höher als bis zur Linie Schulter–Knie gedrückt. Zu leicht: HB-03 Einbeinige Hüftbrücke.",
+    hinweise:
+      "Der Rücken bleibt in der Endposition gerade, das Becken wird nicht höher als bis zur Linie Schulter–Knie gedrückt. Zu leicht: HB-03 Einbeinige Hüftbrücke.",
   },
   {
     id: "HB-02",
@@ -39,7 +40,7 @@ export const hb: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["unterer Rücken","Gesäß","Rückseite Oberschenkel"],
+    hauptmuskeln: ["Rückenstrecker", "Gesäß", "Oberschenkelrückseite"],
     belastungsart: "wdh",
     standardBereich: "10–15",
     steigerungsart: ["wdh", "gewicht", "tempo"],
@@ -56,7 +57,8 @@ export const hb: ExerciseSeed[] = [
       "Schwung aus dem Oberkörper",
       "Kopf wird in den Nacken gelegt",
     ],
-    hinweise: "Richte dich nur bis zur geraden Linie auf, nicht darüber hinaus. Ohne Gerät: HB-01 Hüftbrücke.",
+    hinweise:
+      "Richte dich nur bis zur geraden Linie auf, nicht darüber hinaus. Ohne Gerät: HB-01 Hüftbrücke.",
   },
   {
     id: "HB-03",
@@ -68,23 +70,20 @@ export const hb: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: "HB-01",
     schwererId: "HB-09",
-    hauptmuskeln: ["Gesäß","Rückseite Oberschenkel","Rumpf"],
+    hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rumpf"],
     belastungsart: "wdh",
     standardBereich: "8–12",
-    steigerungsart: ["wdh","tempo","stufe"],
+    steigerungsart: ["wdh", "tempo", "stufe"],
     ausfuehrung: [
-      "Lege dich auf den Rücken, ein Fuß steht nah am Gesäß, das andere Bein ist gestreckt oder angehoben.",
+      "Lege dich auf den Rücken, ein Fuß steht nah am Gesäß, das andere Bein ist gestreckt angehoben.",
       "Drücke die Ferse des Standbeins in den Boden und hebe das Becken.",
       "Halte das Becken waagerecht, es kippt nicht zur Seite ab.",
       "Spanne oben das Gesäß kurz an.",
       "Senke das Becken kontrolliert ab.",
     ],
-    fehler: [
-      "Becken kippt zur Seite",
-      "Hohlkreuz beim Hochdrücken",
-      "Schwung statt Kontrolle",
-    ],
-    hinweise: "Das freie Bein bleibt in Höhe des Oberschenkels des Standbeins, das hält den Rücken ruhig. Zu schwer: HB-01 Hüftbrücke, mehr Herausforderung: HB-09 Einbeiniges rumänisches Kreuzheben.",
+    fehler: ["Becken kippt zur Seite", "Hohlkreuz beim Hochdrücken", "Schwung statt Kontrolle"],
+    hinweise:
+      "Halte das freie Bein gestreckt in einer Linie mit dem Oberschenkel des Standbeins. Höher führt ins Hohlkreuz. Zu schwer: HB-01 Hüftbrücke. Zu leicht: HB-09 Einbeiniges rumänisches Kreuzheben.",
   },
   {
     id: "HB-04",
@@ -96,12 +95,12 @@ export const hb: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["Rückseite Oberschenkel","Gesäß","unterer Rücken"],
+    hauptmuskeln: ["Oberschenkelrückseite", "Gesäß", "Rückenstrecker"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
-      "Stehe hüftbreit, die Kurzhanteln halten sich vor den Oberschenkeln, die Knie sind leicht gebeugt.",
+      "Stehe hüftbreit, du hältst die Kurzhanteln vor den Oberschenkeln, die Knie sind leicht gebeugt.",
       "Schiebe das Gesäß nach hinten und lasse die Hanteln dicht am Bein nach unten gleiten.",
       "Halte den Rücken gerade, bis du ein Dehnen an der Oberschenkelrückseite spürst.",
       "Drücke die Hüfte nach vorn und richte dich auf.",
@@ -113,7 +112,8 @@ export const hb: ExerciseSeed[] = [
       "Knie beugen sich zu stark, es wird eine Kniebeuge",
       "Überstreckung oben",
     ],
-    hinweise: "Gehe nur so tief, wie der Rücken gerade bleibt, meist bis unter das Knie oder zur Mitte des Schienbeins. Zu schwer: HB-01 Hüftbrücke, zum Üben der Bewegung geht auch HB-05 Kettlebell-Kreuzheben.",
+    hinweise:
+      "Gehe nur so tief, wie der Rücken gerade bleibt, meist bis unter das Knie. Zu schwer: HB-01 Hüftbrücke oder HB-05 Kettlebell-Kreuzheben (zum Üben der Bewegung).",
   },
   {
     id: "HB-05",
@@ -125,10 +125,10 @@ export const hb: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: "HB-06",
-    hauptmuskeln: ["Gesäß","Rückseite Oberschenkel","unterer Rücken"],
+    hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rückenstrecker"],
     belastungsart: "wdh",
     standardBereich: "8–12",
-    steigerungsart: ["wdh","gewicht","tempo","stufe"],
+    steigerungsart: ["wdh", "gewicht", "tempo", "stufe"],
     ausfuehrung: [
       "Stelle dich hüftbreit hin, die Kettlebell steht zwischen den Füßen auf Höhe der Fußmitte.",
       "Schiebe das Gesäß nach hinten, beuge dich vor und greife die Kettlebell mit beiden Händen.",
@@ -142,7 +142,8 @@ export const hb: ExerciseSeed[] = [
       "Zu tiefe Kniebeuge statt Hüftbewegung",
       "Hohlkreuz im Stand",
     ],
-    hinweise: "Wenn die Beweglichkeit zum Greifen fehlt, erhöhe die Kettlebell auf einem Block oder Stapel Bücher. Als nächster Schritt: HB-06 Kettlebell-Swing.",
+    hinweise:
+      "Wenn die Beweglichkeit zum Greifen fehlt, erhöhe die Kettlebell auf einem Block oder Stapel Bücher. Zu leicht: HB-06 Kettlebell-Swing.",
   },
   {
     id: "HB-06",
@@ -154,16 +155,16 @@ export const hb: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: "HB-05",
     schwererId: null,
-    hauptmuskeln: ["Gesäß","Rückseite Oberschenkel","unterer Rücken","Schultern"],
+    hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rückenstrecker", "Schultern"],
     belastungsart: "wdh",
     standardBereich: "10–15",
     steigerungsart: ["wdh", "gewicht"],
     ausfuehrung: [
       "Stelle dich etwas mehr als hüftbreit hin, die Kettlebell steht ein Stück vor dir.",
-      "Greife sie mit beiden Händen, hebe sie nach hinten zwischen die Beine und schiebe das Gesäß zurück.",
+      "Greife sie mit beiden Händen, kippe die Hüfte und ziehe die Kettlebell nach hinten zwischen die Beine.",
       "Strecke die Hüfte kraftvoll nach vorn, die Kettlebell schwingt bis etwa auf Brusthöhe.",
       "Die Arme bleiben locker, die Kraft kommt aus der Hüfte.",
-      "Lasse die Kettlebell zurückfallen und schiebe die Hüfte wieder nach hinten.",
+      "Lasse die Kettlebell zurückschwingen und kippe die Hüfte wieder nach hinten.",
     ],
     fehler: [
       "Rücken rundet sich im Rückschwung",
@@ -171,7 +172,8 @@ export const hb: ExerciseSeed[] = [
       "Zu tiefe Kniebeuge statt Hüftbewegung",
       "Überstreckung im Hohlkreuz oben",
     ],
-    hinweise: "Wähle ein Gewicht, bei dem der Rücken in jeder Wiederholung gerade bleibt. Zu schwer: HB-05 Kettlebell-Kreuzheben, um die Hüftbewegung zuerst ohne Schwung zu üben.",
+    hinweise:
+      "Wähle ein Gewicht, bei dem der Rücken in jeder Wiederholung gerade bleibt. Halte den Platz frei. Brich bei nachlassender Technik ab und setze die Kettlebell vor dir ab, ohne sie abzufangen. Zu schwer: HB-05 Kettlebell-Kreuzheben, um die Hüftbewegung zuerst ohne Schwung zu üben.",
   },
   {
     id: "HB-07",
@@ -179,11 +181,11 @@ export const hb: ExerciseSeed[] = [
     muster: "HB",
     stufe: 3,
     einseitig: false,
-    equipment: [["bank"],["kurzhanteln","langhantel"]],
+    equipment: [["bank"], ["kurzhanteln", "langhantel"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["Gesäß","Rückseite Oberschenkel","Rumpf"],
+    hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rumpf"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo"],
@@ -200,7 +202,8 @@ export const hb: ExerciseSeed[] = [
       "Kopf fällt in den Nacken",
       "Hantel rutscht, weil sie nicht gesichert ist",
     ],
-    hinweise: "Ein Polster oder zusammengerolltes Handtuch unter der Hantel entlastet die Hüftknochen. Zu schwer: HB-01 Hüftbrücke oder HB-03 Einbeinige Hüftbrücke ohne Gewicht.",
+    hinweise:
+      "Ein Polster oder zusammengerolltes Handtuch unter der Hantel entlastet die Hüftknochen. Stelle die Bank an eine Wand. Bei der Langhantel muss sie gegen Wegrollen gesichert sein. Zu schwer: HB-01 Hüftbrücke oder HB-03 Einbeinige Hüftbrücke ohne Gewicht.",
   },
   {
     id: "HB-08",
@@ -212,7 +215,7 @@ export const hb: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["Rückseite Oberschenkel","Gesäß","unterer Rücken"],
+    hauptmuskeln: ["Oberschenkelrückseite", "Gesäß", "Rückenstrecker"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo"],
@@ -229,7 +232,8 @@ export const hb: ExerciseSeed[] = [
       "Knie beugen sich zu stark, es wird eine Kniebeuge",
       "Überstreckung oben",
     ],
-    hinweise: "Beginne mit leichtem Gewicht und achte auf einen geraden Rücken. Zu schwer: HB-04 Rumänisches Kreuzheben mit Kurzhanteln.",
+    hinweise:
+      "Beginne mit leichtem Gewicht und achte auf einen geraden Rücken. Zu schwer: HB-04 Rumänisches Kreuzheben mit Kurzhanteln.",
   },
   {
     id: "HB-09",
@@ -238,13 +242,13 @@ export const hb: ExerciseSeed[] = [
     stufe: 4,
     einseitig: true,
     equipment: [],
-    optionaleLast: ["kurzhanteln","kettlebell"],
+    optionaleLast: ["kurzhanteln", "kettlebell"],
     leichterId: "HB-03",
     schwererId: null,
-    hauptmuskeln: ["Gesäß","Rückseite Oberschenkel","Rumpf"],
+    hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rumpf"],
     belastungsart: "wdh",
     standardBereich: "8–12",
-    steigerungsart: ["wdh","gewicht","tempo"],
+    steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
       "Stehe auf einem Bein, das Standknie ist leicht gebeugt, ein Gewicht hältst du bei Bedarf in der Hand.",
       "Kippe den Oberkörper nach vorn und führe das andere Bein gestreckt nach hinten.",
@@ -258,6 +262,7 @@ export const hb: ExerciseSeed[] = [
       "Standbein beugt sich zu stark",
       "Gewicht schwingt vom Körper weg",
     ],
-    hinweise: "Eine Hand an Wand oder Stuhl hilft beim Gleichgewicht. Zu schwer: HB-03 Einbeinige Hüftbrücke.",
+    hinweise:
+      "Eine Hand an Wand oder Stuhl hilft beim Gleichgewicht. Zu schwer: HB-03 Einbeinige Hüftbrücke.",
   },
 ];

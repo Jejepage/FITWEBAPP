@@ -11,7 +11,7 @@ export const ru: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: "RU-06",
-    hauptmuskeln: ["gerade Bauchmuskeln", "tiefe Rumpfmuskulatur", "Hüftbeuger"],
+    hauptmuskeln: ["gerade Bauchmuskeln", "Rumpf", "Hüftbeuger"],
     belastungsart: "wdh",
     standardBereich: "10–15",
     steigerungsart: ["wdh", "tempo", "stufe"],
@@ -21,12 +21,9 @@ export const ru: ExerciseSeed[] = [
       "Senke den rechten Arm und das linke Bein langsam Richtung Boden, ohne dass der Rücken abhebt.",
       "Hole beides zurück und wechsle die Seite; atme dabei ruhig weiter.",
     ],
-    fehler: [
-      "Hohlkreuz beim Absenken",
-      "Zu schnelle, schwungvolle Bewegung",
-      "Luft anhalten",
-    ],
-    hinweise: "Bewege Arm und Bein nur so weit, wie der untere Rücken am Boden bleibt. Zu leicht: RU-06 Hollow Hold.",
+    fehler: ["Hohlkreuz beim Absenken", "Zu schnelle, schwungvolle Bewegung", "Luft anhalten"],
+    hinweise:
+      "Bewege Arm und Bein nur so weit, wie der untere Rücken am Boden bleibt. Zu leicht: RU-06 Hollow Hold.",
   },
   {
     id: "RU-02",
@@ -38,7 +35,7 @@ export const ru: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["tiefe Rumpfmuskulatur", "Rückenstrecker", "Gesäßmuskeln", "Schultermuskulatur"],
+    hauptmuskeln: ["Rumpf", "Rückenstrecker", "Gesäß", "Schultern"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "tempo"],
@@ -53,7 +50,8 @@ export const ru: ExerciseSeed[] = [
       "Hüfte kippt oder dreht zur Seite",
       "Bein wird zu hoch gehoben",
     ],
-    hinweise: "Hebe das Bein nur bis auf Hüfthöhe. Bei empfindlichen Handgelenken kannst du die Hände zu Fäusten ballen oder auf Hanteln abstützen. Zu schwer: RU-01 Dead Bug.",
+    hinweise:
+      "Hebe das Bein nur bis auf Hüfthöhe. Bei empfindlichen Handgelenken kannst du die Hände zu Fäusten ballen. Zu schwer: RU-01 Dead Bug.",
   },
   {
     id: "RU-03",
@@ -65,7 +63,7 @@ export const ru: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: "RU-04",
-    hauptmuskeln: ["gerade Bauchmuskeln", "tiefe Rumpfmuskulatur", "Schultermuskulatur", "Gesäßmuskeln"],
+    hauptmuskeln: ["gerade Bauchmuskeln", "Rumpf", "Schultern", "Gesäß"],
     belastungsart: "zeit",
     standardBereich: "20–40 s",
     steigerungsart: ["zeit", "stufe"],
@@ -81,7 +79,8 @@ export const ru: ExerciseSeed[] = [
       "Nacken überstreckt",
       "Luft anhalten",
     ],
-    hinweise: "Beende den Satz, sobald du die Körperspannung nicht mehr halten kannst. Zu schwer: Plank mit Knien am Boden oder RU-01 Dead Bug. Zu leicht: RU-04 Seitstütz.",
+    hinweise:
+      "Beende den Satz, sobald du die Körperspannung nicht mehr halten kannst. Zu schwer: Plank mit Knien am Boden oder RU-01 Dead Bug. Zu leicht: RU-04 Seitstütz.",
   },
   {
     id: "RU-04",
@@ -93,7 +92,7 @@ export const ru: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: "RU-03",
     schwererId: null,
-    hauptmuskeln: ["schräge Bauchmuskeln", "tiefe Rumpfmuskulatur", "Gesäßmuskeln", "Schultermuskulatur"],
+    hauptmuskeln: ["schräge Bauchmuskeln", "Rumpf", "Gesäß", "Schultern"],
     belastungsart: "zeit",
     standardBereich: "15–30 s",
     steigerungsart: ["zeit"],
@@ -108,7 +107,8 @@ export const ru: ExerciseSeed[] = [
       "Rumpf kippt nach vorn oder hinten",
       "Schulter sackt in Richtung Ohr",
     ],
-    hinweise: "Stelle bei Bedarf die Knie angewinkelt auf, um es leichter zu machen. Zu schwer: RU-03 Unterarmstütz (Plank).",
+    hinweise:
+      "Stelle bei Bedarf die Knie angewinkelt auf, um es leichter zu machen. Zu schwer: RU-03 Unterarmstütz (Plank).",
   },
   {
     id: "RU-05",
@@ -116,11 +116,11 @@ export const ru: ExerciseSeed[] = [
     muster: "RU",
     stufe: 2,
     einseitig: true,
-    equipment: [["maschinen","band"]],
+    equipment: [["maschinen", "band"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["schräge Bauchmuskeln", "tiefe Rumpfmuskulatur", "Gesäßmuskeln"],
+    hauptmuskeln: ["schräge Bauchmuskeln", "Rumpf", "Gesäß"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "tempo", "gewicht"],
@@ -135,7 +135,8 @@ export const ru: ExerciseSeed[] = [
       "Hohlkreuz oder Ausweichen der Hüfte",
       "Zu viel Widerstand, sodass der Rumpf nachgibt",
     ],
-    hinweise: "Wähle den Widerstand so, dass der Oberkörper stabil bleibt. Zu schwer: RU-01 Dead Bug.",
+    hinweise:
+      "Wähle den Widerstand so, dass der Oberkörper stabil bleibt. Zu schwer: RU-01 Dead Bug.",
   },
   {
     id: "RU-06",
@@ -147,7 +148,7 @@ export const ru: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: "RU-01",
     schwererId: null,
-    hauptmuskeln: ["gerade Bauchmuskeln", "tiefe Rumpfmuskulatur", "Hüftbeuger"],
+    hauptmuskeln: ["gerade Bauchmuskeln", "Rumpf", "Hüftbeuger"],
     belastungsart: "zeit",
     standardBereich: "15–30 s",
     steigerungsart: ["zeit"],
@@ -162,7 +163,8 @@ export const ru: ExerciseSeed[] = [
       "Beine zu tief für die eigene Kraft",
       "Nacken wird nach vorn gezogen",
     ],
-    hinweise: "Hebe die Beine höher oder beuge die Knie, wenn der Rücken abhebt. Zu schwer: RU-01 Dead Bug.",
+    hinweise:
+      "Hebe die Beine höher oder beuge die Knie, wenn der Rücken abhebt. Zu schwer: RU-01 Dead Bug.",
   },
   {
     id: "RU-07",
@@ -174,7 +176,7 @@ export const ru: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["gerade Bauchmuskeln", "Hüftbeuger", "Unterarm- und Griffmuskulatur"],
+    hauptmuskeln: ["gerade Bauchmuskeln", "Hüftbeuger", "Unterarme"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "tempo"],
@@ -189,7 +191,8 @@ export const ru: ExerciseSeed[] = [
       "Nur Beine heben, ohne das Becken zu kippen",
       "Schultern hängen passiv im Gelenk",
     ],
-    hinweise: "Bei Beschwerden an Schulter oder Handgelenk lieber eine andere Übung wählen. Zu schwer: RU-06 Hollow Hold oder RU-01 Dead Bug.",
+    hinweise:
+      "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Stelle zum Beenden erst die Füße ab, dann lasse die Stange los. Bei Beschwerden an Schulter oder Handgelenk lieber eine andere Übung wählen. Zu schwer: RU-06 Hollow Hold oder RU-01 Dead Bug.",
   },
   {
     id: "RU-08",
@@ -201,10 +204,10 @@ export const ru: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["tiefe Rumpfmuskulatur", "schräge Bauchmuskeln", "Schultermuskulatur", "Gesäßmuskeln"],
+    hauptmuskeln: ["Rumpf", "schräge Bauchmuskeln", "Schultern", "Gesäß"],
     belastungsart: "wdh",
-    standardBereich: "6–10",
-    steigerungsart: ["wdh", "tempo", "gewicht"],
+    standardBereich: "3–5",
+    steigerungsart: ["wdh", "gewicht"],
     ausfuehrung: [
       "Lege dich auf den Rücken, halte die Kettlebell mit gestrecktem Arm senkrecht über der Schulter, den Blick auf das Gewicht.",
       "Stütze dich über den Ellbogen und die Hand auf und komme in den Sitz.",
@@ -216,6 +219,7 @@ export const ru: ExerciseSeed[] = [
       "Zu hohes Tempo, Schritte werden ausgelassen",
       "Blick löst sich vom Gewicht",
     ],
-    hinweise: "Übe die Abfolge zuerst ohne Gewicht, dann mit einem Schuh auf der Faust, bevor du die Kettlebell nimmst. Zu schwer: RU-02 Bird Dog oder RU-04 Seitstütz.",
+    hinweise:
+      "Übe die Abfolge langsam und Schritt für Schritt. Zu schwer: erst ohne Gewicht üben (Schuh auf der Faust).",
   },
 ];

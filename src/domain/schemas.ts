@@ -24,7 +24,7 @@ export const exerciseSchema = z.object({
   optionaleLast: z.array(equipmentArtSchema),
   leichterId: z.string().nullable(),
   schwererId: z.string().nullable(),
-  hauptmuskeln: z.array(z.string().min(1)).min(1),
+  hauptmuskeln: z.array(z.string().min(1)).min(1).max(4),
   belastungsart: z.enum(BELASTUNGSARTEN),
   standardBereich: z.string().regex(STANDARD_BEREICH_RE),
   steigerungsart: z.array(z.enum(STEIGERUNGSARTEN)).min(1),

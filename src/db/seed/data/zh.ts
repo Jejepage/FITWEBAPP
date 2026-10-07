@@ -16,10 +16,10 @@ export const zh: ExerciseSeed[] = [
     standardBereich: "8–12",
     steigerungsart: ["gewicht", "wdh", "tempo"],
     ausfuehrung: [
-      "Setz dich aufrecht an das Gerät, Füße fest auf der Platte, Knie leicht gebeugt.",
-      "Greif den Griff mit gestreckten Armen und halte den Oberkörper aufrecht.",
-      "Zieh den Griff zum Bauchnabel und führe die Schulterblätter dabei zusammen.",
-      "Halte kurz und lass den Griff kontrolliert wieder nach vorn gleiten.",
+      "Setze dich aufrecht an das Gerät, Füße fest auf der Platte, Knie leicht gebeugt.",
+      "Greife den Griff mit gestreckten Armen und halte den Oberkörper aufrecht.",
+      "Ziehe den Griff zum Bauchnabel und führe die Schulterblätter dabei zusammen.",
+      "Halte kurz und lasse den Griff kontrolliert wieder nach vorn gleiten.",
     ],
     fehler: [
       "Oberkörper schwingt mit Schwung vor und zurück",
@@ -27,7 +27,8 @@ export const zh: ExerciseSeed[] = [
       "Rücken rundet sich beim Strecken der Arme",
       "Gewicht wird nur mit den Armen gezogen",
     ],
-    hinweise: "Der Rücken bleibt gerade und lang, auch wenn die Arme ganz gestreckt sind. Ohne Studio-Gerät: ZH-02 Rudern mit Band.",
+    hinweise:
+      "Der Rücken bleibt gerade und lang, auch wenn die Arme ganz gestreckt sind. Ohne Studio-Gerät: ZH-02 Rudern mit Band.",
   },
   {
     id: "ZH-02",
@@ -39,15 +40,15 @@ export const zh: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["oberer Rücken", "Latissimus", "hintere Schulter", "Bizeps"],
+    hauptmuskeln: ["oberer Rücken", "Latissimus", "Schultern", "Bizeps"],
     belastungsart: "wdh",
     standardBereich: "10–15",
     steigerungsart: ["wdh", "tempo"],
     ausfuehrung: [
-      "Befestige das Band auf Brusthöhe an einem stabilen Punkt und fass beide Enden.",
-      "Geh so weit zurück, dass das Band gespannt ist, und stell dich hüftbreit mit leicht gebeugten Knien hin.",
-      "Zieh die Hände zu den Rippen und führe die Ellbogen eng am Körper nach hinten.",
-      "Drück die Schulterblätter kurz zusammen und lass das Band langsam zurückfahren.",
+      "Befestige das Band auf Brusthöhe an einem stabilen Punkt und fasse beide Enden.",
+      "Gehe so weit zurück, dass das Band gespannt ist, und stelle dich hüftbreit mit leicht gebeugten Knien hin.",
+      "Ziehe die Hände zu den Rippen und führe die Ellbogen eng am Körper nach hinten.",
+      "Drücke die Schulterblätter kurz zusammen und lasse das Band langsam zurückfahren.",
     ],
     fehler: [
       "Band ist nicht sicher befestigt",
@@ -55,7 +56,8 @@ export const zh: ExerciseSeed[] = [
       "Schultern wandern zu den Ohren",
       "Band schnellt unkontrolliert zurück",
     ],
-    hinweise: "Prüfe Band und Befestigung vor jedem Satz auf Risse und festen Halt. Zu leicht: ZH-05 Brustgestütztes Kurzhantelrudern.",
+    hinweise:
+      "Prüfe Band und Befestigung vor jedem Satz auf Risse und festen Halt. Zu leicht: ZH-05 Brustgestütztes Kurzhantelrudern.",
   },
   {
     id: "ZH-03",
@@ -63,18 +65,18 @@ export const zh: ExerciseSeed[] = [
     muster: "ZH",
     stufe: 2,
     einseitig: true,
-    equipment: [["kurzhanteln"],["bank"]],
+    equipment: [["kurzhanteln"], ["bank"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["Latissimus", "oberer Rücken", "hintere Schulter", "Bizeps"],
+    hauptmuskeln: ["Latissimus", "oberer Rücken", "Schultern", "Bizeps"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["gewicht", "wdh", "tempo"],
     ausfuehrung: [
-      "Stütz eine Hand und das gleiche Knie auf die Bank, das andere Bein steht fest daneben.",
+      "Stütze eine Hand und das gleiche Knie auf die Bank, das andere Bein steht fest daneben.",
       "Halte den Rücken gerade und lang, der Blick geht zum Boden.",
-      "Zieh die Kurzhantel mit hängendem Arm in Richtung Hüfte, der Ellbogen bleibt nah am Körper.",
+      "Ziehe die Kurzhantel mit hängendem Arm in Richtung Hüfte, der Ellbogen bleibt nah am Körper.",
       "Senke die Hantel kontrolliert ab, bis der Arm gestreckt ist.",
     ],
     fehler: [
@@ -83,7 +85,8 @@ export const zh: ExerciseSeed[] = [
       "Hantel wird mit Schwung hochgerissen",
       "Schulter hängt unten nach vorn",
     ],
-    hinweise: "Zieh die Hantel eher zur Hüfte als zur Brust, das schont die Schulter. Ohne Bank: ZH-04 Einarmiges Kettlebell-Rudern; mehr Stütze: ZH-05 Brustgestütztes Kurzhantelrudern.",
+    hinweise:
+      "Ziehe die Hantel eher zur Hüfte als zur Brust, das schont die Schulter. Ohne Bank: ZH-04 Einarmiges Kettlebell-Rudern. Zu schwer: ZH-05 Brustgestütztes Kurzhantelrudern (mehr Stütze).",
   },
   {
     id: "ZH-04",
@@ -95,14 +98,14 @@ export const zh: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["Latissimus", "oberer Rücken", "hintere Schulter", "Bizeps"],
+    hauptmuskeln: ["Latissimus", "oberer Rücken", "Schultern", "Bizeps"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["gewicht", "wdh", "tempo"],
     ausfuehrung: [
-      "Stell dich schulterbreit hin, beug die Hüfte nach hinten und stütz die freie Hand auf dem Oberschenkel oder einem Stuhl ab.",
+      "Stelle dich schulterbreit hin, beuge die Hüfte nach hinten und stütze die freie Hand auf dem Oberschenkel oder einem Stuhl ab.",
       "Halte den Rücken gerade, die Kettlebell hängt mit gestrecktem Arm vor dir.",
-      "Zieh die Kettlebell zur Hüfte, der Ellbogen führt eng am Körper nach hinten.",
+      "Ziehe die Kettlebell zur Hüfte, der Ellbogen führt eng am Körper nach hinten.",
       "Senke sie kontrolliert wieder ab, ohne den Oberkörper aufzurichten.",
     ],
     fehler: [
@@ -111,7 +114,8 @@ export const zh: ExerciseSeed[] = [
       "Kettlebell pendelt oder wird hochgeschwungen",
       "Becken dreht mit",
     ],
-    hinweise: "Die Kettlebell hängt neben dem Bein, der Griff bleibt dabei fest. Alternative mit Bank: ZH-03 Einarmiges Kurzhantelrudern auf der Bank.",
+    hinweise:
+      "Die Kettlebell hängt neben dem Bein, der Griff bleibt dabei fest. Mit Bank: ZH-03 Einarmiges Kurzhantelrudern auf der Bank.",
   },
   {
     id: "ZH-05",
@@ -119,18 +123,18 @@ export const zh: ExerciseSeed[] = [
     muster: "ZH",
     stufe: 2,
     einseitig: false,
-    equipment: [["kurzhanteln"],["bank"]],
+    equipment: [["kurzhanteln"], ["bank"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: "ZH-06",
-    hauptmuskeln: ["oberer Rücken", "Latissimus", "hintere Schulter", "Bizeps"],
+    hauptmuskeln: ["oberer Rücken", "Latissimus", "Schultern", "Bizeps"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["gewicht", "wdh", "tempo", "stufe"],
     ausfuehrung: [
-      "Stell die Bank leicht schräg und leg dich mit der Brust darauf, je eine Kurzhantel in den Händen.",
-      "Lass die Arme gestreckt hängen, die Füße stehen fest am Boden.",
-      "Zieh beide Ellbogen schräg nach hinten oben und führe die Schulterblätter zusammen.",
+      "Stelle die Bank leicht schräg und lege dich mit der Brust darauf, je eine Kurzhantel in den Händen.",
+      "Lasse die Arme gestreckt hängen, die Füße stehen fest am Boden.",
+      "Ziehe beide Ellbogen schräg nach hinten oben und führe die Schulterblätter zusammen.",
       "Senke die Hanteln langsam ab, ohne den Brustkorb von der Bank zu lösen.",
     ],
     fehler: [
@@ -139,7 +143,7 @@ export const zh: ExerciseSeed[] = [
       "Hanteln werden mit Schwung hochgezogen",
       "Schultern hochgezogen",
     ],
-    hinweise: "Die Bank stützt den Rücken, daher ist die Übung für Einsteiger und bei empfindlichem unterem Rücken gut geeignet. Zu leicht: ZH-06 Vorgebeugtes Kurzhantelrudern.",
+    hinweise: "Die Bank stützt den Oberkörper. Zu leicht: ZH-06 Vorgebeugtes Kurzhantelrudern.",
   },
   {
     id: "ZH-06",
@@ -151,14 +155,14 @@ export const zh: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: "ZH-05",
     schwererId: null,
-    hauptmuskeln: ["oberer Rücken", "Latissimus", "unterer Rücken", "Bizeps"],
+    hauptmuskeln: ["oberer Rücken", "Latissimus", "Rückenstrecker", "Bizeps"],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["gewicht", "wdh", "tempo"],
     ausfuehrung: [
-      "Steh hüftbreit, die Knie leicht gebeugt, und halte in jeder Hand eine Kurzhantel.",
-      "Beug dich mit geradem Rücken aus der Hüfte vor, bis der Oberkörper etwa 45 Grad geneigt ist.",
-      "Zieh beide Hanteln zu den Rippen und führe die Schulterblätter zusammen.",
+      "Stehe hüftbreit, die Knie leicht gebeugt, und halte in jeder Hand eine Kurzhantel.",
+      "Beuge dich mit geradem Rücken aus der Hüfte vor, bis der Oberkörper etwa 45° geneigt ist.",
+      "Ziehe beide Hanteln zu den Rippen und führe die Schulterblätter zusammen.",
       "Senke die Hanteln kontrolliert ab und halte die Rumpfspannung.",
     ],
     fehler: [
@@ -167,7 +171,8 @@ export const zh: ExerciseSeed[] = [
       "Hanteln werden mit Schwung hochgerissen",
       "Nacken ist überstreckt, Blick geht nach vorn",
     ],
-    hinweise: "Der untere Rücken hält die Position, nimm daher zuerst nur leichte Gewichte. Zu schwer oder bei Rückenbeschwerden: ZH-05 Brustgestütztes Kurzhantelrudern; ohne Hanteln: ZH-07 Rudern unter dem Tisch.",
+    hinweise:
+      "Der untere Rücken hält die Position, nimm daher zuerst nur leichte Gewichte. Zu schwer oder wenn du die Position nicht halten kannst: ZH-05 Brustgestütztes Kurzhantelrudern; ohne Hanteln: ZH-07 Rudern unter dem Tisch.",
   },
   {
     id: "ZH-07",
@@ -179,14 +184,14 @@ export const zh: ExerciseSeed[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
-    hauptmuskeln: ["oberer Rücken", "Latissimus", "hintere Schulter", "Bizeps"],
+    hauptmuskeln: ["oberer Rücken", "Latissimus", "Schultern", "Bizeps"],
     belastungsart: "wdh",
     standardBereich: "6–10",
     steigerungsart: ["wdh", "tempo"],
     ausfuehrung: [
-      "Leg dich unter einen stabilen, schweren Tisch und fass die Tischkante schulterbreit.",
-      "Spann Gesäß und Bauch an, sodass dein Körper vom Kopf bis zu den Fersen eine Linie bildet.",
-      "Zieh die Brust zur Tischkante und führe die Schulterblätter zusammen.",
+      "Lege dich unter einen stabilen, schweren Tisch und fasse die Tischkante schulterbreit.",
+      "Spanne Gesäß und Bauch an, sodass dein Körper vom Kopf bis zu den Fersen eine Linie bildet.",
+      "Ziehe die Brust zur Tischkante und führe die Schulterblätter zusammen.",
       "Senke dich kontrolliert ab, bis die Arme gestreckt sind.",
     ],
     fehler: [
@@ -195,6 +200,7 @@ export const zh: ExerciseSeed[] = [
       "Schultern hochgezogen",
       "Der Körper schwingt mit Schwung nach oben",
     ],
-    hinweise: "Sicherheit: Nutze nur einen sehr stabilen Tisch, der dein Körpergewicht trägt und nicht rutscht oder kippt; teste ihn vorher mit Zug. Zu schwer: Beug die Knie und stell die Füße auf, oder wähl ZH-02 Rudern mit Band.",
+    hinweise:
+      "Sicherheit: Nutze nur einen sehr stabilen Tisch, der dein Körpergewicht trägt und nicht rutscht oder kippt; teste ihn vorher mit Zug. Die Tischplatte muss fest verbunden sein. Zu schwer: Beuge die Knie und stelle die Füße auf, oder wähle ZH-02 Rudern mit Band.",
   },
 ];
