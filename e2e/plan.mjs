@@ -44,14 +44,10 @@ async function ablauf(browser, dbPfad) {
   // 2. Vorschau mit Standardwerten: 16 Slots, Studio, Zusatzblock aus
   assert.equal(await page.locator("select[name^=slot_]").count(), 16);
   assert.equal(
-    await page.getByLabel("Equipment-Profil").inputValue(),
-    await page.getByLabel("Equipment-Profil").locator("option:checked").getAttribute("value"),
-  );
-  assert.equal(
     await page.getByLabel("Equipment-Profil").locator("option:checked").innerText(),
     "Studio",
   );
-  assert.equal(await page.getByLabel(/Zusatzblock/).isChecked(), false);
+  assert.equal(await page.getByRole("checkbox", { name: /Zusatzblock/ }).isChecked(), false);
   assert.ok((await page.getByLabel("Startdatum").inputValue()).match(/^\d{4}-\d{2}-\d{2}$/));
   await keinHorizontalScroll("Vorschau");
   await shot("2-vorschau");
@@ -67,8 +63,34 @@ async function ablauf(browser, dbPfad) {
   assert.equal(werte["A-1-3"], "ZH-07");
   assert.equal(werte["B-2-3"], "ZH-07");
   assert.ok(page.url().includes("profil="));
+  // Keine Mischpläne: Die Studio-Wahl aus der vorigen Vorschau darf nicht in den neuen Vorschlag wandern.
+  assert.equal(await page.getByText(/obwohl es Alternativen gibt/).count(), 0);
+  const nachProfilwechsel = await slotWerte(page);
+  for (const [a, b] of [
+    ["A-1-1", "B-2-2"], // KN
+    ["A-2-1", "B-1-1"], // HB
+    ["A-1-2", "B-1-2"], // DH
+    ["A-2-2", "B-2-2"], // DV
+    ["A-2-3", "B-1-3"], // ZV
+    ["A-Z-1", "B-Z-1"], // TR
+    ["A-Z-2", "B-Z-2"], // RU
+  ]) {
+    assert.notEqual(nachProfilwechsel[a], nachProfilwechsel[b], `A und B verschieden (${a}/${b})`);
+  }
   await shot("3-unterwegs");
   schritt("Unterwegs: ZH-07 in A und B mit Hinweis");
+
+  // Profil wechseln und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
+  await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
+  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
+  await page.getByText(/Eine gewählte Übung ist nicht mehr verfügbar/).waitFor();
+  assert.equal(
+    new Database(dbPfad, { readonly: true }).prepare("select count(*) c from plan").get().c,
+    0,
+  );
+  await page.getByLabel("Equipment-Profil").selectOption({ label: "Unterwegs" });
+  await aktualisieren();
+  schritt("Profilwechsel ohne Aktualisieren lässt sich nicht speichern");
 
   // 4. Manuell tauschen und aktualisieren: Wahl bleibt erhalten
   const kn = page.locator("select[name='slot_A-1-1']");
@@ -126,13 +148,13 @@ async function ablauf(browser, dbPfad) {
   // 9. Plan speichern (Studio, 3 Einheiten, Zusatzblock an)
   await page.goto(`${BASE}/plan/neu`);
   await page.getByLabel("3 Einheiten pro Woche").check();
-  await page.getByLabel(/Zusatzblock/).check();
+  await page.getByRole("checkbox", { name: /Zusatzblock/ }).check();
   await aktualisieren();
   assert.ok(await page.getByLabel("3 Einheiten pro Woche").isChecked());
-  assert.ok(await page.getByLabel(/Zusatzblock/).isChecked());
+  assert.ok(await page.getByRole("checkbox", { name: /Zusatzblock/ }).isChecked());
   const gewaehlt = await slotWerte(page);
   await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1 }).waitFor();
+  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
   await page.getByText("3 Einheiten pro Woche").first().waitFor();
   await page.getByText("Reihenfolge im Wechsel: A-B-A, dann B-A-B").waitFor();
   await page.getByText("Zusatzblock: ja").waitFor();
@@ -171,7 +193,7 @@ async function ablauf(browser, dbPfad) {
   assert.ok(neuAnzahl > 0, "Folgeblock enthält mindestens eine neue Übung");
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
   await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1 }).waitFor();
+  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
   const s2 = db();
   assert.equal(s2.prepare("select count(*) c from plan where status='aktiv'").get().c, 1);
   assert.equal(s2.prepare("select count(*) c from plan").get().c, 2);

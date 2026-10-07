@@ -5,7 +5,12 @@ import { PlanHinweise } from "@/components/plan/plan-hinweise";
 import { eingabe, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import { generierePlan, kandidatenFuerSlot, pruefePlan } from "@/domain/generator";
-import { loesePlanWerteAuf, parsePlanRohwerte, quelleAusSearchParams } from "@/domain/plan-form";
+import {
+  loesePlanWerteAuf,
+  parsePlanRohwerte,
+  planBasis,
+  quelleAusSearchParams,
+} from "@/domain/plan-form";
 import { slotKey, type GeneratorEingabe, type SlotZuordnung } from "@/domain/plan-types";
 import { MUSTER, MUSTER_NAMEN, type Muster } from "@/domain/types";
 import { de } from "@/i18n/de";
@@ -41,6 +46,7 @@ export default async function PlanNeuPage({
     profile.find((p) => p.id === standard.profilId)!;
   const vorgaenger = aufgeloest.vorgaengerId ? getPlan(db, aufgeloest.vorgaengerId) : null;
   const werte = { ...aufgeloest, profilId: profil.id, vorgaengerId: vorgaenger?.id ?? null };
+  const basis = planBasis(werte);
 
   const fehlerParam = typeof sp.fehler === "string" ? sp.fehler : undefined;
   const speicherFehler = FEHLER_CODES.find((c) => c === fehlerParam);
@@ -86,6 +92,7 @@ export default async function PlanNeuPage({
       <form method="get" action="/plan/neu">
         <input type="hidden" name="gesendet" value="1" />
         <input type="hidden" name="seed" value={werte.seed} />
+        <input type="hidden" name="basis" value={basis} />
         {vorgaenger && <input type="hidden" name="vorgaenger" value={vorgaenger.id} />}
         {vorgaenger && <p className="mb-3 text-sm text-neutral-500">{f.folgeblock}</p>}
 

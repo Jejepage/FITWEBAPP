@@ -21,6 +21,8 @@ export interface PlanRohwerte {
   seed: number;
   vorgaengerId?: number;
   auswahl: Partial<Record<SlotKey, string>>;
+  /** Fingerabdruck der Eingaben, aus denen die angezeigte Vorschau entstanden ist (siehe planBasis). */
+  basis?: string;
   aktion: Aktion;
 }
 
@@ -60,6 +62,7 @@ export function parsePlanRohwerte(q: Quelle): PlanRohwerte {
     seed: seed !== undefined && seed <= MAX_SEED ? seed : 0,
     vorgaengerId: ganzzahl(q("vorgaenger")),
     auswahl,
+    basis: q("basis") || undefined,
     aktion,
   };
 }
@@ -85,6 +88,19 @@ export interface PlanWerte {
   auswahl: Partial<Record<SlotKey, string>>;
 }
 
+/**
+ * Fingerabdruck aller Eingaben, die die vorgeschlagene Belegung bestimmen. Ändert sich einer,
+ * passen manuell gewählte Übungen nicht mehr zum neuen Vorschlag und werden verworfen; sonst
+ * entstünden Mischpläne aus alter Wahl und neuem Vorschlag.
+ */
+export function planBasis(
+  w: Pick<PlanWerte, "profilId" | "stufen" | "seed" | "vorgaengerId">,
+): string {
+  return [w.profilId, MUSTER.map((m) => w.stufen[m]).join(""), w.seed, w.vorgaengerId ?? 0].join(
+    "-",
+  );
+}
+
 export interface PlanAufloesung {
   werte: PlanWerte;
   /** Feldfehler, z. B. ein ungültiges Startdatum (dann gilt das Standarddatum). */
@@ -107,21 +123,21 @@ export function loesePlanWerteAuf(roh: PlanRohwerte, standard: PlanStandardwerte
     else fehler.startDatum = "Bitte ein gültiges Datum angeben.";
   }
 
-  const verwerfen = roh.aktion === "neu" || roh.aktion === "mischen";
-  return {
-    werte: {
-      profilId: roh.profilId ?? standard.profilId,
-      stufen,
-      einheitenProWoche: roh.einheitenProWoche ?? standard.einheitenProWoche,
-      // Ein abgeschicktes Formular ohne Haken heißt "aus", ein nie gesendetes nimmt den Standard.
-      zusatzblock: roh.zusatzblock ?? (roh.gesendet ? false : standard.zusatzblock),
-      startDatum,
-      seed: roh.aktion === "mischen" ? (roh.seed + 1) % (MAX_SEED + 1) : roh.seed,
-      vorgaengerId: roh.vorgaengerId ?? null,
-      auswahl: verwerfen ? {} : roh.auswahl,
-    },
-    fehler,
+  const werte: PlanWerte = {
+    profilId: roh.profilId ?? standard.profilId,
+    stufen,
+    einheitenProWoche: roh.einheitenProWoche ?? standard.einheitenProWoche,
+    // Ein abgeschicktes Formular ohne Haken heißt "aus", ein nie gesendetes nimmt den Standard.
+    zusatzblock: roh.zusatzblock ?? (roh.gesendet ? false : standard.zusatzblock),
+    startDatum,
+    seed: roh.aktion === "mischen" ? (roh.seed + 1) % (MAX_SEED + 1) : roh.seed,
+    vorgaengerId: roh.vorgaengerId ?? null,
+    auswahl: roh.auswahl,
   };
+  // Manuelle Wahl gilt nur für genau die Eingaben, aus denen die Vorschau entstanden ist.
+  const veraendert = roh.basis !== undefined && roh.basis !== planBasis(werte);
+  if (roh.aktion === "neu" || roh.aktion === "mischen" || veraendert) werte.auswahl = {};
+  return { werte, fehler };
 }
 
 export const quelleAusSearchParams =

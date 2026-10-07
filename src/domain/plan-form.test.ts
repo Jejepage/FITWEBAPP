@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   istGueltigesDatum,
   loesePlanWerteAuf,
+  planBasis,
   parsePlanRohwerte,
   quelleAusFormData,
   quelleAusSearchParams,
@@ -140,6 +141,46 @@ describe("loesePlanWerteAuf", () => {
     });
     expect(auf({ ...sp, aktion: "neu" }).werte).toMatchObject({ seed: 3, auswahl: {} });
     expect(auf({ ...sp, aktion: "mischen" }).werte).toMatchObject({ seed: 4, auswahl: {} });
+  });
+
+  describe("manuelle Wahl und Basis", () => {
+    const sp = { "slot_A-1-1": "KN-04", profil: "1", seed: "2" };
+    const basisVon = (extra: Record<string, string> = {}) =>
+      planBasis(auf({ ...sp, ...extra, aktion: "aktualisieren" }).werte);
+
+    it("bleibt erhalten, wenn sich die Basis nicht ändert (oder keine angegeben ist)", () => {
+      expect(auf(sp).werte.auswahl).toEqual({ "A-1-1": "KN-04" });
+      expect(auf({ ...sp, basis: basisVon() }).werte.auswahl).toEqual({ "A-1-1": "KN-04" });
+    });
+
+    it("bleibt erhalten, wenn sich nur Einheiten, Zusatzblock oder Startdatum ändern", () => {
+      const basis = basisVon();
+      const neu = auf({ ...sp, basis, einheiten: "3", zusatzblock: "1", start: "2026-12-01" });
+      expect(neu.werte.auswahl).toEqual({ "A-1-1": "KN-04" });
+    });
+
+    it.each([
+      ["Profil", { profil: "2" }],
+      ["Stufe", { stufe_KN: "4" }],
+      ["Seed", { seed: "3" }],
+      ["Vorgänger", { vorgaenger: "5" }],
+    ])("wird verworfen, wenn sich %s ändert", (_name, aenderung) => {
+      const basis = basisVon();
+      expect(auf({ ...sp, ...aenderung, basis }).werte.auswahl).toEqual({});
+    });
+
+    it("planBasis unterscheidet alle bestimmenden Eingaben", () => {
+      const w = auf({}).werte;
+      const basen = new Set([
+        planBasis(w),
+        planBasis({ ...w, profilId: 2 }),
+        planBasis({ ...w, seed: 1 }),
+        planBasis({ ...w, vorgaengerId: 3 }),
+        planBasis({ ...w, stufen: { ...w.stufen, KN: 5 } }),
+        planBasis({ ...w, stufen: { ...w.stufen, RU: 5 } }),
+      ]);
+      expect(basen.size).toBe(6);
+    });
   });
 
   it("Seed läuft nicht über die Grenze hinaus", () => {
