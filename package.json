@@ -12,7 +12,7 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:setup": "tsx src/db/migrate.ts",
-    "e2e": "node e2e/katalog.mjs && node e2e/einstellungen.mjs && node e2e/plan.mjs"
+    "e2e": "node e2e/katalog.mjs && node e2e/einstellungen.mjs && node e2e/plan.mjs && node e2e/training.mjs"
   },
   "engines": {
     "node": ">=22"
