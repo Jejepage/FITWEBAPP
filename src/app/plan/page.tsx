@@ -57,7 +57,11 @@ export default function PlanPage() {
           <dt className="text-neutral-500">{t.zusatzblock}</dt>
           <dd>{plan.zusatzblock ? t.zusatzblockAn : t.zusatzblockAus}</dd>
         </dl>
-        <p className="mt-3 text-sm text-neutral-500">{t.trainingFolgt}</p>
+        <p className="mt-3 text-sm">
+          <Link href="/" className="font-medium text-brand">
+            {t.zumTraining}
+          </Link>
+        </p>
       </section>
 
       <PlanAnsicht slots={slots} uebungen={uebungen} zusatzblockAktiv={plan.zusatzblock} />

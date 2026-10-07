@@ -11,7 +11,6 @@ export const de = {
     einstellungen: "Einstellungen",
   },
   platzhalter: {
-    start: "Hier erscheint später die nächste fällige Einheit.",
     verlauf: "Der Verlauf folgt in Abschnitt 7.",
   },
   katalog: {
@@ -185,7 +184,7 @@ export const de = {
     einheit: (e: string) => `Einheit ${e}`,
     block: { "1": "Block 1", "2": "Block 2", Z: "Zusatzblock" },
     runden: (n: number) => `${n} Runden`,
-    trainingFolgt: "Das Training starten kannst du ab dem nächsten Abschnitt.",
+    zumTraining: "Zum Training",
     form: {
       eingaben: "Eingaben",
       profil: "Equipment-Profil",
@@ -232,5 +231,135 @@ export const de = {
         "Eine gewählte Übung ist nicht mehr verfügbar oder passt nicht zum Profil. Bitte die Vorschau aktualisieren.",
       vorgaenger_unbekannt: "Der Vorgängerplan existiert nicht.",
     },
+  },
+  start: {
+    titel: "Start",
+    keinPlan: "Es gibt noch keinen aktiven Plan.",
+    keinPlanHilfe: "Erstelle zuerst einen Plan, dann kannst du hier das Training starten.",
+    planErstellen: "Plan erstellen",
+    naechsteEinheit: "Nächste Einheit",
+    einheitWoche: (einheit: string, woche: number, von: number) =>
+      `Einheit ${einheit} · Woche ${woche} von ${von}`,
+    wochenvorgabe: "Vorgabe",
+    fokus: {
+      technik: "Technik lernen, Startgewichte finden",
+      einarbeiten: "Einarbeiten",
+      steigern: "Steigern",
+      entlasten: "Entlasten und Test",
+    },
+    zusatzblock: "Zusatzblock (Tragen und Rumpf) in dieser Einheit",
+    starten: "Training starten",
+    laufendTitel: "Training läuft",
+    laufendHilfe: (einheit: string, woche: number) =>
+      `Einheit ${einheit}, Woche ${woche}: Du kannst dort weitermachen, wo du aufgehört hast.`,
+    fortsetzen: "Training fortsetzen",
+    blockFertig: "Block abgeschlossen",
+    blockFertigHilfe:
+      "Du hast alle Einheiten dieses Blocks absolviert. Wie es weitergeht, folgt mit dem nächsten Abschnitt.",
+    zumPlan: "Plan ansehen",
+    fehler: {
+      kein_plan: "Es gibt keinen aktiven Plan.",
+      block_fertig: "Der Block ist bereits abgeschlossen.",
+    },
+  },
+  training: {
+    kopf: (einheit: string, woche: number) => `Einheit ${einheit} · Woche ${woche}`,
+    fortschritt: (n: number, gesamt: number) => `${n} von ${gesamt} Sätzen`,
+    position: (block: string, runde: number, runden: number, pos: number, anzahl: number) =>
+      `${block} · Runde ${runde} von ${runden} · Übung ${pos} von ${anzahl}`,
+    aufwaermenTitel: "Aufwärmen",
+    aufwaermenErledigt: "Aufwärmen erledigt",
+    aufwaermenHilfe: "Danach geht es mit der ersten Übung los.",
+    ziel: "Ziel",
+    letztesMal: "Letztes Mal",
+    keinLetztesMal: "Noch keine Werte",
+    gewicht: "Gewicht (kg)",
+    gewichtOhne: "ohne",
+    wdh: "Wiederholungen",
+    sekunden: "Sekunden",
+    meter: "Meter",
+    rpe: "Anstrengung (RPE)",
+    rpeHilfe: "1 = sehr leicht, 10 = Maximum. Etwa 2 Wiederholungen wären noch möglich = RPE 8.",
+    tempo: "Tempo: 3 Sekunden absenken",
+    satzErledigt: "Satz erledigt",
+    korrekturSpeichern: "Korrektur speichern",
+    korrekturHinweis: "Du änderst einen bereits gespeicherten Satz.",
+    korrekturAbbrechen: "Korrektur verwerfen",
+    erhoehen: "Erhöhen",
+    verringern: "Verringern",
+    ersetzen: "Übung ersetzen",
+    ersetzenHilfe:
+      "Gilt für die restlichen Runden dieser Übung in dieser Einheit. Der Plan bleibt unverändert.",
+    ersetzenKeine: "Keine Alternativen mit deinem Equipment.",
+    zurueckZurGeplanten: (name: string) => `Zurück zu ${name}`,
+    ersetztBadge: "ersetzt",
+    ersetzenFehler: "Die Übung konnte nicht ersetzt werden.",
+    ausfuehrung: "Ausführung und Hinweise",
+    fehlerTitel: "Typische Fehler",
+    vorschlag: {
+      start: "Finde ein Gewicht, mit dem alle Wiederholungen sauber gelingen.",
+      wiederholen: "Gleiches Ziel wie zuletzt.",
+      mehr_wdh: "Vorschlag: eine Wiederholung mehr als zuletzt.",
+      mehr_gewicht: "Vorschlag: mehr Gewicht, Wiederholungen von vorn.",
+      tempo: "Vorschlag: gleiche Wiederholungen, 3 Sekunden absenken.",
+      naechste_stufe: "Bereit für die nächste Stufe",
+      naechste_stufe_name: (name: string) => `Bereit für die nächste Stufe: ${name}`,
+      mehr_zeit: "Vorschlag: etwas länger halten.",
+      mehr_strecke: "Vorschlag: etwas weiter.",
+    },
+    pause: {
+      titel: "Pause",
+      sekundenKurz: (s: number) => `${s} s`,
+      naechste: "Als Nächstes",
+      ueberspringen: "Überspringen",
+      plus15: "+15 s",
+      vorbei: "Weiter geht's",
+    },
+    block: {
+      geschafft: (block: string) => `${block} geschafft`,
+      naechster: "Als Nächstes",
+      weiter: "Weiter",
+    },
+    fertig: {
+      titel: "Geschafft",
+      hilfe: "Prüfe kurz, was gespeichert wurde, und schließe die Einheit ab.",
+      notiz: "Notiz zur Einheit (optional)",
+      notizPlatzhalter: "z. B. Knie hat sich gut angefühlt",
+      abschliessen: "Einheit abschließen",
+      warteSpeichern: "Warte auf das Speichern …",
+      keineSaetze: "Es wurde noch kein Satz gespeichert. Brich die Einheit stattdessen ab.",
+      keineSaetzeTitel: "Keine Sätze gespeichert",
+      zurueck: "Zurück zum Training",
+    },
+    mehr: {
+      titel: "Weitere Aktionen",
+      vorigenAendern: "Vorigen Satz ändern",
+      vorzeitigAbschliessen: "Einheit vorzeitig abschließen",
+      vorzeitigFrage: (offen: number) =>
+        `Es fehlen noch ${offen} Sätze. Die Einheit trotzdem abschließen?`,
+      abbrechen: "Einheit abbrechen",
+      abbrechenFrage:
+        "Einheit wirklich abbrechen? Die Sätze bleiben gespeichert, die Einheit zählt aber nicht für deinen Fortschritt.",
+    },
+    speichern: {
+      wartet: (n: number) =>
+        n === 1
+          ? "1 Satz ist noch nicht gespeichert. Es wird automatisch erneut versucht."
+          : `${n} Sätze sind noch nicht gespeichert. Es wird automatisch erneut versucht.`,
+      fehlgeschlagen: (code: string) =>
+        `Ein Satz wurde vom Server abgelehnt (${code}). Bitte prüfe ihn über „Vorigen Satz ändern“.`,
+    },
+    bildschirm: {
+      kannNicht:
+        "Der Bildschirm bleibt nicht automatisch an. Stelle die Auto-Sperre deines Handys für das Training auf eine längere Zeit.",
+    },
+    fehler: {
+      workout_unbekannt: "Die Einheit gibt es nicht mehr.",
+      nicht_laufend: "Die Einheit ist bereits beendet.",
+      keine_saetze: "Es wurde noch kein Satz gespeichert.",
+    },
+    block1: "Block 1",
+    block2: "Block 2",
+    blockZ: "Zusatzblock",
   },
 } as const;

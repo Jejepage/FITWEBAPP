@@ -1,5 +1,5 @@
 import { asc, eq } from "drizzle-orm";
-import { equipmentProfile, exercise, plan, planSlot } from "@/db/schema";
+import { equipmentProfile, exercise, plan, planSlot, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
 import { erfuellt } from "@/domain/equipment";
 import { istGueltigesDatum } from "@/domain/plan-form";
@@ -82,6 +82,12 @@ export function createPlan(db: Db, e: PlanEingabe): PlanErgebnis {
       }
     }
 
+    // Der bisher aktive Plan wird abgeschlossen; eine darin laufende Einheit wird abgebrochen
+    // (ihre Sätze bleiben gespeichert, sie zählt aber nicht für den Fortschritt).
+    tx.update(workout)
+      .set({ status: "abgebrochen", beendetAm: new Date().toISOString() })
+      .where(eq(workout.status, "laufend"))
+      .run();
     tx.update(plan).set({ status: "abgeschlossen" }).where(eq(plan.status, "aktiv")).run();
     const neu = tx
       .insert(plan)
@@ -141,6 +147,29 @@ export function getPlanSlots(db: Db, planId: number): SlotZuordnung[] {
         (reihenfolge.get(slotKey(a)) ?? Number.MAX_SAFE_INTEGER) -
         (reihenfolge.get(slotKey(b)) ?? Number.MAX_SAFE_INTEGER),
     );
+}
+
+export interface PlanSlotMitId extends SlotZuordnung {
+  id: number;
+}
+
+/** Slots eines Plans samt Datenbank-ID (für den Trainingsablauf), in Vorlagenreihenfolge. */
+export function getPlanSlotsMitId(db: Db, planId: number): PlanSlotMitId[] {
+  const reihenfolge = new Map(SLOT_VORLAGE.map((v, i) => [slotKey(v), i]));
+  return db
+    .select()
+    .from(planSlot)
+    .where(eq(planSlot.planId, planId))
+    .all()
+    .map((s) => ({
+      id: s.id,
+      einheit: s.einheit,
+      block: s.block,
+      position: s.position,
+      muster: s.muster,
+      exerciseId: s.exerciseId,
+    }))
+    .sort((a, b) => (reihenfolge.get(slotKey(a)) ?? 99) - (reihenfolge.get(slotKey(b)) ?? 99));
 }
 
 /** IDs aller Übungen eines Plans, z. B. für die Abwechslungs-Regel im Folgeblock. */

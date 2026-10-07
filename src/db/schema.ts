@@ -133,6 +133,8 @@ export const workout = sqliteTable(
     /** Zusatzblock in dieser Einheit (überschreibt die Planvorgabe). */
     zusatzblock: bool("zusatzblock").notNull(),
     status: text("status").$type<"laufend" | "abgeschlossen" | "abgebrochen">().notNull(),
+    /** Für diese Einheit gewählte Ersatzübungen je Plan-Slot: { "<plan_slot_id>": "<exercise_id>" } */
+    ersetzungen: json<Record<string, string>>("ersetzungen").notNull().default({}),
     notiz: text("notiz"),
     gestartetAm: text("gestartet_am").notNull().default(now),
     beendetAm: text("beendet_am"),
@@ -158,6 +160,8 @@ export const setLog = sqliteTable(
     sekunden: integer("sekunden"),
     meter: real("meter"),
     rpe: real("rpe"),
+    /** Satz mit 3 s Absenken (Steigerung über Tempo, Spec 2.5) */
+    tempo: bool("tempo").notNull().default(false),
     erledigt: bool("erledigt").notNull().default(false),
     erstelltAm: text("erstellt_am").notNull().default(now),
   },
