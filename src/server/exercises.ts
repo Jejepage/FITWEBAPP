@@ -88,19 +88,25 @@ export function getLadder(db: Db, id: string): Exercise[] {
   return kette;
 }
 
-/** Kandidaten für die Auswahllisten "leichter"/"schwerer": gleiches Muster, passende Stufe. */
+/**
+ * Kandidaten für die Auswahllisten "leichter"/"schwerer": gleiches Muster, passende Stufe.
+ * Aktuell verknüpfte Nachbarn sind immer enthalten, damit die Auswahl sie anzeigen kann
+ * und ein unveränderter Speichervorgang die Verknüpfung nicht stillschweigend löst.
+ */
 export function leiterKandidaten(
   db: Db,
-  e: Pick<Exercise, "id" | "muster" | "stufe">,
+  e: Pick<Exercise, "id" | "muster" | "stufe" | "leichterId" | "schwererId">,
 ): { leichter: Exercise[]; schwerer: Exercise[] } {
   const gleiche = alleUebungen(db).filter((x) => x.muster === e.muster && x.id !== e.id);
   return {
-    leichter: gleiche.filter((x) => x.stufe < e.stufe),
-    schwerer: gleiche.filter((x) => x.stufe > e.stufe),
+    leichter: gleiche.filter((x) => x.stufe < e.stufe || x.id === e.leichterId),
+    schwerer: gleiche.filter((x) => x.stufe > e.stufe || x.id === e.schwererId),
   };
 }
 
 export type SpeicherErgebnis = { ok: true; id: string } | { ok: false; fehler: FormFehler };
+
+export const MUSTER_FEHLER = "Bitte ein Bewegungsmuster wählen.";
 
 const nichtGefunden: SpeicherErgebnis = { ok: false, fehler: { _form: "Übung nicht gefunden." } };
 
@@ -145,7 +151,8 @@ function haengeLeiterUm(
     Array.from(alle, ([k, e]) => [k, { l: e.leichterId, s: e.schwererId }]),
   );
   const vorher = new Map<string, Verweise>(Array.from(links, ([k, v]) => [k, { ...v }]));
-  const l = (k: string) => links.get(k)!;
+  // Hängende Verweise (Zielzeile fehlt) dürfen das Speichern nicht blockieren: ins Leere schreiben.
+  const l = (k: string): Verweise => links.get(k) ?? { l: null, s: null };
 
   const alt = l(id);
   if (alt.l && alt.l !== neuL) l(alt.l).s = null;
@@ -181,8 +188,7 @@ function nextId(alle: Iterable<Exercise>, muster: Muster): string | null {
 }
 
 export function createExercise(db: Db, muster: Muster, werte: ExerciseFormWerte): SpeicherErgebnis {
-  if (!MUSTER.includes(muster))
-    return { ok: false, fehler: { muster: "Bitte ein Muster wählen." } };
+  if (!MUSTER.includes(muster)) return { ok: false, fehler: { muster: MUSTER_FEHLER } };
   return db.transaction((tx) => {
     const alle = tx.select().from(exercise).all().map(zuExercise);
     const id = nextId(alle, muster);

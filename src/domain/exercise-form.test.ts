@@ -85,6 +85,14 @@ describe("validiereExercise", () => {
     }
   });
 
+  it("eine leere oder nichtnumerische Stufe wird abgelehnt (NaN, nicht 0)", () => {
+    expect(parseExerciseForm(formular({ ...basis, stufe: "" })).stufe).toBeNaN();
+    expect(parseExerciseForm(formular({ ...basis, stufe: "abc" })).stufe).toBeNaN();
+    const r = validiereExercise(parseExerciseForm(formular({ ...basis, stufe: "" })), fest);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.fehler.stufe).toBeDefined();
+  });
+
   it("verwirft eine Stufe außerhalb 1–5", () => {
     const r = validiereExercise(parseExerciseForm(formular({ ...basis, stufe: "7" })), fest);
     expect(r.ok).toBe(false);

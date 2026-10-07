@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { db } from "@/db/client";
 import { parseExerciseForm } from "@/domain/exercise-form";
 import { MUSTER, PRUEFSTATI, type Muster, type Pruefstatus } from "@/domain/types";
-import { createExercise, setAktiv, setPruefstatus, updateExercise } from "@/server/exercises";
+import {
+  MUSTER_FEHLER,
+  createExercise,
+  setAktiv,
+  setPruefstatus,
+  updateExercise,
+} from "@/server/exercises";
 import type { FormState } from "./form-state";
 
 function aktualisiereKatalog() {
@@ -16,7 +22,7 @@ export async function speichereNeueUebung(_prev: FormState, fd: FormData): Promi
   const werte = parseExerciseForm(fd);
   const muster = String(fd.get("muster") ?? "");
   if (!(MUSTER as readonly string[]).includes(muster)) {
-    return { werte, muster, fehler: { muster: "Bitte ein Bewegungsmuster wählen." } };
+    return { werte, muster, fehler: { muster: MUSTER_FEHLER } };
   }
   const r = createExercise(db, muster as Muster, werte);
   if (!r.ok) return { werte, muster, fehler: r.fehler };
@@ -37,12 +43,14 @@ export async function speichereUebung(
 }
 
 export async function aktivUmschalten(id: string, aktiv: boolean): Promise<void> {
-  setAktiv(db, id, aktiv);
+  const ok = setAktiv(db, id, aktiv);
   aktualisiereKatalog();
+  if (!ok) redirect("/katalog"); // Übung existiert nicht mehr (veraltete Seite)
 }
 
 export async function pruefstatusSetzen(id: string, status: Pruefstatus): Promise<void> {
   if (!(PRUEFSTATI as readonly string[]).includes(status)) return;
-  setPruefstatus(db, id, status);
+  const ok = setPruefstatus(db, id, status);
   aktualisiereKatalog();
+  if (!ok) redirect("/katalog");
 }

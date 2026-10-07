@@ -1,4 +1,6 @@
+import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
+import { exercise } from "@/db/schema";
 import { neueSeedDb } from "@/db/test-utils";
 import type { Db } from "@/db/types";
 import { exerciseZuFormWerte, leereFormWerte } from "@/domain/exercise-form";
@@ -94,6 +96,12 @@ describe("getLadder / leiterKandidaten", () => {
     for (const start of soll) expect(ids(getLadder(db, start))).toEqual(soll);
     expect(ids(getLadder(db, "KN-02"))).toEqual(["KN-02"]);
     expect(getLadder(db, "XX-00")).toEqual([]);
+  });
+
+  it("aktuelle Nachbarn sind auch dann Kandidaten, wenn ihre Stufe nicht passt", () => {
+    const e = { ...getExercise(db, "KN-03")!, leichterId: "KN-02" }; // KN-02 hat dieselbe Stufe 2
+    expect(ids(leiterKandidaten(db, e).leichter)).toContain("KN-02");
+    expect(ids(leiterKandidaten(db, { ...e, leichterId: null }).leichter)).not.toContain("KN-02");
   });
 
   it("Kandidaten stammen aus dem gleichen Muster mit passender Stufe", () => {
@@ -234,6 +242,12 @@ describe("updateExercise", () => {
       expect(updateExercise(db, id, mitLeiter(id, "ZV-02", "ZV-05")).ok).toBe(true);
       expect(ids(getLadder(db, "ZV-06"))).toEqual(["ZV-02", id, "ZV-05", "ZV-06", "ZV-07"]);
       konsistent();
+    });
+
+    it("ein hängender Nachbarverweis blockiert das Speichern nicht", () => {
+      db.update(exercise).set({ schwererId: "KN-99" }).where(eq(exercise.id, "KN-02")).run();
+      expect(updateExercise(db, "KN-02", mitLeiter("KN-02", null, null)).ok).toBe(true);
+      expect(getExercise(db, "KN-02")!.schwererId).toBeNull();
     });
 
     it("weist Stufenverstöße, falsches Muster und Selbstverweis ab", () => {

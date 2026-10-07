@@ -18,9 +18,11 @@ export default async function KatalogPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const auswahl = parseKatalogFilter(await searchParams);
+  const parsed = parseKatalogFilter(await searchParams);
   const profile = listProfiles(db);
-  const profil = auswahl.profilId ? getProfile(db, auswahl.profilId) : null;
+  const profil = parsed.profilId ? getProfile(db, parsed.profilId) : null;
+  // Unbekanntes Profil (z. B. alter Link): Filter ignorieren und nicht als aktiv anzeigen.
+  const auswahl = { ...parsed, profilId: profil?.id };
   const { items, gesamt } = listExercises(db, {
     muster: auswahl.muster,
     stufe: auswahl.stufe,

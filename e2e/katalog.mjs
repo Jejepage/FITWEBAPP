@@ -77,6 +77,12 @@ async function ablauf(name, viewport) {
   await page.getByText("4 von 60 Übungen").waitFor();
   schritt("Filter einseitig (RU → 4)");
 
+  // Unbekanntes Profil im Link: Filter wird ignoriert und nicht als aktiv angezeigt
+  await page.goto(`${BASE}/katalog?profil=999`);
+  await page.getByText("60 von 60 Übungen").waitFor();
+  assert.equal(await page.locator("summary", { hasText: "●" }).count(), 0);
+  schritt("Unbekanntes Profil wird ignoriert");
+
   // 3. Detail mit Leiter
   await page.goto(`${BASE}/katalog/ZV-04`);
   await page.getByRole("heading", { name: "Klimmzug mit Fußhilfe" }).waitFor();
@@ -113,6 +119,14 @@ async function ablauf(name, viewport) {
   );
   await shot("5-fehler");
   schritt("Validierungsfehler sichtbar, Eingaben bleiben erhalten");
+
+  // Leere Stufe: Fehlermeldung statt "NaN"
+  await page.goto(`${BASE}/katalog/ZV-04/bearbeiten`);
+  await page.getByLabel("Stufe (1–5)").fill("");
+  await page.getByRole("button", { name: "Speichern" }).click();
+  await page.getByText("Stufe zwischen 1 und 5 wählen.").waitFor();
+  assert.equal(await page.getByLabel("Stufe (1–5)").inputValue(), "");
+  schritt("Leere Stufe wird abgelehnt, Feld bleibt leer");
 
   // Leiter-Fehler: schwerere Übung mit niedrigerer Stufe
   await page.goto(`${BASE}/katalog/KN-03/bearbeiten`);

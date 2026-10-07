@@ -73,7 +73,7 @@ export function parseExerciseForm(fd: FormData): ExerciseFormWerte {
   }
   return {
     name: text(fd.get("name")),
-    stufe: Number(text(fd.get("stufe"))),
+    stufe: text(fd.get("stufe")) === "" ? Number.NaN : Number(text(fd.get("stufe"))),
     einseitig: fd.get("einseitig") === "on",
     equipment,
     optionaleLast: arten(eintraege(fd, "optionaleLast")),

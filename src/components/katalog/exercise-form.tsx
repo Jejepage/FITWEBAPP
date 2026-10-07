@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import type { FormState } from "@/app/katalog/form-state";
 import { eingabe, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { GRUPPEN_ANZAHL, type ExerciseFormWerte } from "@/domain/exercise-form";
@@ -120,6 +120,11 @@ export function ExerciseForm({
   // zurückgegebenen Werten neu aufgebaut, damit nichts verloren geht.
   const formKey = state.werte ? JSON.stringify(state.werte) : "initial";
 
+  // Nach einem Fehler zur ersten Meldung scrollen (das Formular ist am Handy lang).
+  useEffect(() => {
+    if (hatFehler) document.querySelector("form [role=alert]")?.scrollIntoView({ block: "center" });
+  }, [state, hatFehler]);
+
   return (
     <form key={formKey} action={formAction} noValidate>
       {hatFehler && (
@@ -156,7 +161,7 @@ export function ExerciseForm({
             inputMode="numeric"
             min={1}
             max={5}
-            defaultValue={w.stufe}
+            defaultValue={Number.isFinite(w.stufe) ? w.stufe : ""}
             className={eingabe}
           />
         </Feld>
