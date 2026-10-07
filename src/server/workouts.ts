@@ -4,7 +4,7 @@ import type { Db } from "@/db/types";
 import { erfuellt } from "@/domain/equipment";
 import { satzEingabeSchema } from "@/domain/satz-eingabe";
 import type { SatzWerte } from "@/domain/training-types";
-import { einheitNachFortschritt } from "@/domain/weeks";
+import { einheitNachFortschritt, rundenFuerBlock } from "@/domain/weeks";
 import { getSettings } from "./settings";
 
 export type Workout = typeof workout.$inferSelect;
@@ -113,8 +113,27 @@ export function speichereSatz(db: Db, roh: unknown): SatzErgebnis {
     }
     if (slot.block === "Z" && !w.zusatzblock) return { ok: false, code: "slot_ungueltig" };
 
-    const vorhanden = tx.select().from(setLog).where(eq(setLog.id, s.id)).get();
-    if (vorhanden && vorhanden.workoutId !== w.id) return { ok: false, code: "id_belegt" };
+    if (s.runde > rundenFuerBlock(w.woche, slot.block))
+      return { ok: false, code: "slot_ungueltig" };
+
+    const nachId = tx.select().from(setLog).where(eq(setLog.id, s.id)).get();
+    // Eine vorhandene ID darf nur ihren eigenen Schritt (Slot und Runde) aktualisieren.
+    if (
+      nachId &&
+      (nachId.workoutId !== w.id || nachId.planSlotId !== slot.id || nachId.runde !== s.runde)
+    ) {
+      return { ok: false, code: "id_belegt" };
+    }
+    // Pro Schritt gibt es höchstens einen Satz: eine andere UUID für denselben Schritt
+    // (z. B. veraltete Payload) überschreibt den vorhandenen Satz statt eine Zeile anzulegen.
+    const nachSchritt = tx
+      .select()
+      .from(setLog)
+      .where(
+        and(eq(setLog.workoutId, w.id), eq(setLog.planSlotId, slot.id), eq(setLog.runde, s.runde)),
+      )
+      .get();
+    const vorhanden = nachId ?? nachSchritt;
 
     // Erlaubt ist die geplante Übung, der aktuelle Ersatz oder die Übung, mit der dieser Satz
     // schon gespeichert wurde (z. B. wiederholtes Senden nach einem späteren Austausch).
@@ -135,10 +154,11 @@ export function speichereSatz(db: Db, roh: unknown): SatzErgebnis {
       tempo: s.tempo,
       erledigt: true,
     };
-    tx.insert(setLog)
-      .values({ id: s.id, ...werte })
-      .onConflictDoUpdate({ target: setLog.id, set: werte })
-      .run();
+    if (vorhanden) tx.update(setLog).set(werte).where(eq(setLog.id, vorhanden.id)).run();
+    else
+      tx.insert(setLog)
+        .values({ id: s.id, ...werte })
+        .run();
     return { ok: true };
   });
 }

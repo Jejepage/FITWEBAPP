@@ -167,9 +167,9 @@ describe("Wiederholungsübungen mit Hanteln (KN-04 Goblet Squat)", () => {
     expect(v).toMatchObject({ grund: "wiederholen", gewicht: 10, wdh: 9 });
   });
 
-  it("RPE 9 unter dem Wochenminimum: auf das Minimum angehoben, Grund wiederholen", () => {
+  it("RPE 9 unter dem Wochenminimum: nicht über das zuletzt Geschaffte hinaus, Grund wiederholen", () => {
     const v = vorschlagFuerUebung(eingabe(goblet, 3, wdhSaetze([6, 7, 7], 10, 9)));
-    expect(v).toMatchObject({ grund: "wiederholen", wdh: 8 });
+    expect(v).toMatchObject({ grund: "wiederholen", wdh: 6 });
   });
 
   it("gemischte Wiederholungen 12, 11, 10: Ziel 11", () => {

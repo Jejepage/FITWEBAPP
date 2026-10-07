@@ -170,6 +170,34 @@ describe("speichereSatz", () => {
     expect(getSaetze(db, id)).toHaveLength(1);
   });
 
+  it("lehnt Runden ab, die der Ablauf nicht kennt (Zusatzblock hat zwei Runden)", () => {
+    const id = start({ zusatzblock: true });
+    expect(speichereSatz(db, satz(id, "A-Z-1", { runde: 2 })).ok).toBe(true);
+    expect(speichereSatz(db, satz(id, "A-Z-1", { runde: 3 }))).toEqual({
+      ok: false,
+      code: "slot_ungueltig",
+    });
+    expect(getSaetze(db, id)).toHaveLength(1);
+  });
+
+  it("legt pro Schritt nur eine Zeile an, auch bei anderer UUID", () => {
+    const id = start();
+    speichereSatz(db, satz(id, "A-1-1", { wdh: 10 }));
+    expect(speichereSatz(db, satz(id, "A-1-1", { wdh: 12 })).ok).toBe(true);
+    const saetze = getSaetze(db, id);
+    expect(saetze).toHaveLength(1);
+    expect(saetze[0]?.wdh).toBe(12);
+  });
+
+  it("verschiebt einen vorhandenen Satz nicht in einen anderen Schritt", () => {
+    const id = start();
+    const s = satz(id, "A-1-1");
+    speichereSatz(db, s);
+    const anderer = satz(id, "A-1-2");
+    expect(speichereSatz(db, { ...anderer, id: s.id })).toEqual({ ok: false, code: "id_belegt" });
+    expect(speichereSatz(db, { ...s, runde: 2 })).toEqual({ ok: false, code: "id_belegt" });
+  });
+
   it("überschreibt denselben Satz bei Korrektur (gleiche ID, neue Werte)", () => {
     const id = start();
     const s = satz(id, "A-1-1", { wdh: 10, rpe: 7 });

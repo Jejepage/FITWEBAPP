@@ -110,8 +110,7 @@ export function vorschlagFuerUebung(e: VorschlagEingabe): Vorschlag {
   });
 
   const verwertbar = e.letzteSaetze.filter((s) => messwert(s) !== null);
-  const letzter = verwertbar[verwertbar.length - 1];
-  if (!letzter) return bauen("start", null, ziel.min, false);
+  if (verwertbar.length === 0) return bauen("start", null, ziel.min, false);
 
   // Bezugsgewicht ist das höchste verwendete Gewicht (Arbeitsgewicht). Ein leichterer Aufwärm-
   // oder Abbau-Satz soll den Vorschlag nicht nach unten ziehen. Nur Sätze mit diesem Gewicht zählen.
@@ -153,7 +152,8 @@ export function vorschlagFuerUebung(e: VorschlagEingabe): Vorschlag {
   const mehrGrund: VorschlagGrund =
     art === "wdh" ? "mehr_wdh" : art === "zeit" ? "mehr_zeit" : "mehr_strecke";
   const wunsch = zuHart ? niedrigste : niedrigste + zuwachs;
-  const zielWert = clamp(wunsch, ziel.min, ziel.max);
+  // Zu harte Einheit: nie über das hinaus, was zuletzt geschafft wurde (nur nach oben begrenzen).
+  const zielWert = zuHart ? Math.min(niedrigste, ziel.max) : clamp(wunsch, ziel.min, ziel.max);
   const grund = !zuHart && zielWert > niedrigste ? mehrGrund : "wiederholen";
   return bauen(grund, ref, zielWert, mitTempo);
 }

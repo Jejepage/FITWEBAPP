@@ -86,6 +86,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     daten.gespeichert.length === 0 ? { art: "aufwaermen" } : { art: "satz" },
   );
   const [bearbeiteKey, setBearbeiteKey] = useState<string | null>(null);
+  const phaseVorKorrektur = useRef<Phase | null>(null);
   const [meldung, setMeldung] = useState<string | null>(null);
   const [notiz, setNotiz] = useState("");
   const [beendet, setBeendet] = useState(false);
@@ -107,29 +108,60 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     );
   }, []);
 
+  const entferneSatz = useCallback((id: string) => {
+    setGespeichert((prev) =>
+      Object.fromEntries(Object.entries(prev).filter(([, v]) => v.id !== id)),
+    );
+  }, []);
+
+  const verwirfWartende = () => {
+    const ids = new Set(wartend.current.keys());
+    wartend.current.clear();
+    persistiere();
+    setGespeichert((prev) =>
+      Object.fromEntries(Object.entries(prev).filter(([, v]) => !ids.has(v.id))),
+    );
+    setMeldung(null);
+  };
+
   const sende = useCallback(
-    async (p: Payload) => {
-      if (unterwegs.current.has(p.id)) return;
-      unterwegs.current.add(p.id);
+    async (start: Payload) => {
+      // Der neueste Stand je Satz-ID liegt in `wartend`; nach einer laufenden Sendung wird mit
+      // diesem Stand weitergesendet, damit eine Korrektur nie verloren geht.
+      wartend.current.set(start.id, start);
+      persistiere();
+      if (unterwegs.current.has(start.id)) return;
+      unterwegs.current.add(start.id);
       try {
-        const r = await speichereSatzAktion(p);
-        wartend.current.delete(p.id);
-        persistiere();
-        if (r.ok) setzeStatus(p.id, "ok");
-        else {
-          setzeStatus(p.id, "abgelehnt");
-          setMeldung(t.speichern.fehlgeschlagen(r.code));
+        let p: Payload | undefined = start;
+        while (p) {
+          const gesendet: Payload = p;
+          try {
+            const r = await speichereSatzAktion(gesendet);
+            const neuer = wartend.current.get(gesendet.id);
+            if (neuer !== gesendet) {
+              p = neuer; // inzwischen korrigiert: den neuen Stand senden
+              continue;
+            }
+            wartend.current.delete(gesendet.id);
+            persistiere();
+            if (r.ok) setzeStatus(gesendet.id, "ok");
+            else {
+              // Abgelehnte Sätze zählen nicht als erledigt: Der Schritt wird wieder offen.
+              entferneSatz(gesendet.id);
+              setMeldung(t.speichern.fehlgeschlagen(r.code));
+            }
+          } catch {
+            // Netz weg: Satz bleibt lokal erhalten und wird später erneut gesendet.
+            setzeStatus(gesendet.id, "wartet");
+          }
+          p = undefined;
         }
-      } catch {
-        // Netz weg: Satz bleibt lokal erhalten und wird später erneut gesendet.
-        wartend.current.set(p.id, p);
-        persistiere();
-        setzeStatus(p.id, "wartet");
       } finally {
-        unterwegs.current.delete(p.id);
+        unterwegs.current.delete(start.id);
       }
     },
-    [persistiere, setzeStatus],
+    [persistiere, setzeStatus, entferneSatz],
   );
 
   const wiederhole = useCallback(() => {
@@ -217,7 +249,8 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
 
     if (bearbeiteKey) {
       setBearbeiteKey(null);
-      setPhase({ art: "satz" });
+      setPhase(phaseVorKorrektur.current ?? { art: "satz" });
+      phaseVorKorrektur.current = null;
       return;
     }
     const pause = schritt.pauseNach;
@@ -257,6 +290,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     const gespeicherteSchritte = schritte.filter((s) => gespeichert[s.key]);
     const letzter = gespeicherteSchritte[gespeicherteSchritte.length - 1];
     if (!letzter) return;
+    phaseVorKorrektur.current = phase.art === "pause" || phase.art === "block" ? phase : null;
     setBearbeiteKey(letzter.key);
     setPhase({ art: "satz" });
   };
@@ -321,7 +355,14 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
           role="status"
           className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          {t.speichern.wartet(wartendAnzahl)}
+          {t.speichern.wartet(wartendAnzahl)}{" "}
+          <button
+            type="button"
+            onClick={verwirfWartende}
+            className="min-h-11 font-medium underline"
+          >
+            {t.speichern.verwerfen}
+          </button>
         </p>
       )}
       {meldung && <FehlerBanner>{meldung}</FehlerBanner>}
@@ -575,7 +616,8 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         onErledigt={onErledigt}
         onKorrekturVerwerfen={() => {
           setBearbeiteKey(null);
-          setPhase({ art: "satz" });
+          setPhase(phaseVorKorrektur.current ?? { art: "satz" });
+          phaseVorKorrektur.current = null;
         }}
       />
 

@@ -342,6 +342,7 @@ export const de = {
         "Einheit wirklich abbrechen? Die Sätze bleiben gespeichert, die Einheit zählt aber nicht für deinen Fortschritt.",
     },
     speichern: {
+      verwerfen: "Nicht gespeicherte Sätze verwerfen",
       wartet: (n: number) =>
         n === 1
           ? "1 Satz ist noch nicht gespeichert. Es wird automatisch erneut versucht."
