@@ -41,7 +41,8 @@ CREATE TABLE `plan` (
 	`status` text NOT NULL,
 	`vorgaenger_id` integer,
 	`erstellt_am` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')) NOT NULL,
-	FOREIGN KEY (`profil_id`) REFERENCES `equipment_profile`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`profil_id`) REFERENCES `equipment_profile`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`vorgaenger_id`) REFERENCES `plan`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `plan_ein_aktiver_idx` ON `plan` (`status`) WHERE "plan"."status" = 'aktiv';--> statement-breakpoint

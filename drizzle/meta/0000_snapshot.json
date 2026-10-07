@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "0f121342-5aa9-4e09-9608-27f3b3d4dfd8",
+  "id": "e40fe3a2-d0ec-4aaa-8665-789d2d352544",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "equipment_profile": {
@@ -309,6 +309,19 @@
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "plan_vorgaenger_id_plan_id_fk": {
+          "name": "plan_vorgaenger_id_plan_id_fk",
+          "tableFrom": "plan",
+          "tableTo": "plan",
+          "columnsFrom": [
+            "vorgaenger_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },

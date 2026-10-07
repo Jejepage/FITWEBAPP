@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnySQLiteColumn,
   index,
   integer,
   real,
@@ -86,7 +87,9 @@ export const plan = sqliteTable(
     /** Stufen pro Muster zum Zeitpunkt der Erstellung (Grundlage für den Stufen-Check). */
     stufen: json<Record<Muster, number>>("stufen").notNull(),
     status: text("status").$type<"aktiv" | "abgeschlossen">().notNull(),
-    vorgaengerId: integer("vorgaenger_id"),
+    vorgaengerId: integer("vorgaenger_id").references((): AnySQLiteColumn => plan.id, {
+      onDelete: "set null",
+    }),
     erstelltAm: text("erstellt_am").notNull().default(now),
   },
   (t) => [

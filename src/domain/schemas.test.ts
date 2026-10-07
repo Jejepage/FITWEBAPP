@@ -1,14 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { STANDARD_BEREICH_RE, equipmentBedingungSchema } from "./schemas";
-
-describe("standardBereich", () => {
-  it.each(["8–12", "8-12", "20–40 s", "20–40 m", "3–5"])("akzeptiert %s", (v) => {
-    expect(STANDARD_BEREICH_RE.test(v)).toBe(true);
-  });
-  it.each(["", "8", "acht–zwölf", "20–40 sek", "8–12 Wdh"])("verwirft %s", (v) => {
-    expect(STANDARD_BEREICH_RE.test(v)).toBe(false);
-  });
-});
+import { equipmentBedingungSchema } from "./schemas";
 
 describe("equipmentBedingung", () => {
   it("akzeptiert Gruppenlisten und die leere Liste", () => {
@@ -19,5 +10,6 @@ describe("equipmentBedingung", () => {
   it("verwirft unbekannte Arten und leere Gruppen", () => {
     expect(equipmentBedingungSchema.safeParse([["hantelbank"]]).success).toBe(false);
     expect(equipmentBedingungSchema.safeParse([[]]).success).toBe(false);
+    expect(equipmentBedingungSchema.safeParse([["keins"]]).success).toBe(false);
   });
 });

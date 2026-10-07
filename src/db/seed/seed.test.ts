@@ -3,7 +3,8 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { eq } from "drizzle-orm";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it } from "vitest";
 import { exerciseSeedSchema } from "@/domain/schemas";
 import { EQUIPMENT_ARTEN, MUSTER, type EquipmentArt, type EquipmentBedingung } from "@/domain/types";
@@ -11,13 +12,14 @@ import { equipmentProfile, exercise, settings } from "../schema";
 import { uebungenSeed } from "./data";
 import { seed } from "./run";
 
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const byId = new Map(uebungenSeed.map((u) => [u.id, u]));
 
 function neueDb() {
   const sqlite = new Database(":memory:");
   sqlite.pragma("foreign_keys = ON");
   const db = drizzle(sqlite);
-  migrate(db, { migrationsFolder: join(process.cwd(), "drizzle") });
+  migrate(db, { migrationsFolder: join(ROOT, "drizzle") });
   return db;
 }
 
@@ -135,11 +137,17 @@ describe("Abgleich mit docs/SPEC.md §4.2", () => {
       const optional = (z.match(/\b(KH|KB)\b/g) ?? []).map((a) => ABK[a]!);
       return { equipment: [], optional };
     }
-    const gruppen = z.split(" + ").map((g) => g.split(" oder ").map((a) => ABK[a.trim()]!));
+    const gruppen = z.split(" + ").map((g) =>
+      g.split(" oder ").map((a) => {
+        const art = ABK[a.trim()];
+        if (!art) throw new Error(`Unbekannte Equipment-Abkürzung "${a}" in Zelle "${zelle}"`);
+        return art;
+      }),
+    );
     return { equipment: gruppen, optional: [] };
   }
 
-  const text = readFileSync(join(process.cwd(), "docs/SPEC.md"), "utf8");
+  const text = readFileSync(join(ROOT, "docs/SPEC.md"), "utf8");
   const zeilen = [...text.matchAll(/^\| ((?:KN|HB|DH|DV|ZH|ZV|TR|RU)-\d{2}) \| (.+?) \| (.+?) \| (\d) \| (ja)? ?\|$/gm)];
 
   it("findet alle 60 Zeilen in der Spec", () => {
@@ -190,6 +198,16 @@ describe("Seed-Runner", () => {
     const kn03 = db.select().from(exercise).where(eq(exercise.id, "KN-03")).get()!;
     expect(kn03).toMatchObject({ name: "Meine Kniebeuge", aktiv: false, pruefstatus: "geprueft" });
     expect(db.select().from(settings).get()!.einheitenProWoche).toBe(3);
+  });
+
+  it("legt Standardprofile nur beim ersten Lauf an (gelöschte kehren nicht zurück, nur ein Standardprofil)", () => {
+    seed(db);
+    db.delete(equipmentProfile).where(eq(equipmentProfile.seedKey, "studio")).run();
+    db.update(equipmentProfile).set({ istStandard: true }).where(eq(equipmentProfile.seedKey, "zuhause")).run();
+    seed(db);
+    const profile = db.select().from(equipmentProfile).all();
+    expect(profile.map((p) => p.seedKey).sort()).toEqual(["unterwegs", "zuhause"]);
+    expect(profile.filter((p) => p.istStandard)).toHaveLength(1);
   });
 
   it("speichert Seed-Übungen als 'zu prüfen' und aktiv; Listen bleiben als Listen lesbar", () => {
