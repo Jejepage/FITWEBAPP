@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import type { FormState } from "@/app/katalog/form-state";
+import { Checkbox, FehlerBanner, Feld, Gruppe } from "@/components/form-felder";
 import { eingabe, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { GRUPPEN_ANZAHL, type ExerciseFormWerte } from "@/domain/exercise-form";
 import {
@@ -19,83 +20,6 @@ import { de } from "@/i18n/de";
 
 const t = de.katalog;
 const f = t.feld;
-
-function Feld({
-  label,
-  hilfe,
-  fehler,
-  children,
-}: {
-  label: string;
-  hilfe?: string;
-  fehler?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mb-4">
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium">{label}</span>
-        {children}
-      </label>
-      {hilfe && <p className="mt-1 text-sm text-neutral-500">{hilfe}</p>}
-      {fehler && (
-        <p role="alert" className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
-          {fehler}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function Checkbox({
-  name,
-  value,
-  label,
-  checked,
-}: {
-  name: string;
-  value?: string;
-  label: string;
-  checked: boolean;
-}) {
-  return (
-    <label className="flex min-h-11 items-center gap-3">
-      <input
-        type="checkbox"
-        name={name}
-        value={value}
-        defaultChecked={checked}
-        className="size-5"
-      />
-      <span>{label}</span>
-    </label>
-  );
-}
-
-function Gruppe({
-  legende,
-  fehler,
-  hilfe,
-  children,
-}: {
-  legende: string;
-  fehler?: string;
-  hilfe?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <fieldset className="mb-4 rounded-lg border border-neutral-200 p-3 dark:border-neutral-800">
-      <legend className="px-1 text-sm font-medium">{legende}</legend>
-      {hilfe && <p className="mb-1 text-sm text-neutral-500">{hilfe}</p>}
-      {children}
-      {fehler && (
-        <p role="alert" className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
-          {fehler}
-        </p>
-      )}
-    </fieldset>
-  );
-}
 
 export function ExerciseForm({
   aktion,
@@ -127,14 +51,7 @@ export function ExerciseForm({
 
   return (
     <form key={formKey} action={formAction} noValidate>
-      {hatFehler && (
-        <p
-          role="alert"
-          className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-800 dark:bg-red-950 dark:text-red-200"
-        >
-          {fehler._form ?? t.formularFehler}
-        </p>
-      )}
+      {hatFehler && <FehlerBanner>{fehler._form ?? t.formularFehler}</FehlerBanner>}
 
       {muster !== undefined && (
         <Feld label={f.muster} fehler={fehler.muster}>

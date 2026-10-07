@@ -1,4 +1,11 @@
-import { EQUIPMENT_NAMEN, type EquipmentArt, type EquipmentBedingung } from "./types";
+import {
+  EQUIPMENT_NAMEN,
+  MUSTER,
+  type EquipmentArt,
+  type EquipmentBedingung,
+  type Exercise,
+  type Muster,
+} from "./types";
 
 /**
  * Erfüllt das verfügbare Equipment die Bedingung einer Übung?
@@ -18,4 +25,16 @@ export function beschreibeBedingung(bedingung: EquipmentBedingung): string {
   return bedingung
     .map((gruppe) => gruppe.map((art) => EQUIPMENT_NAMEN[art]).join(" oder "))
     .join(" + ");
+}
+
+/** Zahl aktiver Übungen je Muster, die mit dem Equipment machbar sind. */
+export function zaehleMachbar(
+  uebungen: readonly Pick<Exercise, "muster" | "equipment" | "aktiv">[],
+  verfuegbar: readonly EquipmentArt[],
+): Record<Muster, number> {
+  const anzahl = Object.fromEntries(MUSTER.map((m) => [m, 0])) as Record<Muster, number>;
+  for (const u of uebungen) {
+    if (u.aktiv && erfuellt(u.equipment, verfuegbar)) anzahl[u.muster]++;
+  }
+  return anzahl;
 }

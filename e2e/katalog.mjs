@@ -1,48 +1,14 @@
 // Browsertest für den Katalog (Abschnitt 3). Start: npm run build && npm run e2e
-// Startet die App mit frischer Temp-Datenbank und fährt den Ablauf im Mobil- und Desktop-Viewport durch.
-import { spawn } from "node:child_process";
-import { mkdtempSync, mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import assert from "node:assert/strict";
-import { chromium } from "playwright-core";
+import { join } from "node:path";
+import { BASE, SHOTS, hinweisBestaetigen, sammleFehler, withApp } from "./harness.mjs";
 
-const PORT = 3120;
-const BASE = `http://127.0.0.1:${PORT}`;
-const SHOTS = process.env.SHOTS_DIR ?? join(tmpdir(), "fit-e2e-shots");
-mkdirSync(SHOTS, { recursive: true });
-
-const dbDir = mkdtempSync(join(tmpdir(), "fit-e2e-"));
-const server = spawn("npx", ["next", "start", "-p", String(PORT), "-H", "127.0.0.1"], {
-  env: { ...process.env, DB_PATH: join(dbDir, "fit.db"), NEXT_TELEMETRY_DISABLED: "1" },
-  stdio: ["ignore", "pipe", "pipe"],
-  detached: true, // eigene Prozessgruppe, damit beim Beenden auch der next-Kindprozess stirbt
-});
-let serverLog = "";
-server.stdout.on("data", (d) => (serverLog += d));
-server.stderr.on("data", (d) => (serverLog += d));
-
-async function warten() {
-  for (let i = 0; i < 60; i++) {
-    try {
-      if ((await fetch(`${BASE}/api/health`)).ok) return;
-    } catch {}
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  throw new Error(`Server startet nicht:\n${serverLog}`);
-}
-
-const executablePath = process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium";
 let browser;
-let fehlgeschlagen = false;
 
 async function ablauf(name, viewport) {
   const context = await browser.newContext({ viewport, hasTouch: viewport.width < 600 });
   const page = await context.newPage();
-  const fehler = [];
-  page.on("pageerror", (e) => fehler.push(e.message));
-  page.on("console", (m) => m.type() === "error" && fehler.push(m.text()));
-  page.on("response", (r) => r.status() >= 400 && fehler.push(`HTTP ${r.status()} ${r.url()}`));
+  const fehler = sammleFehler(page);
   const shot = (n) => page.screenshot({ path: join(SHOTS, `${name}-${n}.png`), fullPage: true });
   const keinHorizontalScroll = async (wo) =>
     assert.ok(
@@ -50,6 +16,8 @@ async function ablauf(name, viewport) {
       `${name}: horizontales Scrollen auf ${wo}`,
     );
   const schritt = (s) => console.log(`  [${name}] ${s}`);
+
+  await hinweisBestaetigen(page); // erster Start: Hinweis bestätigen
 
   // 1. Liste
   await page.goto(`${BASE}/katalog`);
@@ -194,12 +162,10 @@ async function ablauf(name, viewport) {
   await context.close();
 }
 
-try {
-  await warten();
-  browser = await chromium.launch({ executablePath, args: ["--no-sandbox"] });
+await withApp(async (app) => {
+  browser = app.browser;
   console.log("Mobil (390×844)");
   await ablauf("mobil", { width: 390, height: 844 });
-  // Zweiter Durchlauf braucht frischen Zustand → Server mit neuer DB wäre nötig; Desktop prüft nur Anzeige.
   console.log("Desktop (1280×900)");
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
@@ -212,15 +178,4 @@ try {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
   console.log("  [desktop] Liste und Detail ohne horizontales Scrollen");
   await context.close();
-  console.log(`\nAlle Prüfungen bestanden. Screenshots: ${SHOTS}`);
-} catch (e) {
-  fehlgeschlagen = true;
-  console.error("\nFEHLGESCHLAGEN:", e);
-  console.error("\nServer-Log:\n" + serverLog.slice(-1500));
-} finally {
-  await browser?.close();
-  try {
-    process.kill(-server.pid);
-  } catch {}
-  process.exit(fehlgeschlagen ? 1 : 0);
-}
+});

@@ -14,7 +14,6 @@ export const de = {
     start: "Hier erscheint später die nächste fällige Einheit.",
     plan: "Der Plan-Generator folgt in Abschnitt 5.",
     verlauf: "Der Verlauf folgt in Abschnitt 7.",
-    einstellungen: "Equipment und Einstellungen folgen in Abschnitt 4.",
   },
   katalog: {
     titel: "Katalog",
@@ -102,5 +101,65 @@ export const de = {
       pruefstatus: "Prüfstatus",
       pruefstati: { zu_pruefen: "zu prüfen", geprueft: "geprüft" },
     },
+  },
+  hinweis: {
+    titel: "Wichtiger Hinweis",
+    text: "Diese App gibt allgemeine Trainingsempfehlungen. Sie ersetzt keine ärztliche oder physiotherapeutische Beratung.",
+    zusatz: [
+      "Wenn du Vorerkrankungen oder Beschwerden hast, kläre dein Training vorher medizinisch ab.",
+      "Beginne mit leichten Gewichten, achte auf saubere Technik und brich bei Schmerzen ab.",
+    ],
+    bestaetigen: "Verstanden",
+  },
+  einstellungen: {
+    titel: "Einstellungen",
+    training: "Training",
+    gespeichert: "Einstellungen gespeichert.",
+    formularFehler: "Bitte die markierten Felder prüfen.",
+    stufenTitel: "Startstufe pro Bewegungsmuster",
+    stufenHilfe:
+      "Stufe 1 ist leicht, Stufe 5 sehr anspruchsvoll. Neue Pläne beginnen mit diesen Stufen; nach Woche 6 schlägt die App Änderungen vor.",
+    stufe: (m: string) => `Stufe ${m}`,
+    einheiten: "Einheiten pro Woche",
+    einheitenOption: (n: number) => `${n} pro Woche`,
+    zusatzblock: "Zusatzblock (Tragen und Rumpf) in neuen Plänen einplanen",
+    zusatzblockHilfe:
+      "Ohne Zusatzblock hat jede Einheit 6, mit Zusatzblock 8 Übungen. In jeder Einheit änderbar.",
+    aufwaermen: "Aufwärmprogramm (Text)",
+    aufwaermenHilfe: "Wird vor jeder Einheit angezeigt.",
+    speichern: "Speichern",
+    profile: "Equipment-Profile",
+    profileHilfe: "Ein Profil beschreibt, was du am jeweiligen Ort zur Verfügung hast.",
+    neuesProfil: "Neues Profil",
+    standard: "Standard",
+    keinEquipment: "Kein Gerät (nur Körpergewicht)",
+    gewichteKurz: (art: string, liste: string) => `${art}: ${liste} kg`,
+    machbarKurz: "machbar",
+    hinweisTitel: "Hinweis",
+  },
+  profil: {
+    neuTitel: "Neues Profil",
+    bearbeitenTitel: (name: string) => `Profil „${name}“`,
+    zurueck: "Zurück zu den Einstellungen",
+    name: "Name",
+    equipment: "Verfügbares Equipment",
+    equipmentHilfe:
+      "Alltagsgegenstände wie Stuhl, Tisch, Rucksack und Wand gelten immer als verfügbar. Ohne Auswahl sind nur Übungen ohne Gerät möglich.",
+    gewichte: (art: string) => `Gewichte ${art} (kg)`,
+    gewichteHilfe:
+      "Verfügbare Gewichte, z. B. „12, 16“ oder als Bereich „2–20/2“ (2 bis 20 kg in 2-kg-Schritten). Dezimalkomma ist erlaubt: „2,5“. Nur nötig, wenn das Equipment angekreuzt ist.",
+    istStandard: "Als Standardprofil verwenden",
+    istStandardFest:
+      "Dies ist das Standardprofil. Um ein anderes festzulegen, öffne dieses und setze dort den Haken.",
+    speichern: "Speichern",
+    abbrechen: "Abbrechen",
+    machbarTitel: "Damit machbar",
+    machbarHilfe:
+      "Aktive Übungen je Bewegungsmuster mit dem gespeicherten Equipment dieses Profils.",
+    machbarWarnung: (muster: string) =>
+      `Für ${muster} gibt es mit diesem Profil keine Übung. Ein Plan kann dort keinen Platz füllen.`,
+    loeschenTitel: "Profil löschen",
+    loeschen: "Profil löschen",
+    loeschenFrage: "Dieses Profil wirklich löschen?",
   },
 } as const;

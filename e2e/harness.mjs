@@ -1,0 +1,68 @@
+// Gemeinsame Steuerung für Browsertests: frische Temp-DB, App starten, Chromium starten, aufräumen.
+import { spawn } from "node:child_process";
+import { mkdirSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { chromium } from "playwright-core";
+
+export const PORT = Number(process.env.E2E_PORT ?? 3120);
+export const BASE = `http://127.0.0.1:${PORT}`;
+export const SHOTS = process.env.SHOTS_DIR ?? join(tmpdir(), "fit-e2e-shots");
+
+/** Erster Start: Hinweis bestätigen, damit die App benutzbar ist. */
+export async function hinweisBestaetigen(page) {
+  await page.goto(`${BASE}/`);
+  await page.getByRole("button", { name: "Verstanden" }).click();
+  await page.getByRole("navigation", { name: "Hauptnavigation" }).waitFor();
+}
+
+/** Browser-Fehler (Konsole, HTTP >= 400) einer Seite sammeln. */
+export function sammleFehler(page) {
+  const fehler = [];
+  page.on("pageerror", (e) => fehler.push(e.message));
+  page.on("console", (m) => m.type() === "error" && fehler.push(m.text()));
+  page.on("response", (r) => r.status() >= 400 && fehler.push(`HTTP ${r.status()} ${r.url()}`));
+  return fehler;
+}
+
+export async function withApp(fn) {
+  mkdirSync(SHOTS, { recursive: true });
+  const dbDir = mkdtempSync(join(tmpdir(), "fit-e2e-"));
+  const server = spawn("npx", ["next", "start", "-p", String(PORT), "-H", "127.0.0.1"], {
+    env: { ...process.env, DB_PATH: join(dbDir, "fit.db"), NEXT_TELEMETRY_DISABLED: "1" },
+    stdio: ["ignore", "pipe", "pipe"],
+    detached: true, // eigene Prozessgruppe, damit beim Beenden auch der next-Kindprozess stirbt
+  });
+  let log = "";
+  server.stdout.on("data", (d) => (log += d));
+  server.stderr.on("data", (d) => (log += d));
+
+  let browser;
+  let fehlgeschlagen = false;
+  try {
+    let bereit = false;
+    for (let i = 0; i < 60 && !bereit; i++) {
+      try {
+        bereit = (await fetch(`${BASE}/api/health`)).ok;
+      } catch {}
+      if (!bereit) await new Promise((r) => setTimeout(r, 500));
+    }
+    if (!bereit) throw new Error(`Server startet nicht:\n${log}`);
+    browser = await chromium.launch({
+      executablePath: process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium",
+      args: ["--no-sandbox"],
+    });
+    await fn({ browser, BASE, SHOTS });
+    console.log(`\nAlle Prüfungen bestanden. Screenshots: ${SHOTS}`);
+  } catch (e) {
+    fehlgeschlagen = true;
+    console.error("\nFEHLGESCHLAGEN:", e);
+    console.error("\nServer-Log:\n" + log.slice(-1500));
+  } finally {
+    await browser?.close();
+    try {
+      process.kill(-server.pid);
+    } catch {}
+    process.exit(fehlgeschlagen ? 1 : 0);
+  }
+}
