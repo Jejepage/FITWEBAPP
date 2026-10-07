@@ -169,6 +169,13 @@ describe("loesePlanWerteAuf", () => {
       expect(auf({ ...sp, ...aenderung, basis }).werte.auswahl).toEqual({});
     });
 
+    it("meldet veraltete Vorschau, wenn bestimmende Eingaben geändert wurden", () => {
+      const basis = basisVon();
+      expect(auf({ ...sp, basis }).vorschauVeraltet).toBe(false);
+      expect(auf({ ...sp, basis, profil: "2" }).vorschauVeraltet).toBe(true);
+      expect(auf({ ...sp, profil: "2" }).vorschauVeraltet).toBe(false); // ohne Basis nichts zu vergleichen
+    });
+
     it("planBasis unterscheidet alle bestimmenden Eingaben", () => {
       const w = auf({}).werte;
       const basen = new Set([
@@ -183,7 +190,8 @@ describe("loesePlanWerteAuf", () => {
     });
   });
 
-  it("Seed läuft nicht über die Grenze hinaus", () => {
-    expect(auf({ seed: "999999", aktion: "mischen" }).werte.seed).toBe(0);
+  it("Mischen ergibt nie Seed 0 und bleibt im Bereich", () => {
+    expect(auf({ seed: "999999", aktion: "mischen" }).werte.seed).toBe(1);
+    expect(auf({ seed: "0", aktion: "mischen" }).werte.seed).toBe(1);
   });
 });

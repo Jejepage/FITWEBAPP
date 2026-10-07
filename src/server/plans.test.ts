@@ -120,6 +120,9 @@ describe("createPlan", () => {
     [{ profilId: 9999 }, "profil_unbekannt"],
     [{ startDatum: "2026-02-30" }, "datum_ungueltig"],
     [{ einheitenProWoche: 4 }, "einheiten_ungueltig"],
+    [{ stufen: { ...stufen, KN: 6 } }, "stufen_ungueltig"],
+    [{ stufen: { ...stufen, HB: 0 } }, "stufen_ungueltig"],
+    [{ stufen: { ...stufen, DH: 2.5 } }, "stufen_ungueltig"],
     [{ vorgaengerId: 9999 }, "vorgaenger_unbekannt"],
   ] as const)("lehnt %j ab", (override, code) => {
     expect(createPlan(db, eingabe(override))).toEqual({ ok: false, code });

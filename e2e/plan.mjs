@@ -83,7 +83,8 @@ async function ablauf(browser, dbPfad) {
   // Profil wechseln und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
   await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByText(/Eine gewählte Übung ist nicht mehr verfügbar/).waitFor();
+  await page.getByText(/Du hast Eingaben geändert\. Bitte erst „Vorschau aktualisieren“/).waitFor();
+  assert.ok(!page.url().includes("ACTION"), "keine internen Framework-Felder in der URL");
   assert.equal(
     new Database(dbPfad, { readonly: true }).prepare("select count(*) c from plan").get().c,
     0,
@@ -131,6 +132,16 @@ async function ablauf(browser, dbPfad) {
   await page.getByRole("button", { name: "Speichern" }).click();
   await page.getByRole("heading", { name: "Equipment-Profile" }).waitFor();
   await page.goto(`${BASE}/plan/neu`);
+  await page.getByLabel("Equipment-Profil").selectOption({ label: "Leer" });
+  await aktualisieren();
+  await page
+    .getByRole("alert")
+    .filter({ hasText: "Mit diesem Profil gibt es keine Übung für" })
+    .waitFor();
+  // Ausweg aus dem Fehlerzustand: Profil wechseln und neu abschicken (Button steckt in der Meldung)
+  await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
+  await page.getByRole("alert").getByRole("button", { name: "Vorschau aktualisieren" }).click();
+  await page.locator("select[name^=slot_]").first().waitFor();
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Leer" });
   await aktualisieren();
   await page

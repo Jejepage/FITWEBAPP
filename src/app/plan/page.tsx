@@ -54,7 +54,7 @@ export default function PlanPage() {
           <dd>{datumAnzeige(plan.startDatum)}</dd>
           <dt className="text-neutral-500">{t.einheitenProWoche(plan.einheitenProWoche)}</dt>
           <dd>{t.wochenfolge(plan.einheitenProWoche)}</dd>
-          <dt className="text-neutral-500">Zusatzblock</dt>
+          <dt className="text-neutral-500">{t.zusatzblock}</dt>
           <dd>{plan.zusatzblock ? t.zusatzblockAn : t.zusatzblockAus}</dd>
         </dl>
         <p className="mt-3 text-sm text-neutral-500">{t.trainingFolgt}</p>

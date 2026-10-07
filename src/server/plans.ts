@@ -4,7 +4,7 @@ import type { Db } from "@/db/types";
 import { erfuellt } from "@/domain/equipment";
 import { istGueltigesDatum } from "@/domain/plan-form";
 import { SLOT_VORLAGE, slotKey, type SlotZuordnung } from "@/domain/plan-types";
-import type { Muster } from "@/domain/types";
+import { MUSTER, type Muster } from "@/domain/types";
 
 export type Plan = typeof plan.$inferSelect;
 
@@ -22,6 +22,7 @@ export type PlanFehlerCode =
   | "profil_unbekannt"
   | "datum_ungueltig"
   | "einheiten_ungueltig"
+  | "stufen_ungueltig"
   | "slots_unvollstaendig"
   | "uebung_ungueltig"
   | "vorgaenger_unbekannt";
@@ -43,6 +44,10 @@ export function createPlan(db: Db, e: PlanEingabe): PlanErgebnis {
     if (!istGueltigesDatum(e.startDatum)) return { ok: false, code: "datum_ungueltig" };
     if (e.einheitenProWoche !== 2 && e.einheitenProWoche !== 3) {
       return { ok: false, code: "einheiten_ungueltig" };
+    }
+    const stufeOk = (s: number) => Number.isInteger(s) && s >= 1 && s <= 5;
+    if (!MUSTER.every((m) => stufeOk(e.stufen[m]))) {
+      return { ok: false, code: "stufen_ungueltig" };
     }
     if (
       e.vorgaengerId !== null &&
@@ -131,7 +136,11 @@ export function getPlanSlots(db: Db, planId: number): SlotZuordnung[] {
       muster: s.muster,
       exerciseId: s.exerciseId,
     }))
-    .sort((a, b) => (reihenfolge.get(slotKey(a)) ?? 0) - (reihenfolge.get(slotKey(b)) ?? 0));
+    .sort(
+      (a, b) =>
+        (reihenfolge.get(slotKey(a)) ?? Number.MAX_SAFE_INTEGER) -
+        (reihenfolge.get(slotKey(b)) ?? Number.MAX_SAFE_INTEGER),
+    );
 }
 
 /** IDs aller Übungen eines Plans, z. B. für die Abwechslungs-Regel im Folgeblock. */

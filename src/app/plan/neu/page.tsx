@@ -177,6 +177,14 @@ export default async function PlanNeuPage({
               {t.fehlendeMuster(ergebnis.fehlendeMuster.map((m) => MUSTER_NAMEN[m]).join(", "))}
             </p>
             <p className="mt-1 text-sm">{t.fehlendeMusterHilfe}</p>
+            <button
+              type="submit"
+              name="aktion"
+              value="aktualisieren"
+              className={`${knopfSekundaer} mt-3`}
+            >
+              {f.aktualisieren}
+            </button>
           </section>
         ) : (
           <>

@@ -177,6 +177,7 @@ export const de = {
     einheitenProWoche: (n: number) => `${n} Einheiten pro Woche`,
     wochenfolge: (n: number) =>
       n === 3 ? "Reihenfolge im Wechsel: A-B-A, dann B-A-B" : "Reihenfolge: A, B",
+    zusatzblock: "Zusatzblock",
     zusatzblockAn: "Zusatzblock: ja",
     zusatzblockAus: "Zusatzblock: nein",
     zusatzAusHinweis:
@@ -222,6 +223,9 @@ export const de = {
       profil_unbekannt: "Das Profil gibt es nicht mehr. Bitte ein anderes wählen.",
       datum_ungueltig: "Bitte ein gültiges Startdatum angeben.",
       einheiten_ungueltig: "Bitte 2 oder 3 Einheiten pro Woche wählen.",
+      stufen_ungueltig: "Die Wunschstufen müssen zwischen 1 und 5 liegen.",
+      vorschau_veraltet:
+        "Du hast Eingaben geändert. Bitte erst „Vorschau aktualisieren“, damit der Vorschlag zu den neuen Eingaben passt, und dann speichern.",
       slots_unvollstaendig:
         "Die Übungsauswahl ist unvollständig. Bitte die Vorschau aktualisieren.",
       uebung_ungueltig:

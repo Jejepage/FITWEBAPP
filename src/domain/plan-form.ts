@@ -105,6 +105,11 @@ export interface PlanAufloesung {
   werte: PlanWerte;
   /** Feldfehler, z. B. ein ungültiges Startdatum (dann gilt das Standarddatum). */
   fehler: Record<string, string>;
+  /**
+   * Profil, Stufen, Seed oder Vorgänger wurden seit der letzten Vorschau geändert; die manuelle
+   * Wahl wurde deshalb verworfen. Ein Speichern wäre dann nicht, was der Nutzer gesehen hat.
+   */
+  vorschauVeraltet: boolean;
 }
 
 /**
@@ -130,14 +135,15 @@ export function loesePlanWerteAuf(roh: PlanRohwerte, standard: PlanStandardwerte
     // Ein abgeschicktes Formular ohne Haken heißt "aus", ein nie gesendetes nimmt den Standard.
     zusatzblock: roh.zusatzblock ?? (roh.gesendet ? false : standard.zusatzblock),
     startDatum,
-    seed: roh.aktion === "mischen" ? (roh.seed + 1) % (MAX_SEED + 1) : roh.seed,
+    // Mischen liefert nie 0 (0 heißt "nicht gemischt"): ... 999999 → 1
+    seed: roh.aktion === "mischen" ? (roh.seed % MAX_SEED) + 1 : roh.seed,
     vorgaengerId: roh.vorgaengerId ?? null,
     auswahl: roh.auswahl,
   };
   // Manuelle Wahl gilt nur für genau die Eingaben, aus denen die Vorschau entstanden ist.
   const veraendert = roh.basis !== undefined && roh.basis !== planBasis(werte);
   if (roh.aktion === "neu" || roh.aktion === "mischen" || veraendert) werte.auswahl = {};
-  return { werte, fehler };
+  return { werte, fehler, vorschauVeraltet: veraendert };
 }
 
 export const quelleAusSearchParams =
