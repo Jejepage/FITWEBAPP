@@ -81,3 +81,14 @@ export type Block = "1" | "2" | "Z";
 
 /** Verfügbare Hantelgewichte in kg je Equipment-Art (nur zuhause relevant). */
 export type Gewichte = Partial<Record<EquipmentArt, number[]>>;
+
+export const EQUIPMENT_NAMEN: Record<EquipmentArt, string> = {
+  maschinen: "Maschinen/Kabelzug",
+  langhantel: "Langhantel",
+  kurzhanteln: "Kurzhanteln",
+  kettlebell: "Kettlebell",
+  bank: "Bank",
+  stange: "Stange",
+  band: "Band",
+  keins: "Kein Gerät",
+};

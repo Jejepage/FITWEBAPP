@@ -1,27 +1,20 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { eq } from "drizzle-orm";
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { exerciseSeedSchema } from "@/domain/schemas";
-import { EQUIPMENT_ARTEN, MUSTER, type EquipmentArt, type EquipmentBedingung } from "@/domain/types";
+import {
+  EQUIPMENT_ARTEN,
+  MUSTER,
+  type EquipmentArt,
+  type EquipmentBedingung,
+} from "@/domain/types";
+import { PROJEKT_ROOT, neueDb } from "../test-utils";
 import { equipmentProfile, exercise, settings } from "../schema";
 import { uebungenSeed } from "./data";
 import { seed } from "./run";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const byId = new Map(uebungenSeed.map((u) => [u.id, u]));
-
-function neueDb() {
-  const sqlite = new Database(":memory:");
-  sqlite.pragma("foreign_keys = ON");
-  const db = drizzle(sqlite);
-  migrate(db, { migrationsFolder: join(ROOT, "drizzle") });
-  return db;
-}
 
 describe("Seed-Daten", () => {
   it("enthält 60 Übungen mit eindeutigen IDs", () => {
@@ -36,11 +29,14 @@ describe("Seed-Daten", () => {
     }
   });
 
-  it.each(uebungenSeed.map((u) => [u.id, u] as const))("%s ist gültig und ihre ID passt zum Muster", (id, u) => {
-    const r = exerciseSeedSchema.safeParse(u);
-    expect(r.success, r.success ? "" : JSON.stringify(r.error.issues)).toBe(true);
-    expect(id.startsWith(`${u.muster}-`)).toBe(true);
-  });
+  it.each(uebungenSeed.map((u) => [u.id, u] as const))(
+    "%s ist gültig und ihre ID passt zum Muster",
+    (id, u) => {
+      const r = exerciseSeedSchema.safeParse(u);
+      expect(r.success, r.success ? "" : JSON.stringify(r.error.issues)).toBe(true);
+      expect(id.startsWith(`${u.muster}-`)).toBe(true);
+    },
+  );
 
   it("verwendet nur bekannte Equipment-Arten (Bedingung und optionale Last)", () => {
     for (const u of uebungenSeed) {
@@ -61,7 +57,12 @@ describe("Seed-Daten", () => {
   it("'gewicht' als Steigerung nur bei beladbaren Übungen, 'stufe' nur mit schwererer Übung", () => {
     const beladbar = (eq: EquipmentBedingung, opt: EquipmentArt[]) =>
       opt.length > 0 ||
-      eq.some((g) => g.some((a) => a === "maschinen" || a === "langhantel" || a === "kurzhanteln" || a === "kettlebell"));
+      eq.some((g) =>
+        g.some(
+          (a) =>
+            a === "maschinen" || a === "langhantel" || a === "kurzhanteln" || a === "kettlebell",
+        ),
+      );
     for (const u of uebungenSeed) {
       // TR-01: Last ist der Rucksack selbst (Alltagsgegenstand), Gewicht wird darin variiert.
       if (u.steigerungsart.includes("gewicht") && u.id !== "TR-01") {
@@ -131,7 +132,10 @@ describe("Abgleich mit docs/SPEC.md §4.2", () => {
     BD: "band",
   };
 
-  function parseEquipment(zelle: string): { equipment: EquipmentBedingung; optional: EquipmentArt[] } {
+  function parseEquipment(zelle: string): {
+    equipment: EquipmentBedingung;
+    optional: EquipmentArt[];
+  } {
     const z = zelle.trim();
     if (z.startsWith("–") || z.startsWith("Stuhl")) {
       const optional = (z.match(/\b(KH|KB)\b/g) ?? []).map((a) => ABK[a]!);
@@ -147,8 +151,12 @@ describe("Abgleich mit docs/SPEC.md §4.2", () => {
     return { equipment: gruppen, optional: [] };
   }
 
-  const text = readFileSync(join(ROOT, "docs/SPEC.md"), "utf8");
-  const zeilen = [...text.matchAll(/^\| ((?:KN|HB|DH|DV|ZH|ZV|TR|RU)-\d{2}) \| (.+?) \| (.+?) \| (\d) \| (ja)? ?\|$/gm)];
+  const text = readFileSync(join(PROJEKT_ROOT, "docs/SPEC.md"), "utf8");
+  const zeilen = [
+    ...text.matchAll(
+      /^\| ((?:KN|HB|DH|DV|ZH|ZV|TR|RU)-\d{2}) \| (.+?) \| (.+?) \| (\d) \| (ja)? ?\|$/gm,
+    ),
+  ];
 
   it("findet alle 60 Zeilen in der Spec", () => {
     expect(zeilen).toHaveLength(60);
@@ -190,7 +198,10 @@ describe("Seed-Runner", () => {
 
   it("ist idempotent und überschreibt keine Nutzeränderungen", () => {
     seed(db);
-    db.update(exercise).set({ name: "Meine Kniebeuge", aktiv: false, pruefstatus: "geprueft" }).where(eq(exercise.id, "KN-03")).run();
+    db.update(exercise)
+      .set({ name: "Meine Kniebeuge", aktiv: false, pruefstatus: "geprueft" })
+      .where(eq(exercise.id, "KN-03"))
+      .run();
     db.update(settings).set({ einheitenProWoche: 3 }).where(eq(settings.id, 1)).run();
     seed(db);
     expect(db.select().from(exercise).all()).toHaveLength(60);
@@ -203,7 +214,10 @@ describe("Seed-Runner", () => {
   it("legt Standardprofile nur beim ersten Lauf an (gelöschte kehren nicht zurück, nur ein Standardprofil)", () => {
     seed(db);
     db.delete(equipmentProfile).where(eq(equipmentProfile.seedKey, "studio")).run();
-    db.update(equipmentProfile).set({ istStandard: true }).where(eq(equipmentProfile.seedKey, "zuhause")).run();
+    db.update(equipmentProfile)
+      .set({ istStandard: true })
+      .where(eq(equipmentProfile.seedKey, "zuhause"))
+      .run();
     seed(db);
     const profile = db.select().from(equipmentProfile).all();
     expect(profile.map((p) => p.seedKey).sort()).toEqual(["unterwegs", "zuhause"]);
@@ -213,7 +227,9 @@ describe("Seed-Runner", () => {
   it("speichert Seed-Übungen als 'zu prüfen' und aktiv; Listen bleiben als Listen lesbar", () => {
     seed(db);
     const alle = db.select().from(exercise).all();
-    expect(alle.every((e) => e.pruefstatus === "zu_pruefen" && e.aktiv && e.bild === null)).toBe(true);
+    expect(alle.every((e) => e.pruefstatus === "zu_pruefen" && e.aktiv && e.bild === null)).toBe(
+      true,
+    );
     const goblet = alle.find((e) => e.id === "KN-04")!;
     expect(goblet.equipment).toEqual([["kurzhanteln", "kettlebell"]]);
     expect(Array.isArray(goblet.ausfuehrung)).toBe(true);

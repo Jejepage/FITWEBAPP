@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
-    "db:setup": "tsx src/db/migrate.ts"
+    "db:setup": "tsx src/db/migrate.ts",
+    "e2e": "node e2e/katalog.mjs"
   },
   "engines": {
     "node": ">=22"
@@ -33,6 +34,7 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.0",
+    "playwright-core": "^1.56.1",
     "postcss": "^8.5.29",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
