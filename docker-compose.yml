@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    image: fitwebapp:latest
+    restart: unless-stopped
+    environment:
+      DB_PATH: /data/fit.db
+      APP_PASSWORD: ${APP_PASSWORD:-}
+    volumes:
+      - fit-data:/data
+    ports:
+      # Nur auf die LAN-Adresse des Docker-Hosts binden, nie auf 0.0.0.0 ins Internet.
+      # In .env setzen: BIND_ADDR=192.168.178.50 (Default: nur lokal)
+      - "${BIND_ADDR:-127.0.0.1}:${APP_PORT:-3000}:3000"
+
+volumes:
+  fit-data:
