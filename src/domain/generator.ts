@@ -61,23 +61,37 @@ export function kandidatenFuerSlot(e: KandidatenEingabe, muster: Muster): Exerci
   return sortierteKandidaten(e, muster, 0);
 }
 
-/** Stellt sicher, dass in KN/HB eine einseitige Übung steht; ersetzt dafür genau einen Slot. */
-function erzwingeEinseitig(slots: SlotZuordnung[], kandidaten: Record<Muster, Exercise[]>): void {
+/**
+ * Stellt sicher, dass in KN/HB eine einseitige Übung steht; ersetzt dafür genau einen Slot.
+ * Gewählt wird der Slot, dessen bester einseitiger Kandidat den kleinsten Stufenrang hat (also
+ * der Wunschstufe seines Musters am nächsten liegt). Bei Gleichstand wird die schlechter
+ * eingestufte Übung verdrängt (meist B), danach entscheidet die Reihenfolge der Vorlage.
+ * Verglichen wird der Stufenrang, nicht die Listenposition: So hängt die Entscheidung nicht
+ * von gleichrangigen Übungen davor ab und damit auch nicht vom Seed.
+ */
+function erzwingeEinseitig(
+  slots: SlotZuordnung[],
+  kandidaten: Record<Muster, Exercise[]>,
+  stufen: Record<Muster, number>,
+): void {
   const relevant = slots.filter((s) => EINSEITIG_MUSTER.includes(s.muster));
   const istEinseitig = (s: SlotZuordnung) =>
     kandidaten[s.muster].some((u) => u.id === s.exerciseId && u.einseitig);
   if (relevant.some(istEinseitig)) return;
 
-  let beste: { slot: SlotZuordnung; wahl: Exercise; rang: number } | null = null;
+  let beste: { slot: SlotZuordnung; wahl: Exercise; rang: number; verdraengt: number } | null =
+    null;
   for (const slot of relevant) {
     const liste = kandidaten[slot.muster];
     const einseitige = liste.filter((u) => u.einseitig);
     const andere = slots.find((s) => s.muster === slot.muster && s.einheit !== slot.einheit);
     const wahl = einseitige.find((u) => u.id !== andere?.exerciseId) ?? einseitige[0];
     if (!wahl) continue;
-    const rang = liste.indexOf(wahl);
-    // Bei Gleichstand gewinnt der frühere Slot der Vorlage (strikt kleiner).
-    if (!beste || rang < beste.rang) beste = { slot, wahl, rang };
+    const rang = stufenRang(wahl.stufe, begrenzeStufe(stufen[slot.muster]));
+    const verdraengt = liste.findIndex((u) => u.id === slot.exerciseId);
+    const besser =
+      !beste || rang < beste.rang || (rang === beste.rang && verdraengt > beste.verdraengt); // sonst gewinnt der frühere Slot
+    if (besser) beste = { slot, wahl, rang, verdraengt };
   }
   if (beste) beste.slot.exerciseId = beste.wahl.id;
 }
@@ -97,7 +111,7 @@ export function generierePlan(e: GeneratorEingabe): GeneratorErgebnis {
     const wahl = (vorlage.einheit === "A" ? liste[0] : (liste[1] ?? liste[0])) as Exercise;
     return { ...vorlage, exerciseId: wahl.id };
   });
-  erzwingeEinseitig(slots, kandidaten);
+  erzwingeEinseitig(slots, kandidaten, e.stufen);
 
   return { ok: true, slots, hinweise: pruefePlan(slots, e) };
 }

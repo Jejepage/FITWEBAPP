@@ -241,19 +241,41 @@ describe("generierePlan: konkrete Fälle", () => {
     expect(ids(slots, "ZV")).toEqual(["ZV-07", "ZV-06"]);
   });
 
-  it("Einseitig-Regel: bei Gleichstand ersetzt der frühere Slot der Vorlage (HB-A)", () => {
-    // Stufe 1: KN-01, KN-02 … KN-05 (Index 4) und HB-01, HB-02, HB-03 (Index 2) sind nicht einseitig
-    // bzw. erst spät; HB-03 liegt für HB-A und HB-B gleich weit vorn, A kommt zuerst.
+  it("Einseitig-Regel: HB-03 (Stufenrang 1) schlägt KN-05 (Rang 2); verdrängt wird die schlechtere Übung (HB-B)", () => {
+    // Stufe 1: HB-01 (A) und HB-02 (B); HB-03 ist die nächstbeste einseitige Übung.
     const { slots } = plan(eingabe("studio", einheitlich(1)));
-    expect(ids(slots, "HB")).toEqual(["HB-03", "HB-02"]);
+    expect(ids(slots, "HB")).toEqual(["HB-01", "HB-03"]);
     expect(ids(slots, "KN")).toEqual(["KN-01", "KN-02"]);
   });
 
-  it("Einseitig-Regel: kommt HB nicht in Frage, wird ein KN-Slot ersetzt", () => {
+  it("Einseitig-Regel: kommt HB nicht in Frage, wird die schlechtere KN-Übung (B) ersetzt", () => {
     const uebungen = KATALOG.filter((u) => !(u.muster === "HB" && u.einseitig));
     const { slots } = plan({ ...eingabe("studio", einheitlich(1)), uebungen });
     expect(ids(slots, "HB")).toEqual(["HB-01", "HB-02"]);
-    expect(ids(slots, "KN")).toEqual(["KN-05", "KN-02"]);
+    expect(ids(slots, "KN")).toEqual(["KN-01", "KN-05"]);
+  });
+
+  it("Einseitig-Regel vergleicht den Stufenrang, nicht die Listenposition (KN 2, HB 3)", () => {
+    // Beide einseitigen Kandidaten stehen in ihrer Liste an derselben Position (Index 4),
+    // HB-03 hat aber Rang 1 (Stufe 2 bei Wunsch 3), KN-05 Rang 2 (Stufe 3 bei Wunsch 2).
+    const stufen = { ...einheitlich(2), HB: 3 };
+    const { slots } = plan(eingabe("studio", stufen));
+    expect(ids(slots, "HB")).toEqual(["HB-06", "HB-03"]);
+    expect(ids(slots, "KN")).toEqual(["KN-02", "KN-03"]);
+  });
+
+  it("Einseitig-Entscheidung hängt nicht vom Seed ab: KN 1, HB 1 ersetzt immer in HB", () => {
+    for (let seed = 0; seed <= 20; seed++) {
+      const { slots } = plan({ ...eingabe("studio", einheitlich(1)), seed });
+      const einseitigeIds = new Set(KATALOG.filter((u) => u.einseitig).map((u) => u.id));
+      const einseitig = slots.filter(
+        (s) => KN_HB.includes(s.muster) && einseitigeIds.has(s.exerciseId),
+      );
+      expect(
+        einseitig.map((s) => s.muster),
+        `Seed ${seed}`,
+      ).toEqual(["HB"]);
+    }
   });
 
   it("ohne einseitige KN/HB-Kandidaten bleibt es bei Regel 4 und es gibt einen Hinweis", () => {
