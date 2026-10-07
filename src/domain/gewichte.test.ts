@@ -21,6 +21,10 @@ describe("parseGewichte", () => {
     expect(werte("1,25 2,5")).toEqual([1.25, 2.5]);
   });
 
+  it("ein Komma am Ende stört nicht", () => {
+    expect(werte("12, 16,")).toEqual([12, 16]);
+  });
+
   it("liest Bereiche von–bis/Schritt (Gedankenstrich oder Bindestrich)", () => {
     expect(werte("2–20/2")).toEqual([2, 4, 6, 8, 10, 12, 14, 16, 18, 20]);
     expect(werte("2-8/2")).toEqual([2, 4, 6, 8]);
@@ -47,6 +51,9 @@ describe("parseGewichte", () => {
     ["20–2/2", /Anfang/],
     ["1–1000/1", /zu viele/],
     ["2–20", /gültige/],
+    ["12,16", /unklar/],
+    ["8,12,16", /gültige|unklar/],
+    ["2,3", /unklar/],
   ])("verwirft %s", (text, grund) => {
     const r = parseGewichte(text);
     expect(r.ok).toBe(false);

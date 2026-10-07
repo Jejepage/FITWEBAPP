@@ -1,7 +1,8 @@
 /**
  * Hantelgewichte in kg als Text. Erlaubt sind:
  * - Listen, getrennt durch Leerzeichen, Zeilenumbruch, Semikolon oder Komma mit Leerzeichen: "12, 16"
- * - Dezimalzahlen mit Komma oder Punkt: "2,5" (Komma ohne Leerzeichen ist ein Dezimalkomma)
+ * - Dezimalzahlen mit Komma oder Punkt: "2,5" (Komma ohne Leerzeichen ist ein Dezimalkomma; weil
+ *   reale Gewichte in Vielfachen von 0,25 kg vorkommen, wird "12,16" als Tippfehler abgewiesen)
  * - Bereiche "von–bis/Schritt": "2–20/2" = 2, 4, …, 20
  */
 export const MAX_GEWICHT_KG = 500;
@@ -17,26 +18,34 @@ const runde = (n: number) => Math.round(n * 1000) / 1000;
 
 export function parseGewichte(text: string): GewichteErgebnis {
   const tokens = text
-    .replace(/,(?=\s)/g, " ") // Komma + Leerzeichen trennt Werte
+    .replace(/,(?=\s|$)/g, " ") // Komma + Leerzeichen (oder am Ende) trennt Werte
     .split(/[;\s]+/)
-    .map((t) => t.trim().replace(/,/g, "."))
+    .map((t) => t.trim())
     .filter(Boolean);
 
   const werte = new Set<number>();
-  for (const token of tokens) {
+  for (const roh of tokens) {
+    const token = roh.replace(/,/g, ".");
     const einzel = EINZEL_RE.exec(token);
     if (einzel) {
-      werte.add(runde(Number(einzel[1])));
+      const wert = Number(einzel[1]);
+      if (roh.includes(",") && !Number.isInteger(wert * 4)) {
+        return {
+          ok: false,
+          grund: `„${roh}“ ist unklar. Mehrere Gewichte trennst du mit Semikolon oder Komma plus Leerzeichen („12, 16“). Ein Dezimalkomma geht nur bei Vielfachen von 0,25 kg („2,5“).`,
+        };
+      }
+      werte.add(runde(wert));
       continue;
     }
     const bereich = BEREICH_RE.exec(token);
-    if (!bereich) return { ok: false, grund: `„${token}“ ist keine gültige Angabe.` };
+    if (!bereich) return { ok: false, grund: `„${roh}“ ist keine gültige Angabe.` };
     const [von, bis, schritt] = [Number(bereich[1]), Number(bereich[2]), Number(bereich[3])];
     if (schritt <= 0) return { ok: false, grund: "Die Schrittweite muss größer als 0 sein." };
     if (von > bis)
-      return { ok: false, grund: `Im Bereich „${token}“ ist der Anfang größer als das Ende.` };
+      return { ok: false, grund: `Im Bereich „${roh}“ ist der Anfang größer als das Ende.` };
     if ((bis - von) / schritt > MAX_ANZAHL_GEWICHTE) {
-      return { ok: false, grund: `Der Bereich „${token}“ enthält zu viele Werte.` };
+      return { ok: false, grund: `Der Bereich „${roh}“ enthält zu viele Werte.` };
     }
     for (let i = 0; von + i * schritt <= bis + 1e-9; i++) werte.add(runde(von + i * schritt));
   }

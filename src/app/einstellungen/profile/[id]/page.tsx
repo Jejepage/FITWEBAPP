@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ProfilPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const profil = Number.isInteger(Number(id)) ? getProfile(db, Number(id)) : null;
+  const profil = /^\d{1,9}$/.test(id) ? getProfile(db, Number(id)) : null;
   if (!profil) notFound();
 
   return (

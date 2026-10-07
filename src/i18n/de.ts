@@ -134,7 +134,8 @@ export const de = {
     standard: "Standard",
     keinEquipment: "Kein Gerät (nur Körpergewicht)",
     gewichteKurz: (art: string, liste: string) => `${art}: ${liste} kg`,
-    machbarKurz: "machbar",
+    machbarVonGesamt: (n: number, gesamt: number) => `${n} von ${gesamt} Übungen machbar`,
+    bestaetigtAm: (datum: string) => `Bestätigt am ${datum}.`,
     hinweisTitel: "Hinweis",
   },
   profil: {

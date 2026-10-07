@@ -1,6 +1,6 @@
 import { asc, count, eq, ne } from "drizzle-orm";
 import { equipmentProfile, plan, workout } from "@/db/schema";
-import type { Db } from "@/db/types";
+import type { Db, Tx } from "@/db/types";
 import type { FormFehler, ProfilDaten } from "@/domain/profile-form";
 
 export type Profil = typeof equipmentProfile.$inferSelect;
@@ -21,8 +21,20 @@ export function getStandardProfil(db: Db): Profil | null {
 
 export type ProfilErgebnis = { ok: true; id: number } | { ok: false; fehler: FormFehler };
 
+const NAME_BELEGT = "Ein Profil mit diesem Namen gibt es schon.";
+
+function nameVergeben(tx: Tx, name: string, ausser?: number): boolean {
+  const gesucht = name.trim().toLowerCase();
+  return tx
+    .select({ id: equipmentProfile.id, name: equipmentProfile.name })
+    .from(equipmentProfile)
+    .all()
+    .some((p) => p.id !== ausser && p.name.trim().toLowerCase() === gesucht);
+}
+
 export function createProfile(db: Db, daten: ProfilDaten): ProfilErgebnis {
-  return db.transaction((tx) => {
+  return db.transaction((tx): ProfilErgebnis => {
+    if (nameVergeben(tx, daten.name)) return { ok: false, fehler: { name: NAME_BELEGT } };
     const erstes =
       tx.select({ id: equipmentProfile.id }).from(equipmentProfile).limit(1).all().length === 0;
     const istStandard = daten.istStandard || erstes;
@@ -42,9 +54,10 @@ export function createProfile(db: Db, daten: ProfilDaten): ProfilErgebnis {
 }
 
 export function updateProfile(db: Db, id: number, daten: ProfilDaten): ProfilErgebnis {
-  return db.transaction((tx) => {
+  return db.transaction((tx): ProfilErgebnis => {
     const aktuell = tx.select().from(equipmentProfile).where(eq(equipmentProfile.id, id)).get();
     if (!aktuell) return { ok: false, fehler: { _form: "Profil nicht gefunden." } };
+    if (nameVergeben(tx, daten.name, id)) return { ok: false, fehler: { name: NAME_BELEGT } };
     // Das aktuelle Standardprofil bleibt Standard; gewechselt wird, indem man ein anderes dazu macht.
     const istStandard = aktuell.istStandard || daten.istStandard;
     if (istStandard && !aktuell.istStandard) {
@@ -62,7 +75,7 @@ export function updateProfile(db: Db, id: number, daten: ProfilDaten): ProfilErg
 }
 
 export function deleteProfile(db: Db, id: number): ProfilErgebnis {
-  return db.transaction((tx) => {
+  return db.transaction((tx): ProfilErgebnis => {
     const profil = tx.select().from(equipmentProfile).where(eq(equipmentProfile.id, id)).get();
     if (!profil) return { ok: false, fehler: { _form: "Profil nicht gefunden." } };
 

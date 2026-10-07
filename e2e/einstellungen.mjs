@@ -102,6 +102,13 @@ async function ablauf(browser, name, viewport) {
   await page.getByText("Bitte einen Namen angeben.").waitFor();
   await page.getByText(/„abc“ ist keine gültige Angabe/).waitFor();
   schritt(`[${name}] Ungültige Gewichte und fehlender Name werden abgelehnt`);
+  // Typische Fehleingabe "12,16" (gemeint: 12 und 16) wird nicht still als 12,16 kg gespeichert
+  await page.getByLabel("Kettlebell", { exact: true }).check();
+  await page.getByLabel("Gewichte Kettlebell (kg)").fill("12,16");
+  await page.getByRole("button", { name: "Speichern" }).click();
+  await page.getByText(/„12,16“ ist unklar/).waitFor();
+  await page.getByLabel("Kettlebell", { exact: true }).uncheck();
+  schritt(`[${name}] „12,16“ wird als unklar abgelehnt`);
   await page.getByLabel("Name").fill("Garage");
   await page.getByLabel("Bank", { exact: true }).check();
   await page.getByLabel("Gewichte Kurzhanteln (kg)").fill("2,5–10/2,5");
@@ -128,6 +135,13 @@ async function ablauf(browser, name, viewport) {
   await page.getByRole("button", { name: "Filtern" }).click();
   await page.getByText("35 von 60 Übungen").waitFor();
   schritt(`[${name}] Katalogfilter „Garage“ zeigt 35 Übungen`);
+
+  // Doppelter Name wird abgelehnt
+  await page.goto(`${BASE}/einstellungen/profile/neu`);
+  await page.getByLabel("Name").fill("studio");
+  await page.getByRole("button", { name: "Speichern" }).click();
+  await page.getByText("Ein Profil mit diesem Namen gibt es schon.").waitFor();
+  schritt(`[${name}] Doppelter Profilname wird abgelehnt`);
 
   // 6. Standardprofil wechseln
   await page.goto(`${BASE}/einstellungen`);
@@ -189,4 +203,24 @@ async function ablauf(browser, name, viewport) {
 await withApp(async ({ browser }) => {
   console.log("Mobil (390×844)");
   await ablauf(browser, "mobil", { width: 390, height: 844 });
+
+  console.log("Desktop (1280×900)");
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await context.newPage();
+  const fehler = sammleFehler(page);
+  for (const [pfad, titel] of [
+    ["/einstellungen", "Einstellungen"],
+    ["/einstellungen/profile/1", "Profil „Studio“"],
+  ]) {
+    await page.goto(`${BASE}${pfad}`);
+    await page.getByRole("heading", { name: titel, level: 1 }).waitFor();
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+    await page.screenshot({
+      path: join(SHOTS, `desktop-${titel.replace(/\W+/g, "-")}.png`),
+      fullPage: true,
+    });
+  }
+  assert.deepEqual(fehler, [], "desktop: Browser-Fehler");
+  console.log("  [desktop] Einstellungen und Profilseite ohne horizontales Scrollen");
+  await context.close();
 });

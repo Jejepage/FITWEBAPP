@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import type { SettingsState } from "@/app/einstellungen/form-state";
 import { Checkbox, ErfolgBanner, FehlerBanner, Feld, Gruppe } from "@/components/form-felder";
 import { eingabe, knopfPrimaer } from "@/components/ui";
@@ -21,6 +21,10 @@ export function SettingsForm({
   const w = state.werte ?? werte;
   const fehler = state.fehler ?? {};
   const hatFehler = Object.keys(fehler).length > 0;
+  // "Gespeichert" gilt nur, bis wieder etwas geändert wird: Die Änderung wird an den Zustand
+  // gebunden, auf den sie folgt; ein neuer Speicherzustand zeigt den Hinweis wieder an.
+  const [geaendertNach, setGeaendertNach] = useState<SettingsState | null>(null);
+  const geaendert = geaendertNach === state;
 
   useEffect(() => {
     if (hatFehler) document.querySelector("form [role=alert]")?.scrollIntoView({ block: "center" });
@@ -30,10 +34,11 @@ export function SettingsForm({
     <form
       key={state.werte ? JSON.stringify(state.werte) : "initial"}
       action={formAction}
+      onChange={() => setGeaendertNach(state)}
       noValidate
     >
       {hatFehler && <FehlerBanner>{t.formularFehler}</FehlerBanner>}
-      {state.gespeichert && <ErfolgBanner>{t.gespeichert}</ErfolgBanner>}
+      {state.gespeichert && !geaendert && <ErfolgBanner>{t.gespeichert}</ErfolgBanner>}
 
       <Gruppe legende={t.stufenTitel} hilfe={t.stufenHilfe} fehler={fehler.stufen}>
         <div className="grid grid-cols-2 gap-x-3">

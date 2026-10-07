@@ -78,7 +78,7 @@ export default function EinstellungenPage() {
                     </p>
                   )}
                   <p className="mt-1 text-sm text-neutral-500">
-                    {gesamt} von {uebungen.filter((u) => u.aktiv).length} Übungen {t.machbarKurz}
+                    {t.machbarVonGesamt(gesamt, uebungen.filter((u) => u.aktiv).length)}
                   </p>
                 </Link>
               </li>
@@ -99,7 +99,11 @@ export default function EinstellungenPage() {
         </ul>
         <p className="mt-3 text-xs text-neutral-500">
           {s.hinweisAkzeptiertAm &&
-            `Bestätigt am ${new Date(s.hinweisAkzeptiertAm).toLocaleDateString("de-DE")}.`}
+            t.bestaetigtAm(
+              new Date(s.hinweisAkzeptiertAm).toLocaleDateString("de-DE", {
+                timeZone: "Europe/Berlin",
+              }),
+            )}
         </p>
       </section>
     </>

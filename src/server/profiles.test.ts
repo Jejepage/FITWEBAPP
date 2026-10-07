@@ -73,6 +73,21 @@ describe("createProfile", () => {
   });
 });
 
+describe("eindeutige Namen", () => {
+  it("lehnt doppelte Namen ab, ohne Rücksicht auf Groß-/Kleinschreibung und Leerzeichen", () => {
+    const r = createProfile(db, daten({ name: " studio " }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.fehler.name).toMatch(/schon/);
+    expect(listProfiles(db)).toHaveLength(3);
+    const u = updateProfile(db, idVon("zuhause"), daten({ name: "UNTERWEGS" }));
+    expect(u.ok).toBe(false);
+  });
+
+  it("ein Profil darf seinen eigenen Namen behalten", () => {
+    expect(updateProfile(db, idVon("studio"), daten({ name: "Studio" })).ok).toBe(true);
+  });
+});
+
 describe("updateProfile", () => {
   it("ändert Name, Equipment und Gewichte, behält den Seed-Schlüssel", () => {
     const id = idVon("zuhause");
