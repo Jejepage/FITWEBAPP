@@ -52,7 +52,7 @@ export async function withApp(fn) {
       executablePath: process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium",
       args: ["--no-sandbox"],
     });
-    await fn({ browser, BASE, SHOTS });
+    await fn({ browser, BASE, SHOTS, dbPfad: join(dbDir, "fit.db") });
     console.log(`\nAlle Prüfungen bestanden. Screenshots: ${SHOTS}`);
   } catch (e) {
     fehlgeschlagen = true;

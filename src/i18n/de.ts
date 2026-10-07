@@ -12,7 +12,6 @@ export const de = {
   },
   platzhalter: {
     start: "Hier erscheint später die nächste fällige Einheit.",
-    plan: "Der Plan-Generator folgt in Abschnitt 5.",
     verlauf: "Der Verlauf folgt in Abschnitt 7.",
   },
   katalog: {
@@ -162,5 +161,72 @@ export const de = {
     loeschenTitel: "Profil löschen",
     loeschen: "Profil löschen",
     loeschenFrage: "Dieses Profil wirklich löschen?",
+  },
+  plan: {
+    titel: "Plan",
+    neuTitel: "Neuer Plan",
+    keinPlan: "Es gibt noch keinen aktiven Plan.",
+    keinPlanHilfe:
+      "Ein Plan legt für jede Einheit fest, welche Übungen du machst. Du wählst Equipment und Stufen, die App schlägt die Übungen vor.",
+    erstellen: "Plan erstellen",
+    neuErstellen: "Neuen Plan erstellen",
+    zurueck: "Zurück zum Plan",
+    aktiverPlan: "Aktiver Plan",
+    profil: "Profil",
+    start: "Start",
+    einheitenProWoche: (n: number) => `${n} Einheiten pro Woche`,
+    wochenfolge: (n: number) =>
+      n === 3 ? "Reihenfolge im Wechsel: A-B-A, dann B-A-B" : "Reihenfolge: A, B",
+    zusatzblockAn: "Zusatzblock: ja",
+    zusatzblockAus: "Zusatzblock: nein",
+    zusatzAusHinweis:
+      "Der Zusatzblock ist für diesen Plan ausgeschaltet. Du kannst ihn in jeder Einheit beim Start zuschalten.",
+    einheit: (e: string) => `Einheit ${e}`,
+    block: { "1": "Block 1", "2": "Block 2", Z: "Zusatzblock" },
+    runden: (n: number) => `${n} Runden`,
+    trainingFolgt: "Das Training starten kannst du ab dem nächsten Abschnitt.",
+    form: {
+      eingaben: "Eingaben",
+      profil: "Equipment-Profil",
+      stufen: "Wunschstufe pro Muster",
+      einheiten: "Einheiten pro Woche",
+      zusatzblock: "Zusatzblock (Tragen und Rumpf) einplanen",
+      startDatum: "Startdatum",
+      aktualisieren: "Vorschau aktualisieren",
+      mischen: "Anders mischen",
+      neu: "Neu vorschlagen",
+      speichern: "Plan speichern und aktivieren",
+      speichernHilfe:
+        "Gespeichert wird genau das, was in der Vorschau steht. Ein bisher aktiver Plan wird abgeschlossen.",
+      auswahlHilfe:
+        "Du kannst jede Übung tauschen. Mit „Vorschau aktualisieren“ siehst du Hinweise zur Auswahl.",
+      folgeblock: "Folgeblock: Übungen aus dem vorigen Block werden nach Möglichkeit vermieden.",
+      stufeKurz: (s: number) => `Stufe ${s}`,
+      einseitigKurz: "einseitig",
+    },
+    fehlendeMuster: (liste: string) =>
+      `Mit diesem Profil gibt es keine Übung für: ${liste}. Ein Plan kann so nicht erstellt werden.`,
+    fehlendeMusterHilfe: "Wähle ein anderes Profil oder ergänze das Equipment bzw. den Katalog.",
+    hinweise: {
+      titel: "Hinweise zur Auswahl",
+      wenig_auswahl: (muster: string) =>
+        `${muster}: Mit diesem Profil gibt es nur eine Übung, sie steht in A und B.`,
+      gleiche_uebung_ab: (muster: string) =>
+        `${muster}: In A und B steht dieselbe Übung, obwohl es Alternativen gibt.`,
+      einseitig_fehlt:
+        "In Kniebeuge und Hüftbeuge steht keine einseitige (einbeinige) Übung. Empfohlen ist mindestens eine pro Woche.",
+      stufe_weicht_ab: (muster: string, gewuenscht: number, tatsaechlich: number) =>
+        `${muster}: Stufe ${tatsaechlich} statt der Wunschstufe ${gewuenscht}.`,
+    },
+    fehler: {
+      profil_unbekannt: "Das Profil gibt es nicht mehr. Bitte ein anderes wählen.",
+      datum_ungueltig: "Bitte ein gültiges Startdatum angeben.",
+      einheiten_ungueltig: "Bitte 2 oder 3 Einheiten pro Woche wählen.",
+      slots_unvollstaendig:
+        "Die Übungsauswahl ist unvollständig. Bitte die Vorschau aktualisieren.",
+      uebung_ungueltig:
+        "Eine gewählte Übung ist nicht mehr verfügbar oder passt nicht zum Profil. Bitte die Vorschau aktualisieren.",
+      vorgaenger_unbekannt: "Der Vorgängerplan existiert nicht.",
+    },
   },
 } as const;
