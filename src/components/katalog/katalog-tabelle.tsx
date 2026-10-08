@@ -25,7 +25,7 @@ export const FILTER_FORM_ID = "katalog-filter";
 
 // Filterfelder in der Kopfzeile im Pillen-Stil; 16 px Schrift, damit das iPad nicht zoomt
 const feld =
-  "block w-full min-h-11 rounded-full border border-transparent bg-fill px-3.5 py-1.5 text-base font-normal text-ink placeholder:text-ink-3 transition-colors focus:border-accent focus:bg-surface focus:outline-2 focus:outline-offset-0 focus:outline-accent/40";
+  "block w-full min-w-24 min-h-11 rounded-full border border-transparent bg-fill px-3.5 py-1.5 text-base font-normal text-ink placeholder:text-ink-3 transition-colors focus:border-accent focus:bg-surface focus:outline-2 focus:outline-offset-0 focus:outline-accent/40";
 
 function Auswahl({
   name,
@@ -216,15 +216,23 @@ function Zelle({
   switch (spalte) {
     case "name":
       return (
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <MusterPunkt muster={e.muster} />
-          <Link
-            href={`/katalog/${e.id}`}
-            className={`text-[15px] font-semibold hover:underline ${e.aktiv ? "text-accent-ink" : "text-ink-2"}`}
-          >
-            {e.name}
-          </Link>
-          {!e.aktiv && <Badge farbe="grau">{t.inaktiv}</Badge>}
+        <span className="flex items-start gap-2.5">
+          <span className="mt-2 shrink-0">
+            <MusterPunkt muster={e.muster} />
+          </span>
+          <span className="min-w-0">
+            <Link
+              href={`/katalog/${e.id}`}
+              className={`text-[15px] font-semibold hover:underline ${e.aktiv ? "text-accent-ink" : "text-ink-2"}`}
+            >
+              {e.name}
+            </Link>
+            {!e.aktiv && (
+              <span className="ml-2">
+                <Badge farbe="grau">{t.inaktiv}</Badge>
+              </span>
+            )}
+          </span>
         </span>
       );
     case "stufe":
@@ -383,7 +391,7 @@ export function KatalogTabelle({
                     key={s}
                     scope="col"
                     aria-sort={aktiv ? (richtung === "auf" ? "ascending" : "descending") : "none"}
-                    className="whitespace-nowrap px-4 pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-ink-3"
+                    className="whitespace-nowrap px-4 pb-1 pt-4 text-[13px] font-semibold text-ink-3"
                   >
                     <Link
                       href={sortLink(s)}

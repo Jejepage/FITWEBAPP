@@ -42,6 +42,8 @@ Zu `npm run e2e` (siehe `e2e/harness.mjs`):
 - Jeder Test nutzt eine frische Temp-Datenbank, die lokale Daten bleiben unberührt.
 - Es wird ein bereits installiertes Chromium verwendet (`playwright-core`, kein Browser-Download): Standardpfad `/opt/pw-browsers/chromium`, anderer Pfad über `CHROMIUM_PATH`. Screenshots landen in `SHOTS_DIR` (Standard: Temp-Ordner).
 - Einzelne Tests: `node e2e/training.mjs` usw.
+- Gestaltungsprüfung (nicht in `npm run e2e`): `node e2e/design.mjs` macht Screenshots aller Hauptseiten in Hell und Dunkel bei 390, 820, 1440 und 1920 px (`<SHOTS_DIR>/design/`) und prüft automatisch Überlauf, Tippflächen, Eingabeschrift und Textkontrast; `node e2e/design-lose.mjs` deckt Hinweis- und Anmeldeseite ab. Einschränkung per `DESIGN_SEITEN`, `DESIGN_BREITEN`, `DESIGN_SCHEMA`.
+- Paralleles Arbeiten: `NEXT_DIST_DIR=.next-a` baut in einen eigenen Ordner (zusammen mit `E2E_PORT`).
 
 ## Betrieb
 

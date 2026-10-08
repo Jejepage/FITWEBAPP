@@ -20,12 +20,17 @@ async function ablauf(browser, lanBase, dbPfad) {
   const sicher = `http://127.0.0.1:${PORT}`;
   /** Netzausfall: auch die Anfragen des Service Workers brechen ab (setOffline allein erfasst sie nicht). */
   const offline = async (context, an) => {
-    await context.setOffline(an);
-    if (an)
+    if (an) {
+      await context.setOffline(true);
       await context.route("**/*", (route) =>
         route.abort("internetdisconnected"),
       );
-    else await context.unroute("**/*");
+    } else {
+      // Erst die Abbruch-Regel entfernen, dann das Netz freigeben: Das "online"-Ereignis löst sofort
+      // einen neuen Sendeversuch aus, der sonst in der gerade entfernten Regel hängen bleiben kann.
+      await context.unroute("**/*");
+      await context.setOffline(false);
+    }
   };
   const zaehle = () => {
     const d = new Database(dbPfad, { readonly: true });
@@ -115,14 +120,19 @@ async function ablauf(browser, lanBase, dbPfad) {
   // --- 3. Erster Satz online, Notfall-Cache der Trainingsseite wird aufgefrischt ---------------------
   await page.getByRole("button", { name: "Satz erledigt" }).click();
   await page.getByText("1 von 18 Sätzen").first().waitFor();
-  await page.waitForFunction(
-    async () => {
+  // Der Service Worker frischt den Cache nach dem Speichern auf; erst warten, bis das geschehen ist.
+  // (waitForFunction wartet nicht auf asynchrone Prüfungen, daher eine eigene Schleife.)
+  const stand = async () =>
+    page.evaluate(async () => {
       const c = await caches.open("fit-v3-seiten");
       const t = await (await c.match(location.pathname))?.text();
       return Boolean(t && t.includes("1 von 18 Sätzen"));
-    },
-    undefined,
-    { timeout: 15000 },
+    });
+  for (let i = 0; i < 150 && !(await stand()); i++)
+    await page.waitForTimeout(100);
+  assert.ok(
+    await stand(),
+    "Cache der Trainingsseite wurde nach dem Satz aufgefrischt",
   );
   const gecacht = await page.evaluate(async () => {
     const c = await caches.open("fit-v3-seiten");

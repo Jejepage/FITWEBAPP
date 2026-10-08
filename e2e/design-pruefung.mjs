@@ -1,9 +1,9 @@
 // Automatische Gestaltungsprüfungen einer geöffneten Seite (von design.mjs und design-lose.mjs genutzt).
 
 /** Automatische Prüfungen im Browser; liefert eine Liste von Befunden. */
-export async function pruefeSeite(page, { touch, breite }) {
+export async function pruefeSeite(page, { touch }) {
   return page.evaluate(
-    ({ touch, breite }) => {
+    ({ touch }) => {
       const befunde = [];
       const sichtbar = (el) => {
         const r = el.getBoundingClientRect();
@@ -165,6 +165,6 @@ export async function pruefeSeite(page, { touch, breite }) {
           befunde.length > 25 ? [`… ${befunde.length - 25} weitere`] : [],
         );
     },
-    { touch, breite },
+    { touch },
   );
 }
