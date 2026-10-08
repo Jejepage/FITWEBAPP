@@ -1,10 +1,13 @@
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { equipmentProfile, exercise, plan, planSlot, setLog, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
+import { ersetzungenFuerProfil } from "@/domain/ad-hoc";
 import { erfuellt } from "@/domain/equipment";
 import { satzEingabeSchema } from "@/domain/satz-eingabe";
 import type { SatzWerte } from "@/domain/training-types";
+import type { Muster } from "@/domain/types";
 import { einheitNachFortschritt, rundenFuerBlock } from "@/domain/weeks";
+import { zuExercise } from "./exercises";
 import { getSettings } from "./settings";
 
 export type Workout = typeof workout.$inferSelect;
@@ -27,15 +30,20 @@ export function getLaufendesWorkout(db: Db): Workout | null {
 
 export type StartErgebnis =
   | { ok: true; id: number; neu: boolean }
-  | { ok: false; code: "kein_plan" | "block_fertig" };
+  | { ok: false; code: "kein_plan" | "block_fertig" | "profil_unbekannt" }
+  | { ok: false; code: "profil_unmoeglich"; fehlendeMuster: Muster[] };
 
 /**
  * Startet die nächste fällige Einheit des aktiven Plans. Läuft schon eine Einheit, wird diese
  * zurückgegeben (es läuft höchstens eine gleichzeitig).
+ *
+ * Mit `profilId` ≠ Planprofil ist es eine Ad-hoc-Einheit (Spec F6): Die Übungen, die das Profil
+ * nicht erfüllt, werden für diese Einheit ersetzt (`workout.ersetzungen`), der Plan bleibt
+ * unverändert. Die Einheit zählt für den Wochenfortschritt, nicht für die Steigerung.
  */
 export function startWorkout(
   db: Db,
-  opts: { heute: string; zusatzblock?: boolean },
+  opts: { heute: string; zusatzblock?: boolean; profilId?: number },
 ): StartErgebnis {
   return db.transaction((tx): StartErgebnis => {
     const laufend = tx
@@ -57,6 +65,33 @@ export function startWorkout(
     const naechste = einheitNachFortschritt(fertig, p.einheitenProWoche === 3 ? 3 : 2);
     if (naechste.blockFertig) return { ok: false, code: "block_fertig" };
 
+    const adHoc = opts.profilId !== undefined && opts.profilId !== p.profilId;
+    let profilId = p.profilId;
+    let ersetzungen: Record<string, string> = {};
+    if (adHoc) {
+      const profil = tx
+        .select()
+        .from(equipmentProfile)
+        .where(eq(equipmentProfile.id, opts.profilId as number))
+        .get();
+      if (!profil) return { ok: false, code: "profil_unbekannt" };
+      const slots = tx
+        .select()
+        .from(planSlot)
+        .where(and(eq(planSlot.planId, p.id), eq(planSlot.einheit, naechste.einheit)))
+        .all();
+      const r = ersetzungenFuerProfil({
+        slots: slots.map((s) => ({ slotId: s.id, muster: s.muster, exerciseId: s.exerciseId })),
+        uebungen: tx.select().from(exercise).all().map(zuExercise),
+        equipment: profil.equipment,
+      });
+      if (r.fehlendeMuster.length > 0) {
+        return { ok: false, code: "profil_unmoeglich", fehlendeMuster: r.fehlendeMuster };
+      }
+      profilId = profil.id;
+      ersetzungen = r.ersetzungen;
+    }
+
     const neu = tx
       .insert(workout)
       .values({
@@ -64,10 +99,11 @@ export function startWorkout(
         datum: opts.heute,
         einheit: naechste.einheit,
         woche: naechste.woche,
-        profilId: p.profilId,
-        adHoc: false,
+        profilId,
+        adHoc,
         zusatzblock: opts.zusatzblock ?? p.zusatzblock,
         status: "laufend",
+        ersetzungen,
       })
       .returning({ id: workout.id })
       .get();

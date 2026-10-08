@@ -104,6 +104,8 @@ export function ladeTrainingsDaten(db: Db, workoutId: number): TrainingsDaten | 
   const vorgabe = wochenVorgabe(w.woche);
   return {
     workoutId: w.id,
+    adHoc: w.adHoc,
+    profilName: profil.name,
     einheit: w.einheit,
     woche: w.woche,
     zusatzblock: w.zusatzblock,

@@ -87,6 +87,16 @@ export default function EinstellungenPage() {
         </ul>
       </section>
 
+      <section className="mb-10">
+        <Link
+          href="/einstellungen/daten"
+          className={`${karte} flex min-h-14 items-center justify-between gap-3 hover:border-brand`}
+        >
+          <span className="font-semibold">{de.daten.link}</span>
+          <span aria-hidden="true">→</span>
+        </Link>
+      </section>
+
       <section aria-labelledby="hinweis" className={karte}>
         <h2 id="hinweis" className="mb-2 text-lg font-semibold">
           {t.hinweisTitel}

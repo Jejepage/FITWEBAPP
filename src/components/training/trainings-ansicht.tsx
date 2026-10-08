@@ -306,7 +306,14 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   // --- Darstellung ------------------------------------------------------------------------
   const kopf = (
     <header className="mb-4">
-      <p className="text-sm font-medium text-neutral-500">{t.kopf(daten.einheit, daten.woche)}</p>
+      <p className="text-sm font-medium text-neutral-500">
+        {t.kopf(daten.einheit, daten.woche)}
+        {daten.adHoc && (
+          <span className="ml-2 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+            {de.adhoc.kopfBadge(daten.profilName)}
+          </span>
+        )}
+      </p>
       <div
         className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800"
         role="progressbar"

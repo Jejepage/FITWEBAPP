@@ -3,6 +3,7 @@ import { karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import { de } from "@/i18n/de";
 import type { SearchParams } from "@/server/katalog-filter";
+import { listProfiles } from "@/server/profiles";
 import { ladeStartInfo } from "@/server/start-info";
 import { startTraining } from "./training/actions";
 
@@ -16,6 +17,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const fehlerParam = typeof sp.fehler === "string" ? sp.fehler : undefined;
   const fehler = FEHLER_CODES.find((c) => c === fehlerParam);
   const info = ladeStartInfo(db);
+  const profile = listProfiles(db);
 
   return (
     <>
@@ -82,6 +84,14 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
               {t.starten}
             </button>
           </form>
+          {profile.length > 1 && (
+            <Link
+              href="/training/start"
+              className="mt-3 flex min-h-11 items-center justify-center text-brand"
+            >
+              {de.adhoc.link}
+            </Link>
+          )}
         </section>
       )}
 

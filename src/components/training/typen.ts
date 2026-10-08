@@ -41,6 +41,9 @@ export interface GespeicherterSatzInfo {
 
 export interface TrainingsDaten {
   workoutId: number;
+  /** Einheit mit anderem Profil als dem des Plans (Spec F6) */
+  adHoc: boolean;
+  profilName: string;
   einheit: Einheit;
   woche: number;
   zusatzblock: boolean;

@@ -1,9 +1,12 @@
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
-import { exercise, plan, workout } from "@/db/schema";
+import { equipmentProfile, exercise, plan, workout } from "@/db/schema";
 import { neueSeedDb } from "@/db/test-utils";
 import type { Db } from "@/db/types";
+import { erfuellt } from "@/domain/equipment";
+import { alleUebungen } from "./exercises";
 import { getPlan, getPlanSlotsMitId } from "./plans";
+import { listProfiles } from "./profiles";
 import { legePlanAn } from "./test-helfer";
 import {
   beendeWorkout,
@@ -140,6 +143,92 @@ describe("startWorkout", () => {
     expect(getWorkout(db, id)!.status).toBe("abgebrochen");
     expect(getLaufendesWorkout(db)).toBeNull();
     expect(getPlan(db, planId)!.status).toBe("abgeschlossen");
+  });
+});
+
+describe("startWorkout mit anderem Profil (Ad-hoc)", () => {
+  const profilId = (key: string) => listProfiles(db).find((p) => p.seedKey === key)!.id;
+
+  it("Planprofil gewählt: normale Einheit ohne Ersetzungen", () => {
+    const r = startWorkout(db, { heute: "2026-10-08", profilId: profilId("studio") });
+    if (!r.ok) throw new Error(r.code);
+    expect(getWorkout(db, r.id)).toMatchObject({ adHoc: false, ersetzungen: {} });
+  });
+
+  it("Unterwegs: Ad-hoc mit Profil der Einheit und passenden Ersatzübungen, Plan unverändert", () => {
+    const vorher = getPlanSlotsMitId(db, planId);
+    const r = startWorkout(db, { heute: "2026-10-08", profilId: profilId("unterwegs") });
+    if (!r.ok) throw new Error(r.code);
+    const w = getWorkout(db, r.id)!;
+    expect(w).toMatchObject({
+      adHoc: true,
+      profilId: profilId("unterwegs"),
+      einheit: "A",
+      woche: 1,
+    });
+    const katalog = new Map(alleUebungen(db).map((u) => [u.id, u]));
+    const stange = ["stange"] as const;
+    expect(Object.keys(w.ersetzungen).length).toBeGreaterThan(0);
+    for (const [slotId, id] of Object.entries(w.ersetzungen)) {
+      const slot = vorher.find((s) => s.id === Number(slotId))!;
+      expect(katalog.get(id)!.muster).toBe(slot.muster);
+      expect(erfuellt(katalog.get(id)!.equipment, stange)).toBe(true);
+    }
+    expect(getPlanSlotsMitId(db, planId)).toEqual(vorher);
+  });
+
+  it("zählt für den Wochenfortschritt", () => {
+    const id = (() => {
+      const r = startWorkout(db, { heute: "2026-10-08", profilId: profilId("unterwegs") });
+      if (!r.ok) throw new Error(r.code);
+      return r.id;
+    })();
+    const slot = getPlanSlotsMitId(db, planId).find((s) => s.einheit === "A" && s.block === "1")!;
+    const ersatz = getWorkout(db, id)!.ersetzungen[String(slot.id)] ?? slot.exerciseId;
+    expect(
+      speichereSatz(db, {
+        id: "adhoc-0001",
+        workoutId: id,
+        planSlotId: slot.id,
+        exerciseId: ersatz,
+        runde: 1,
+        gewicht: null,
+        wdh: 10,
+        sekunden: null,
+        meter: null,
+        rpe: 7,
+        tempo: false,
+      }).ok,
+    ).toBe(true);
+    expect(beendeWorkout(db, id, null)).toEqual({ ok: true });
+    expect(zaehleAbgeschlosseneEinheiten(db, planId)).toBe(1);
+    expect(getWorkout(db, start())).toMatchObject({ einheit: "B", woche: 1 });
+  });
+
+  it("unbekanntes Profil: Fehler, keine Einheit angelegt", () => {
+    expect(startWorkout(db, { heute: "2026-10-08", profilId: 9999 })).toEqual({
+      ok: false,
+      code: "profil_unbekannt",
+    });
+    expect(getLaufendesWorkout(db)).toBeNull();
+  });
+
+  it("Profil ohne passende Übung für ein Muster: Fehler mit fehlenden Mustern", () => {
+    const leer = db
+      .insert(equipmentProfile)
+      .values({ name: "Leer", equipment: [], gewichte: {}, istStandard: false })
+      .returning({ id: equipmentProfile.id })
+      .get();
+    const r = startWorkout(db, { heute: "2026-10-08", profilId: leer.id });
+    expect(r).toMatchObject({ ok: false, code: "profil_unmoeglich" });
+    if (!r.ok && r.code === "profil_unmoeglich") expect(r.fehlendeMuster).toContain("ZV");
+    expect(getLaufendesWorkout(db)).toBeNull();
+  });
+
+  it("läuft schon eine Einheit, wird sie zurückgegeben (Profil wird ignoriert)", () => {
+    const erste = start();
+    const r = startWorkout(db, { heute: "2026-10-09", profilId: profilId("unterwegs") });
+    expect(r).toEqual({ ok: true, id: erste, neu: false });
   });
 });
 

@@ -14,7 +14,7 @@ import {
 
 type ExerciseRow = typeof exercise.$inferSelect;
 
-function zuExercise(row: ExerciseRow): Exercise {
+export function zuExercise(row: ExerciseRow): Exercise {
   return { ...row, stufe: row.stufe as Stufe };
 }
 

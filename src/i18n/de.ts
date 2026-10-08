@@ -332,6 +332,65 @@ export const de = {
       vorgaenger_unbekannt: "Der Vorgängerplan existiert nicht.",
     },
   },
+  daten: {
+    titel: "Datensicherung",
+    zurueck: "Zurück zu den Einstellungen",
+    link: "Datensicherung (Export und Import)",
+    hilfe:
+      "Sichere deine Daten als JSON-Datei und stelle sie bei Bedarf wieder her. Die Datei ist nicht verschlüsselt: Bewahre sie sicher auf.",
+    export: "Export",
+    exportAlles: "Alle Daten exportieren",
+    exportAllesHilfe: "Katalog, Profile, Einstellungen, Pläne, Einheiten und alle Sätze.",
+    exportKatalog: "Nur den Katalog exportieren",
+    exportKatalogHilfe: "Alle Übungen mit deinen Änderungen.",
+    import: "Import",
+    datei: "JSON-Datei",
+    importKatalog: "Katalog importieren",
+    importKatalogHilfe:
+      "Übungen gleicher ID werden aktualisiert, neue werden angelegt. Es wird nichts gelöscht, Pläne und Protokolle bleiben unberührt.",
+    importAlles: "Alle Daten importieren",
+    importAllesHilfe:
+      "Achtung: Alle aktuellen Daten (Katalog, Profile, Einstellungen, Pläne, Einheiten, Sätze) werden durch den Inhalt der Datei ersetzt. Exportiere vorher den aktuellen Stand.",
+    bestaetigung: "Ich habe verstanden, dass alle aktuellen Daten ersetzt werden.",
+    ergebnisOk: "Import erfolgreich.",
+    bilanz: {
+      uebungen: "Übungen",
+      neu: "davon neu",
+      profile: "Profile",
+      plaene: "Pläne",
+      einheiten: "Einheiten",
+      saetze: "Sätze",
+    },
+    ergebnisFehler: "Der Import wurde nicht durchgeführt. Es wurde nichts geändert.",
+  },
+  adhoc: {
+    titel: "Mit anderem Profil trainieren",
+    hilfe:
+      "Du trainierst heute mit anderem Equipment, zum Beispiel unterwegs. Übungen, die dort nicht gehen, werden nur für diese Einheit durch ähnliche ersetzt. Der Plan bleibt unverändert.",
+    zaehlt:
+      "Die Einheit zählt für den Wochenfortschritt, aber nicht für die Steigerung der Planübungen.",
+    profil: "Profil für diese Einheit",
+    vorschauAktualisieren: "Vorschau aktualisieren",
+    vorschau: "Vorschau",
+    planUebung: "Plan",
+    heute: "Heute",
+    bleibt: "bleibt",
+    ersetztDurch: "ersetzt durch",
+    planProfilHinweis:
+      "Das ist das Profil deines Plans: Es ist eine normale Einheit, nichts wird ersetzt.",
+    starten: "Training starten",
+    zurueck: "Zurück zum Start",
+    link: "Mit anderem Profil trainieren",
+    zusatzblock: "Zusatzblock (Tragen und Rumpf)",
+    kopfBadge: (profil: string) => `Ad-hoc · ${profil}`,
+    fehler: {
+      kein_plan: "Es gibt keinen aktiven Plan.",
+      block_fertig: "Der Block ist abgeschlossen.",
+      profil_unbekannt: "Dieses Profil gibt es nicht.",
+      profil_unmoeglich: (muster: string) =>
+        `Mit diesem Profil gibt es für ${muster} keine passende Übung. Wähle ein anderes Profil.`,
+    },
+  },
   start: {
     titel: "Start",
     keinPlan: "Es gibt noch keinen aktiven Plan.",
