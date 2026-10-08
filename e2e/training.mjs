@@ -3,7 +3,12 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import Database from "better-sqlite3";
-import { SHOTS, hinweisBestaetigen, sammleFehler, withApp } from "./harness.mjs";
+import {
+  SHOTS,
+  hinweisBestaetigen,
+  sammleFehler,
+  withApp,
+} from "./harness.mjs";
 
 const schritt = (s) => console.log(`  ${s}`);
 
@@ -15,19 +20,26 @@ async function ablauf(browser, BASE, dbPfad) {
   context.on("dialog", (d) => d.accept()); // confirm() bei Abbruch/vorzeitigem Abschluss
   const page = await context.newPage();
   const fehler = sammleFehler(page);
-  const shot = (n) => page.screenshot({ path: join(SHOTS, `training-${n}.png`), fullPage: true });
+  const shot = (n) =>
+    page.screenshot({ path: join(SHOTS, `training-${n}.png`), fullPage: true });
   const db = () => new Database(dbPfad, { readonly: true });
   const keinHorizontalScroll = async (wo) =>
     assert.ok(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
       `horizontales Scrollen auf ${wo}`,
     );
 
   // --- Vorbereitung: Hinweis bestätigen, Plan über die Oberfläche anlegen -----------------
   await hinweisBestaetigen(page, BASE);
   await page.goto(`${BASE}/plan/neu`);
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByRole("heading", { name: "Plan", level: 1, exact: true })
+    .waitFor();
 
   // --- 1. Startseite ---------------------------------------------------------------------
   await page.goto(`${BASE}/`);
@@ -40,8 +52,14 @@ async function ablauf(browser, BASE, dbPfad) {
     uuid: typeof crypto.randomUUID,
     wakeLock: "wakeLock" in navigator,
   }));
-  assert.deepEqual(kontext, { sicher: false, uuid: "undefined", wakeLock: false }, "HTTP-Kontext");
-  schritt("Startseite zeigt Einheit A, Woche 1 und Vorgabe; Test läuft im unsicheren Kontext");
+  assert.deepEqual(
+    kontext,
+    { sicher: false, uuid: "undefined", wakeLock: false },
+    "HTTP-Kontext",
+  );
+  schritt(
+    "Startseite zeigt Einheit A, Woche 1 und Vorgabe; Test läuft im unsicheren Kontext",
+  );
 
   // --- 2. Training starten, Aufwärmen ----------------------------------------------------
   await page.getByRole("button", { name: "Training starten" }).click();
@@ -67,7 +85,11 @@ async function ablauf(browser, BASE, dbPfad) {
       .first()
       .waitFor();
     if (await weiter.isVisible()) await weiter.click();
-    await page.getByRole("button", { name: "Satz erledigt" }).or(fertig).first().waitFor();
+    await page
+      .getByRole("button", { name: "Satz erledigt" })
+      .or(fertig)
+      .first()
+      .waitFor();
   };
   const satzErledigt = async () => {
     await page.getByRole("button", { name: "Satz erledigt" }).click();
@@ -78,9 +100,14 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByText(/Block 1 · Runde 1 von 3 · Übung 1 von 3/).waitFor();
   await page.getByText(/Ziel:.*10–12 Wdh · RPE 6/).waitFor();
   await page.getByText("Noch keine Werte").waitFor();
-  assert.equal(await page.getByLabel("Wiederholungen", { exact: true }).inputValue(), "10");
   assert.equal(
-    await page.getByRole("radio", { name: "6", exact: true }).getAttribute("aria-checked"),
+    await page.getByLabel("Wiederholungen", { exact: true }).inputValue(),
+    "10",
+  );
+  assert.equal(
+    await page
+      .getByRole("radio", { name: "6", exact: true })
+      .getAttribute("aria-checked"),
     "true",
   );
   await keinHorizontalScroll("Satz");
@@ -88,8 +115,16 @@ async function ablauf(browser, BASE, dbPfad) {
 
   // Tippflächen am Handy: alle sichtbaren Bedienelemente mindestens 44 px hoch
   const zuKlein = await page.evaluate(() =>
-    [...document.querySelectorAll("button, input:not([type=checkbox]), summary")]
-      .filter((e) => e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().height < 44)
+    [
+      ...document.querySelectorAll(
+        "button, input:not([type=checkbox]), summary",
+      ),
+    ]
+      .filter(
+        (e) =>
+          e.getBoundingClientRect().height > 0 &&
+          e.getBoundingClientRect().height < 44,
+      )
       .map(
         (e) =>
           `${e.tagName} ${e.textContent?.trim().slice(0, 25) ?? ""} ${Math.round(e.getBoundingClientRect().height)}px`,
@@ -100,7 +135,11 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByRole("button", { name: "Satz erledigt" }).click();
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
   await page.getByText(/Übung 2 von 3/).waitFor();
-  assert.equal(await page.getByText("Pause", { exact: true }).count(), 0, "kein Pausenbildschirm");
+  assert.equal(
+    await page.getByText("Pause", { exact: true }).count(),
+    0,
+    "kein Pausenbildschirm",
+  );
   assert.equal(await fortschritt(), 1);
   await shot("4-naechster-satz");
   schritt("Satz gespeichert, direkt der nächste Satz (kein Pausentimer)");
@@ -108,7 +147,9 @@ async function ablauf(browser, BASE, dbPfad) {
   // --- 4. Übung ersetzen (zweiter Schritt, Block 1 Übung 2) ------------------------------
   const geplant = await titel();
   await page.getByText("Übung ersetzen", { exact: true }).click();
-  const alternativen = page.locator("details", { hasText: "Übung ersetzen" }).getByRole("button");
+  const alternativen = page
+    .locator("details", { hasText: "Übung ersetzen" })
+    .getByRole("button");
   const ersatzText = await alternativen.first().innerText();
   const ersatzName = ersatzText.split("\n")[0].trim();
   await alternativen.first().click();
@@ -131,13 +172,20 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
   assert.equal(await fortschritt(), 5);
   assert.equal(await titel(), sechster, "Fortsetzen springt zum sechsten Satz");
-  assert.equal(await page.getByRole("heading", { name: "Aufwärmen", level: 1 }).count(), 0);
-  schritt("Unterbrechen und fortsetzen: gleicher Fortschritt, kein erneutes Aufwärmen");
+  assert.equal(
+    await page.getByRole("heading", { name: "Aufwärmen", level: 1 }).count(),
+    0,
+  );
+  schritt(
+    "Unterbrechen und fortsetzen: gleicher Fortschritt, kein erneutes Aufwärmen",
+  );
 
   // --- 6. Vorigen Satz korrigieren --------------------------------------------------------
   await page.getByText("Weitere Aktionen").click();
   await page.getByRole("button", { name: "Vorigen Satz ändern" }).click();
-  await page.getByText("Du änderst einen bereits gespeicherten Satz.").waitFor();
+  await page
+    .getByText("Du änderst einen bereits gespeicherten Satz.")
+    .waitFor();
   const wdh = page.getByLabel("Wiederholungen", { exact: true });
   await wdh.fill("12");
   await page
@@ -146,7 +194,11 @@ async function ablauf(browser, BASE, dbPfad) {
     .click();
   await page.getByRole("button", { name: "Korrektur speichern" }).click();
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
-  assert.equal(await fortschritt(), 5, "Korrektur erzeugt keinen zusätzlichen Satz");
+  assert.equal(
+    await fortschritt(),
+    5,
+    "Korrektur erzeugt keinen zusätzlichen Satz",
+  );
   assert.equal(await titel(), sechster);
   schritt("Vorigen Satz korrigiert (überschrieben, kein Duplikat)");
 
@@ -167,7 +219,9 @@ async function ablauf(browser, BASE, dbPfad) {
   assert.equal(await fortschritt(), 6, "Anzeige geht trotzdem weiter");
   await shot("5-offline");
   await context.setOffline(false);
-  await page.getByText(/noch nicht gespeichert/).waitFor({ state: "detached", timeout: 20000 });
+  await page
+    .getByText(/noch nicht gespeichert/)
+    .waitFor({ state: "detached", timeout: 20000 });
   assert.equal(zaehle(), vorher + 1, "nach dem Netzausfall gespeichert");
   schritt("Netzausfall: Satz lokal gehalten, automatisch nachgespeichert");
   await naechsterSatz();
@@ -192,7 +246,11 @@ async function ablauf(browser, BASE, dbPfad) {
       await shot("6-blockwechsel");
       await weiter.click();
     }
-    await page.getByRole("button", { name: "Satz erledigt" }).or(fertig).first().waitFor();
+    await page
+      .getByRole("button", { name: "Satz erledigt" })
+      .or(fertig)
+      .first()
+      .waitFor();
   }
   assert.ok(sawBlock, "Blockwechsel wurde angezeigt");
   await page.getByRole("heading", { name: "Geschafft", level: 1 }).waitFor();
@@ -207,7 +265,9 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByText("Einheit gespeichert. Gut gemacht!").waitFor();
   await page.getByRole("heading", { name: "Nächstes Mal", level: 2 }).waitFor();
   await page
-    .getByText(/Vorschlag für die nächste Einheit mit diesen Übungen \(Woche 2\)/)
+    .getByText(
+      /Vorschlag für die nächste Einheit mit diesen Übungen \(Woche 2\)/,
+    )
     .waitFor();
   assert.equal(
     await page.getByRole("heading", { name: "Protokoll", level: 2 }).count(),
@@ -223,21 +283,36 @@ async function ablauf(browser, BASE, dbPfad) {
   assert.equal(w1.status, "abgeschlossen");
   assert.equal(w1.notiz, "Knie fühlte sich gut an.");
   assert.equal(w1.einheit, "A");
-  const saetze = d.prepare("select * from set_log where workout_id = 1 order by rowid").all();
+  const saetze = d
+    .prepare("select * from set_log where workout_id = 1 order by rowid")
+    .all();
   assert.equal(saetze.length, 18);
-  assert.equal(new Set(saetze.map((s) => s.id)).size, 18, "keine doppelten Satz-IDs");
+  assert.equal(
+    new Set(saetze.map((s) => s.id)).size,
+    18,
+    "keine doppelten Satz-IDs",
+  );
   assert.ok(
     saetze.every((s) => /^[0-9a-f-]{36}$/.test(s.id)),
     "UUIDs auch ohne crypto.randomUUID",
   );
   const korrigiert = saetze[4];
-  assert.ok(korrigiert.wdh === 12 && korrigiert.rpe === 8, "fünfter Satz wurde korrigiert");
+  assert.ok(
+    korrigiert.wdh === 12 && korrigiert.rpe === 8,
+    "fünfter Satz wurde korrigiert",
+  );
   const ersetzt = saetze.filter(
     (s) =>
       s.exercise_id !==
-      d.prepare("select exercise_id from plan_slot where id = ?").get(s.plan_slot_id).exercise_id,
+      d
+        .prepare("select exercise_id from plan_slot where id = ?")
+        .get(s.plan_slot_id).exercise_id,
   );
-  assert.equal(ersetzt.length, 3, "Ersatzübung in allen drei Runden protokolliert");
+  assert.equal(
+    ersetzt.length,
+    3,
+    "Ersatzübung in allen drei Runden protokolliert",
+  );
   const slotErsatz = JSON.parse(w1.ersetzungen);
   assert.equal(Object.keys(slotErsatz).length, 1);
   d.close();
@@ -250,11 +325,16 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByRole("button", { name: "Training starten" }).click();
   await page.getByRole("button", { name: "Aufwärmen erledigt" }).click();
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
-  assert.equal(await page.getByRole("progressbar").getAttribute("aria-valuemax"), "22");
+  assert.equal(
+    await page.getByRole("progressbar").getAttribute("aria-valuemax"),
+    "22",
+  );
   // Einheit vorzeitig abschließen nach einem Satz (zählt) statt alle 22 durchzuklicken
   await satzErledigt();
   await page.getByText("Weitere Aktionen").click();
-  await page.getByRole("button", { name: "Einheit vorzeitig abschließen" }).click();
+  await page
+    .getByRole("button", { name: "Einheit vorzeitig abschließen" })
+    .click();
   await page.getByRole("heading", { name: "Geschafft", level: 1 }).waitFor();
   await page.getByRole("button", { name: "Einheit abschließen" }).click();
   await page.getByText("Einheit gespeichert. Gut gemacht!").waitFor();
@@ -276,9 +356,13 @@ async function ablauf(browser, BASE, dbPfad) {
     "11",
     "Vorschlag: eine Wiederholung mehr als zuletzt (10 → 11)",
   );
-  await page.getByText("Vorschlag: eine Wiederholung mehr als zuletzt.").waitFor();
+  await page
+    .getByText("Vorschlag: eine Wiederholung mehr als zuletzt.")
+    .waitFor();
   await shot("8-woche2");
-  schritt("Woche 2: 'Letztes Mal' und Vorschlag 11 Wdh (Steigerungslogik angebunden)");
+  schritt(
+    "Woche 2: 'Letztes Mal' und Vorschlag 11 Wdh (Steigerungslogik angebunden)",
+  );
 
   // --- 12. Abbrechen zählt nicht ------------------------------------------------------------
   await page.getByRole("button", { name: "Satz erledigt" }).click();
@@ -287,17 +371,30 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByRole("button", { name: "Einheit abbrechen" }).click();
   await page.getByText("Einheit A · Woche 2 von 6").waitFor();
   const d2 = db();
-  assert.equal(d2.prepare("select status from workout where id = 3").get().status, "abgebrochen");
-  assert.equal(d2.prepare("select count(*) c from set_log where workout_id = 3").get().c, 1);
   assert.equal(
-    d2.prepare("select count(*) c from workout where status = 'abgeschlossen'").get().c,
+    d2.prepare("select status from workout where id = 3").get().status,
+    "abgebrochen",
+  );
+  assert.equal(
+    d2.prepare("select count(*) c from set_log where workout_id = 3").get().c,
+    1,
+  );
+  assert.equal(
+    d2
+      .prepare("select count(*) c from workout where status = 'abgeschlossen'")
+      .get().c,
     2,
   );
   d2.close();
-  schritt("Einheit abgebrochen: Satz bleibt gespeichert, zählt aber nicht für den Fortschritt");
+  schritt(
+    "Einheit abgebrochen: Satz bleibt gespeichert, zählt aber nicht für den Fortschritt",
+  );
 
   assert.deepEqual(
-    fehler.filter((f) => !/net::ERR_INTERNET_DISCONNECTED|Failed to fetch|Load failed/.test(f)),
+    fehler.filter(
+      (f) =>
+        !/net::ERR_INTERNET_DISCONNECTED|Failed to fetch|Load failed/.test(f),
+    ),
     [],
     "Browser-Fehler",
   );

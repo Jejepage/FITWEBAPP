@@ -23,8 +23,12 @@ export function ExerciseCard({ e }: { e: Exercise }) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         <Badge>{de.katalog.stufeBadge(e.stufe)}</Badge>
         {e.einseitig && <Badge>{de.katalog.einseitigBadge}</Badge>}
-        {e.pruefstatus === "zu_pruefen" && <Badge farbe="hinweis">{de.katalog.zuPruefen}</Badge>}
-        {videoLink(e.videoUrl) && <Badge farbe="gut">{de.katalog.videoBadge}</Badge>}
+        {e.pruefstatus === "zu_pruefen" && (
+          <Badge farbe="hinweis">{de.katalog.zuPruefen}</Badge>
+        )}
+        {videoLink(e.videoUrl) && (
+          <Badge farbe="gut">{de.katalog.videoBadge}</Badge>
+        )}
         {!e.aktiv && <Badge farbe="grau">{de.katalog.inaktiv}</Badge>}
       </div>
     </Link>

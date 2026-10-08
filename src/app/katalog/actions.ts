@@ -4,7 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/db/client";
 import { parseExerciseForm } from "@/domain/exercise-form";
-import { MUSTER, PRUEFSTATI, type Muster, type Pruefstatus } from "@/domain/types";
+import {
+  MUSTER,
+  PRUEFSTATI,
+  type Muster,
+  type Pruefstatus,
+} from "@/domain/types";
 import {
   MUSTER_FEHLER,
   createExercise,
@@ -18,7 +23,10 @@ function aktualisiereKatalog() {
   revalidatePath("/katalog", "layout");
 }
 
-export async function speichereNeueUebung(_prev: FormState, fd: FormData): Promise<FormState> {
+export async function speichereNeueUebung(
+  _prev: FormState,
+  fd: FormData,
+): Promise<FormState> {
   const werte = parseExerciseForm(fd);
   const muster = String(fd.get("muster") ?? "");
   if (!(MUSTER as readonly string[]).includes(muster)) {
@@ -42,13 +50,19 @@ export async function speichereUebung(
   redirect(`/katalog/${id}`);
 }
 
-export async function aktivUmschalten(id: string, aktiv: boolean): Promise<void> {
+export async function aktivUmschalten(
+  id: string,
+  aktiv: boolean,
+): Promise<void> {
   const ok = setAktiv(db, id, aktiv);
   aktualisiereKatalog();
   if (!ok) redirect("/katalog"); // Übung existiert nicht mehr (veraltete Seite)
 }
 
-export async function pruefstatusSetzen(id: string, status: Pruefstatus): Promise<void> {
+export async function pruefstatusSetzen(
+  id: string,
+  status: Pruefstatus,
+): Promise<void> {
   if (!(PRUEFSTATI as readonly string[]).includes(status)) return;
   const ok = setPruefstatus(db, id, status);
   aktualisiereKatalog();

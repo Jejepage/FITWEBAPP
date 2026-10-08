@@ -3,9 +3,17 @@ import type { Exercise } from "@/domain/types";
 import { de } from "@/i18n/de";
 
 /** Stufenleiter als senkrechte Kette: oben leicht, unten schwer. Jedes Glied ist anklickbar. */
-export function Ladder({ kette, aktuellId }: { kette: Exercise[]; aktuellId: string }) {
+export function Ladder({
+  kette,
+  aktuellId,
+}: {
+  kette: Exercise[];
+  aktuellId: string;
+}) {
   if (kette.length <= 1)
-    return <p className="text-sm text-neutral-500">Keine Stufenleiter verknüpft.</p>;
+    return (
+      <p className="text-sm text-neutral-500">Keine Stufenleiter verknüpft.</p>
+    );
   return (
     <ol className="space-y-1" aria-label={de.katalog.stufenleiter}>
       {kette.map((e, i) => {

@@ -6,43 +6,68 @@ import { BASE, SHOTS, sammleFehler, withApp } from "./harness.mjs";
 const schritt = (s) => console.log(`  ${s}`);
 
 async function ablauf(browser, name, viewport) {
-  const context = await browser.newContext({ viewport, hasTouch: viewport.width < 600 });
+  const context = await browser.newContext({
+    viewport,
+    hasTouch: viewport.width < 600,
+  });
+  await context.addCookies([
+    { name: "fit_katalog", value: "ansicht=karten", url: BASE },
+  ]);
   context.on("dialog", (d) => d.accept()); // confirm() beim Löschen
   const page = await context.newPage();
   const fehler = sammleFehler(page);
-  const shot = (n) => page.screenshot({ path: join(SHOTS, `${name}-${n}.png`), fullPage: true });
+  const shot = (n) =>
+    page.screenshot({ path: join(SHOTS, `${name}-${n}.png`), fullPage: true });
   const keinHorizontalScroll = async (wo) =>
     assert.ok(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
       `${name}: horizontales Scrollen auf ${wo}`,
     );
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
-  const profilKarte = (n) => page.getByRole("link", { name: new RegExp(`^${n}`) });
+  const profilKarte = (n) =>
+    page.getByRole("link", { name: new RegExp(`^${n}`) });
 
   // 1. Erster Start: Hinweis blockiert die App, bis er bestätigt ist
   await page.goto(`${BASE}/katalog`);
   await page.getByRole("heading", { name: "Wichtiger Hinweis" }).waitFor();
-  assert.equal(await nav.count(), 0, "Navigation darf vor der Bestätigung nicht sichtbar sein");
-  await page.getByText("ersetzt keine ärztliche oder physiotherapeutische Beratung").waitFor();
+  assert.equal(
+    await nav.count(),
+    0,
+    "Navigation darf vor der Bestätigung nicht sichtbar sein",
+  );
+  await page
+    .getByText("ersetzt keine ärztliche oder physiotherapeutische Beratung")
+    .waitFor();
   await keinHorizontalScroll("Hinweis");
   await shot("1-hinweis");
   await page.getByRole("button", { name: "Verstanden" }).click();
   await nav.waitFor();
   await page.reload();
   await nav.waitFor();
-  assert.equal(await page.getByRole("heading", { name: "Wichtiger Hinweis" }).count(), 0);
-  schritt(`[${name}] Hinweis erscheint beim ersten Start und danach nicht wieder`);
+  assert.equal(
+    await page.getByRole("heading", { name: "Wichtiger Hinweis" }).count(),
+    0,
+  );
+  schritt(
+    `[${name}] Hinweis erscheint beim ersten Start und danach nicht wieder`,
+  );
 
   // 2. Einstellungen ändern und nach Neuladen wiederfinden
   await page.goto(`${BASE}/einstellungen`);
-  await page.getByRole("heading", { name: "Einstellungen", level: 1 }).waitFor();
+  await page
+    .getByRole("heading", { name: "Einstellungen", level: 1 })
+    .waitFor();
   await keinHorizontalScroll("Einstellungen");
   await shot("2-einstellungen");
   await page.getByLabel("Kniebeuge (KN)").selectOption("4");
   await page.getByLabel("Rumpf (RU)").selectOption("1");
   await page.getByLabel("3 pro Woche").check();
   await page.getByLabel(/Zusatzblock/).check();
-  await page.getByLabel("Aufwärmprogramm (Text)").fill("Zehn Minuten locker radeln.");
+  await page
+    .getByLabel("Aufwärmprogramm (Text)")
+    .fill("Zehn Minuten locker radeln.");
   await page.getByRole("button", { name: "Speichern" }).click();
   await page.getByText("Einstellungen gespeichert.").waitFor();
   await page.reload();
@@ -55,7 +80,9 @@ async function ablauf(browser, name, viewport) {
     await page.getByLabel("Aufwärmprogramm (Text)").inputValue(),
     "Zehn Minuten locker radeln.",
   );
-  schritt(`[${name}] Einstellungen werden gespeichert und nach Neuladen wiedergefunden`);
+  schritt(
+    `[${name}] Einstellungen werden gespeichert und nach Neuladen wiedergefunden`,
+  );
 
   // Validierung: leerer Aufwärmtext
   await page.getByLabel("Aufwärmprogramm (Text)").fill("");
@@ -71,9 +98,13 @@ async function ablauf(browser, name, viewport) {
   await profilKarte("Zuhause")
     .getByText("Kurzhanteln: 2–20/2 kg · Kettlebell: 12, 16 kg")
     .waitFor();
-  await profilKarte("Unterwegs").getByText("26 von 60 Übungen machbar").waitFor();
+  await profilKarte("Unterwegs")
+    .getByText("26 von 60 Übungen machbar")
+    .waitFor();
   await shot("3-profile");
-  schritt(`[${name}] Profilliste: Studio 60, Zuhause 47, Unterwegs 26 Übungen machbar`);
+  schritt(
+    `[${name}] Profilliste: Studio 60, Zuhause 47, Unterwegs 26 Übungen machbar`,
+  );
 
   // 4. Profil "Unterwegs": Vorschau je Muster
   await profilKarte("Unterwegs").click();
@@ -116,17 +147,26 @@ async function ablauf(browser, name, viewport) {
   await page.getByRole("heading", { name: "Equipment-Profile" }).waitFor();
   await profilKarte("Garage").getByText("Kurzhanteln: 2,5–10/2,5 kg").waitFor();
   await profilKarte("Garage").getByText("35 von 60 Übungen machbar").waitFor();
-  schritt(`[${name}] Garage angelegt (Gewichte 2,5–10/2,5, 35 Übungen machbar)`);
+  schritt(
+    `[${name}] Garage angelegt (Gewichte 2,5–10/2,5, 35 Übungen machbar)`,
+  );
 
   // Garage hat keine Stange: für Ziehen vertikal gibt es nichts → Warnung
   await profilKarte("Garage").click();
   await page
     .getByRole("alert")
-    .filter({ hasText: "Für Ziehen vertikal gibt es mit diesem Profil keine Übung" })
+    .filter({
+      hasText: "Für Ziehen vertikal gibt es mit diesem Profil keine Übung",
+    })
     .waitFor();
-  assert.equal(await page.getByLabel("Gewichte Kurzhanteln (kg)").inputValue(), "2,5–10/2,5");
+  assert.equal(
+    await page.getByLabel("Gewichte Kurzhanteln (kg)").inputValue(),
+    "2,5–10/2,5",
+  );
   await shot("5-profil-garage");
-  schritt(`[${name}] Warnung bei fehlendem Muster, Gewichte kompakt wieder angezeigt`);
+  schritt(
+    `[${name}] Warnung bei fehlendem Muster, Gewichte kompakt wieder angezeigt`,
+  );
 
   // Im Katalog wählbar, Anzahl passt zur Vorschau
   await page.goto(`${BASE}/katalog`);
@@ -173,7 +213,9 @@ async function ablauf(browser, name, viewport) {
   }
   await profilKarte("Studio").click();
   await page.getByRole("button", { name: "Profil löschen" }).click();
-  await page.getByText("Das letzte Profil kann nicht gelöscht werden.").waitFor();
+  await page
+    .getByText("Das letzte Profil kann nicht gelöscht werden.")
+    .waitFor();
   schritt(`[${name}] Das letzte Profil bleibt erhalten`);
 
   // 9. Tippflächen am Handy
@@ -186,7 +228,9 @@ async function ablauf(browser, name, viewport) {
         ),
       ]
         .filter(
-          (e) => e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().height < 40,
+          (e) =>
+            e.getBoundingClientRect().height > 0 &&
+            e.getBoundingClientRect().height < 40,
         )
         .map(
           (e) =>
@@ -205,7 +249,12 @@ await withApp(async ({ browser }) => {
   await ablauf(browser, "mobil", { width: 390, height: 844 });
 
   console.log("Desktop (1280×900)");
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
+  await context.addCookies([
+    { name: "fit_katalog", value: "ansicht=karten", url: BASE },
+  ]);
   const page = await context.newPage();
   const fehler = sammleFehler(page);
   for (const [pfad, titel] of [
@@ -214,13 +263,19 @@ await withApp(async ({ browser }) => {
   ]) {
     await page.goto(`${BASE}${pfad}`);
     await page.getByRole("heading", { name: titel, level: 1 }).waitFor();
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    );
     await page.screenshot({
       path: join(SHOTS, `desktop-${titel.replace(/\W+/g, "-")}.png`),
       fullPage: true,
     });
   }
   assert.deepEqual(fehler, [], "desktop: Browser-Fehler");
-  console.log("  [desktop] Einstellungen und Profilseite ohne horizontales Scrollen");
+  console.log(
+    "  [desktop] Einstellungen und Profilseite ohne horizontales Scrollen",
+  );
   await context.close();
 });

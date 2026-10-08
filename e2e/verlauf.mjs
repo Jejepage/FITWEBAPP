@@ -3,7 +3,13 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import Database from "better-sqlite3";
-import { BASE, SHOTS, hinweisBestaetigen, sammleFehler, withApp } from "./harness.mjs";
+import {
+  BASE,
+  SHOTS,
+  hinweisBestaetigen,
+  sammleFehler,
+  withApp,
+} from "./harness.mjs";
 
 const schritt = (s) => console.log(`  ${s}`);
 
@@ -11,7 +17,9 @@ const schritt = (s) => console.log(`  ${s}`);
 function legeBlockAn(dbPfad) {
   const d = new Database(dbPfad);
   const plan = d.prepare("select * from plan where status = 'aktiv'").get();
-  const slots = d.prepare("select * from plan_slot where plan_id = ?").all(plan.id);
+  const slots = d
+    .prepare("select * from plan_slot where plan_id = ?")
+    .all(plan.id);
   const insertWorkout = d.prepare(
     `insert into workout (plan_id, datum, einheit, woche, profil_id, ad_hoc, zusatzblock, status, ersetzungen, beendet_am)
      values (?, ?, ?, ?, ?, 0, 0, 'abgeschlossen', '{}', '2026-10-07T10:00:00.000Z')`,
@@ -33,8 +41,16 @@ function legeBlockAn(dbPfad) {
       n < 8
         ? `2026-10-${String(n + 1).padStart(2, "0")}`
         : `2026-11-${String(n - 7).padStart(2, "0")}`;
-    const w = insertWorkout.run(plan.id, datum, einheit, woche, plan.profil_id).lastInsertRowid;
-    for (const slot of slots.filter((s) => s.einheit === einheit && s.block !== "Z")) {
+    const w = insertWorkout.run(
+      plan.id,
+      datum,
+      einheit,
+      woche,
+      plan.profil_id,
+    ).lastInsertRowid;
+    for (const slot of slots.filter(
+      (s) => s.einheit === einheit && s.block !== "Z",
+    )) {
       const runden = woche === 6 ? 2 : 3;
       const v = werte(slot.muster);
       for (let r = 1; r <= runden; r++) {
@@ -64,10 +80,13 @@ async function ablauf(browser, dbPfad) {
   });
   const page = await context.newPage();
   const fehler = sammleFehler(page);
-  const shot = (n) => page.screenshot({ path: join(SHOTS, `verlauf-${n}.png`), fullPage: true });
+  const shot = (n) =>
+    page.screenshot({ path: join(SHOTS, `verlauf-${n}.png`), fullPage: true });
   const keinHorizontalScroll = async (wo) =>
     assert.ok(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
       `horizontales Scrollen auf ${wo}`,
     );
   const db = () => new Database(dbPfad, { readonly: true });
@@ -82,8 +101,12 @@ async function ablauf(browser, dbPfad) {
 
   // --- 1. Plan anlegen (Standardwerte), danach einen kompletten Block in die DB schreiben ------
   await page.goto(`${BASE}/plan/neu`);
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByRole("heading", { name: "Plan", level: 1, exact: true })
+    .waitFor();
   assert.equal(
     await page.getByRole("heading", { name: "Stufen-Check" }).count(),
     0,
@@ -95,7 +118,9 @@ async function ablauf(browser, dbPfad) {
   // --- 2. Startseite: Block abgeschlossen → Link zum Stufen-Check --------------------------
   await page.goto(`${BASE}/`);
   await page.getByText("Block abgeschlossen").waitFor();
-  await page.getByRole("link", { name: "Stufen-Check und nächster Block" }).click();
+  await page
+    .getByRole("link", { name: "Stufen-Check und nächster Block" })
+    .click();
   await page.getByRole("heading", { name: "Stufen-Check", level: 2 }).waitFor();
 
   // --- 3. Stufen-Check: Empfehlungen je Muster ---------------------------------------------
@@ -117,7 +142,9 @@ async function ablauf(browser, dbPfad) {
   assert.equal(await page.locator("select[name^=stufe_]").count(), 8);
   await keinHorizontalScroll("Stufen-Check");
   await shot("1-stufencheck");
-  schritt("Stufen-Check: Kniebeuge erhöhen, Hüftbeuge senken, Rest gehalten, vorbelegt");
+  schritt(
+    "Stufen-Check: Kniebeuge erhöhen, Hüftbeuge senken, Rest gehalten, vorbelegt",
+  );
 
   // --- 4. Nächsten Block erstellen (Stufe für DH manuell auf 4) ------------------------------
   await page.locator("select[name=stufe_DH]").selectOption("4");
@@ -129,7 +156,9 @@ async function ablauf(browser, dbPfad) {
   assert.equal(url.searchParams.get("stufe_HB"), "1");
   assert.equal(url.searchParams.get("stufe_DH"), "4");
   await page
-    .getByText("Folgeblock: Übungen aus dem vorigen Block werden nach Möglichkeit vermieden.")
+    .getByText(
+      "Folgeblock: Übungen aus dem vorigen Block werden nach Möglichkeit vermieden.",
+    )
     .waitFor();
   assert.equal(await page.locator("select[name=stufe_KN]").inputValue(), "3");
   assert.equal(await page.locator("select[name=slot_A-1-1]").count(), 1);
@@ -149,8 +178,12 @@ async function ablauf(browser, dbPfad) {
     neuIds.some((id) => !altIds.has(id)),
     "mindestens eine neue Übungsvariante im Folgeblock",
   );
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByRole("heading", { name: "Plan", level: 1, exact: true })
+    .waitFor();
   const d = db();
   const plaene = d.prepare("select * from plan order by id").all();
   assert.equal(plaene.length, 2);
@@ -174,19 +207,29 @@ async function ablauf(browser, dbPfad) {
   await page.getByRole("heading", { name: "Blöcke", level: 2 }).waitFor();
   await page.getByText("0 von 12 Einheiten").first().waitFor(); // neuer aktiver Block
   await page.getByText("12 von 12 Einheiten").waitFor(); // früherer Block
-  await page.getByRole("heading", { name: "November 2026", level: 3 }).waitFor();
+  await page
+    .getByRole("heading", { name: "November 2026", level: 3 })
+    .waitFor();
   await page.getByRole("heading", { name: "Oktober 2026", level: 3 }).waitFor();
   const eintraege = page.locator("a[href^='/verlauf/einheit/']");
   assert.equal(await eintraege.count(), 12);
   await keinHorizontalScroll("Verlauf");
   await shot("2-liste");
-  schritt("Verlaufsliste: 12 Einheiten nach Monat, Blockübersicht mit aktivem und früherem Block");
+  schritt(
+    "Verlaufsliste: 12 Einheiten nach Monat, Blockübersicht mit aktivem und früherem Block",
+  );
 
   // --- 6. Einheit im Detail ------------------------------------------------------------------
   await eintraege.first().click();
   await page.getByRole("heading", { name: "Protokoll", level: 2 }).waitFor();
-  await page.getByText("Woche 6 ist Entlastung und Test: keine Steigerung.").waitFor();
-  assert.equal(await page.getByText(/Runde 3:/).count(), 0, "Woche 6 hat nur zwei Runden");
+  await page
+    .getByText("Woche 6 ist Entlastung und Test: keine Steigerung.")
+    .waitFor();
+  assert.equal(
+    await page.getByText(/Runde 3:/).count(),
+    0,
+    "Woche 6 hat nur zwei Runden",
+  );
   await page
     .getByText(/Runde 2:/)
     .first()
@@ -196,9 +239,13 @@ async function ablauf(browser, dbPfad) {
   await page.goBack();
   await eintraege.last().click(); // Woche 1: Vorschläge gelten für Woche 2, auch Wochen später
   await page
-    .getByText(/Vorschlag für die nächste Einheit mit diesen Übungen \(Woche 2\)/)
+    .getByText(
+      /Vorschlag für die nächste Einheit mit diesen Übungen \(Woche 2\)/,
+    )
     .waitFor();
-  schritt("Einheit im Detail: Protokoll, Hinweis zu Woche 6, Vorschläge für die Folgewoche");
+  schritt(
+    "Einheit im Detail: Protokoll, Hinweis zu Woche 6, Vorschläge für die Folgewoche",
+  );
 
   // --- 7. Übungsverlauf mit Diagramm ---------------------------------------------------------
   await page.goto(`${BASE}/verlauf`);
@@ -206,13 +253,19 @@ async function ablauf(browser, dbPfad) {
   await uebung.click();
   await page.locator("svg[role=img]").waitFor();
   const zeilen = await page.locator("tbody tr").count();
-  assert.equal(zeilen, 6, "eine Zeile je Einheit dieser Übung (A oder B jeweils 6)");
+  assert.equal(
+    zeilen,
+    6,
+    "eine Zeile je Einheit dieser Übung (A oder B jeweils 6)",
+  );
   assert.ok((await page.locator("svg[role=img] circle").count()) >= 6);
   await page.getByRole("link", { name: "Volumen", exact: true }).click();
   await page.waitForURL(/metrik=volumen/);
   await page.locator("svg[role=img]").waitFor();
   assert.equal(
-    await page.getByRole("link", { name: "Volumen", exact: true }).getAttribute("aria-current"),
+    await page
+      .getByRole("link", { name: "Volumen", exact: true })
+      .getAttribute("aria-current"),
     "true",
   );
   await keinHorizontalScroll("Übungsverlauf");
@@ -221,12 +274,17 @@ async function ablauf(browser, dbPfad) {
     () => document.querySelectorAll("svg[role=img]:not([aria-label])").length,
   );
   assert.equal(fehlerLinks, 0, "Diagramm hat einen Alternativtext");
-  schritt("Übungsverlauf: Diagramm, Tabelle (6 Zeilen), Umschalter Bester Satz / Volumen");
+  schritt(
+    "Übungsverlauf: Diagramm, Tabelle (6 Zeilen), Umschalter Bester Satz / Volumen",
+  );
 
   // --- 8. Tippflächen und Katalog-Link -------------------------------------------------------
   const zuKlein = await page.evaluate(() =>
     [...document.querySelectorAll("main a, main button, nav a")]
-      .map((el) => ({ t: el.textContent.trim().slice(0, 30), r: el.getBoundingClientRect() }))
+      .map((el) => ({
+        t: el.textContent.trim().slice(0, 30),
+        r: el.getBoundingClientRect(),
+      }))
       .filter((x) => x.r.height > 0 && x.r.height < 40 && x.t.length > 0)
       .map((x) => `${x.t} (${Math.round(x.r.height)} px)`),
   );
@@ -235,7 +293,10 @@ async function ablauf(browser, dbPfad) {
     [],
     "Tippflächen < 40 px",
   );
-  const kat = await page.locator("a[href^='/katalog/']").first().getAttribute("href");
+  const kat = await page
+    .locator("a[href^='/katalog/']")
+    .first()
+    .getAttribute("href");
   await page.goto(`${BASE}${kat}`);
   await page.getByRole("link", { name: "Verlauf ansehen" }).click();
   await page.locator("svg[role=img]").waitFor();

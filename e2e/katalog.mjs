@@ -1,18 +1,34 @@
 // Browsertest für den Katalog (Abschnitt 3). Start: npm run build && npm run e2e
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import { BASE, SHOTS, hinweisBestaetigen, sammleFehler, withApp } from "./harness.mjs";
+import {
+  BASE,
+  SHOTS,
+  hinweisBestaetigen,
+  sammleFehler,
+  withApp,
+} from "./harness.mjs";
 
 let browser;
 
 async function ablauf(name, viewport) {
-  const context = await browser.newContext({ viewport, hasTouch: viewport.width < 600 });
+  const context = await browser.newContext({
+    viewport,
+    hasTouch: viewport.width < 600,
+  });
+  // Diese Suite prüft die Kartenansicht (die Tabelle hat e2e/katalog-tabelle.mjs)
+  await context.addCookies([
+    { name: "fit_katalog", value: "ansicht=karten", url: BASE },
+  ]);
   const page = await context.newPage();
   const fehler = sammleFehler(page);
-  const shot = (n) => page.screenshot({ path: join(SHOTS, `${name}-${n}.png`), fullPage: true });
+  const shot = (n) =>
+    page.screenshot({ path: join(SHOTS, `${name}-${n}.png`), fullPage: true });
   const keinHorizontalScroll = async (wo) =>
     assert.ok(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
       `${name}: horizontales Scrollen auf ${wo}`,
     );
   const schritt = (s) => console.log(`  [${name}] ${s}`);
@@ -29,17 +45,21 @@ async function ablauf(name, viewport) {
   // 2. Filter: Muster ZV + Profil Unterwegs
   await page.locator("summary", { hasText: "Filter" }).click();
   await page.getByLabel("Muster").selectOption("ZV");
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Unterwegs" });
+  await page
+    .getByLabel("Equipment-Profil")
+    .selectOption({ label: "Unterwegs" });
   await shot("2-filter-offen");
   await page.getByRole("button", { name: "Filtern" }).click();
   await page.getByText("4 von 60 Übungen").waitFor();
-  const namen = await page.locator("main a[href^='/katalog/ZV-']").allInnerTexts();
+  const namen = await page
+    .locator("main a[href^='/katalog/ZV-']")
+    .allInnerTexts();
   assert.equal(namen.length, 4, "Unterwegs/ZV: vier Übungen");
   assert.ok(page.url().includes("muster=ZV") && page.url().includes("profil="));
   schritt("Filter Muster+Profil funktioniert (ZV/Unterwegs → 4)");
 
   // Filter zurücksetzen (Bereich bleibt nach dem Filtern offen), dann Stufe+einseitig
-  await page.getByRole("link", { name: "Zurücksetzen" }).click();
+  await page.getByRole("link", { name: "Zurücksetzen" }).first().click();
   await page.getByText("60 von 60 Übungen").waitFor();
   await page.goto(`${BASE}/katalog?muster=RU&einseitig=ja`);
   await page.getByText("4 von 60 Übungen").waitFor();
@@ -55,7 +75,13 @@ async function ablauf(name, viewport) {
   await page.goto(`${BASE}/katalog/ZV-04`);
   await page.getByRole("heading", { name: "Klimmzug mit Fußhilfe" }).waitFor();
   await keinHorizontalScroll("Detail");
-  assert.equal(await page.getByRole("list", { name: "Stufenleiter" }).getByRole("link").count(), 5);
+  assert.equal(
+    await page
+      .getByRole("list", { name: "Stufenleiter" })
+      .getByRole("link")
+      .count(),
+    5,
+  );
   await shot("3-detail");
   await page
     .getByRole("list", { name: "Stufenleiter" })
@@ -68,16 +94,22 @@ async function ablauf(name, viewport) {
   await page.goto(`${BASE}/katalog/ZV-04/bearbeiten`);
   await keinHorizontalScroll("Formular");
   await shot("4-formular");
-  await page.getByLabel("Name", { exact: true }).fill("Klimmzug mit Stuhlhilfe");
+  await page
+    .getByLabel("Name", { exact: true })
+    .fill("Klimmzug mit Stuhlhilfe");
   await page.getByLabel("Prüfstatus").selectOption("geprueft");
   await page.getByRole("button", { name: "Speichern" }).click();
-  await page.getByRole("heading", { name: "Klimmzug mit Stuhlhilfe" }).waitFor();
+  await page
+    .getByRole("heading", { name: "Klimmzug mit Stuhlhilfe" })
+    .waitFor();
   await page.getByText("geprüft", { exact: true }).first().waitFor();
   schritt("Bearbeiten speichert Name und Prüfstatus");
 
   // 5. Validierungsfehler: Eingaben bleiben erhalten
   await page.goto(`${BASE}/katalog/ZV-04/bearbeiten`);
-  await page.getByLabel("Name", { exact: true }).fill("Nur Test, nicht speichern");
+  await page
+    .getByLabel("Name", { exact: true })
+    .fill("Nur Test, nicht speichern");
   await page.getByLabel("Standardbereich").fill("12–8");
   await page.getByRole("button", { name: "Speichern" }).click();
   await page.getByText("erste Zahl höchstens so groß wie die zweite").waitFor();
@@ -112,18 +144,30 @@ async function ablauf(name, viewport) {
   await page.getByText("Bitte ein Bewegungsmuster wählen.").waitFor();
   await page.getByLabel("Bewegungsmuster").selectOption("ZH");
   await page.getByLabel("Name", { exact: true }).fill("Rudern mit Handtuch");
-  await page.getByLabel("Hauptmuskeln", { exact: false }).first().fill("oberer Rücken\nBizeps");
+  await page
+    .getByLabel("Hauptmuskeln", { exact: false })
+    .first()
+    .fill("oberer Rücken\nBizeps");
   await page
     .getByLabel("Ausführung", { exact: true })
     .fill("Handtuch an Türklinke binden\nZurücklehnen\nKörper heranziehen");
-  await page.getByLabel("Typische Fehler").first().fill("Hüfte hängt durch\nSchultern hochgezogen");
+  await page
+    .getByLabel("Typische Fehler")
+    .first()
+    .fill("Hüfte hängt durch\nSchultern hochgezogen");
   await page
     .getByLabel("Hinweise (Gelenke, Alternativen)")
     .fill("Tür muss fest geschlossen und belastbar sein.");
-  await page.getByRole("group", { name: "Gruppe 1" }).getByLabel("Band").check();
+  await page
+    .getByRole("group", { name: "Gruppe 1" })
+    .getByLabel("Band")
+    .check();
   await page.getByRole("button", { name: "Speichern" }).click();
   await page.getByRole("heading", { name: "Rudern mit Handtuch" }).waitFor();
-  assert.ok(page.url().endsWith("/katalog/ZH-08"), `neue ID ZH-08, war ${page.url()}`);
+  assert.ok(
+    page.url().endsWith("/katalog/ZH-08"),
+    `neue ID ZH-08, war ${page.url()}`,
+  );
   await page.getByText("Band", { exact: true }).waitFor();
   schritt("Neue Übung angelegt (ZH-08, Equipment Band)");
 
@@ -136,15 +180,23 @@ async function ablauf(name, viewport) {
   await page.goto(`${BASE}/katalog?muster=ZH&inaktive=1`);
   await page.getByText("8 von 61 Übungen").waitFor();
   await page.locator("a[href='/katalog/ZH-08']").waitFor();
-  schritt("Deaktivierte Übung verschwindet aus der Liste und erscheint mit 'inaktive anzeigen'");
+  schritt(
+    "Deaktivierte Übung verschwindet aus der Liste und erscheint mit 'inaktive anzeigen'",
+  );
 
   // 8. Mobile: Tippflächen mindestens 44 px hoch
   if (viewport.width < 600) {
     await page.goto(`${BASE}/katalog/ZV-02/bearbeiten`);
     const zuKlein = await page.evaluate(() =>
-      [...document.querySelectorAll("button, select, input:not([type=checkbox]), a")]
+      [
+        ...document.querySelectorAll(
+          "button, select, input:not([type=checkbox]), a",
+        ),
+      ]
         .filter(
-          (e) => e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().height < 40,
+          (e) =>
+            e.getBoundingClientRect().height > 0 &&
+            e.getBoundingClientRect().height < 40,
         )
         .map(
           (e) =>
@@ -167,15 +219,27 @@ await withApp(async (app) => {
   console.log("Mobil (390×844)");
   await ablauf("mobil", { width: 390, height: 844 });
   console.log("Desktop (1280×900)");
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
   const page = await context.newPage();
   await page.goto(`${BASE}/katalog`);
   await page.getByText(/\d+ von \d+ Übungen/).waitFor();
-  await page.screenshot({ path: join(SHOTS, "desktop-1-liste.png"), fullPage: true });
+  await page.screenshot({
+    path: join(SHOTS, "desktop-1-liste.png"),
+    fullPage: true,
+  });
   await page.goto(`${BASE}/katalog/KN-04`);
   await page.getByRole("heading", { name: "Goblet Squat" }).waitFor();
-  await page.screenshot({ path: join(SHOTS, "desktop-3-detail.png"), fullPage: true });
-  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+  await page.screenshot({
+    path: join(SHOTS, "desktop-3-detail.png"),
+    fullPage: true,
+  });
+  assert.ok(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  );
   console.log("  [desktop] Liste und Detail ohne horizontales Scrollen");
   await context.close();
 });

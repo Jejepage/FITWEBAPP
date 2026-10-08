@@ -2,7 +2,13 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import Database from "better-sqlite3";
-import { BASE, SHOTS, hinweisBestaetigen, sammleFehler, withApp } from "./harness.mjs";
+import {
+  BASE,
+  SHOTS,
+  hinweisBestaetigen,
+  sammleFehler,
+  withApp,
+} from "./harness.mjs";
 
 const schritt = (s) => console.log(`  ${s}`);
 
@@ -10,7 +16,10 @@ const schritt = (s) => console.log(`  ${s}`);
 const slotWerte = (page) =>
   page.evaluate(() =>
     Object.fromEntries(
-      [...document.querySelectorAll("select[name^=slot_]")].map((s) => [s.name.slice(5), s.value]),
+      [...document.querySelectorAll("select[name^=slot_]")].map((s) => [
+        s.name.slice(5),
+        s.value,
+      ]),
     ),
   );
 
@@ -21,14 +30,18 @@ async function ablauf(browser, dbPfad) {
   });
   const page = await context.newPage();
   const fehler = sammleFehler(page);
-  const shot = (n) => page.screenshot({ path: join(SHOTS, `plan-${n}.png`), fullPage: true });
+  const shot = (n) =>
+    page.screenshot({ path: join(SHOTS, `plan-${n}.png`), fullPage: true });
   const keinHorizontalScroll = async (wo) =>
     assert.ok(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
       `horizontales Scrollen auf ${wo}`,
     );
   const db = () => new Database(dbPfad, { readonly: true });
-  const aktualisieren = () => page.getByRole("button", { name: "Vorschau aktualisieren" }).click();
+  const aktualisieren = () =>
+    page.getByRole("button", { name: "Vorschau aktualisieren" }).click();
 
   await hinweisBestaetigen(page);
 
@@ -44,20 +57,34 @@ async function ablauf(browser, dbPfad) {
   // 2. Vorschau mit Standardwerten: 16 Slots, Studio, Zusatzblock aus
   assert.equal(await page.locator("select[name^=slot_]").count(), 16);
   assert.equal(
-    await page.getByLabel("Equipment-Profil").locator("option:checked").innerText(),
+    await page
+      .getByLabel("Equipment-Profil")
+      .locator("option:checked")
+      .innerText(),
     "Studio",
   );
-  assert.equal(await page.getByRole("checkbox", { name: /Zusatzblock/ }).isChecked(), false);
-  assert.ok((await page.getByLabel("Startdatum").inputValue()).match(/^\d{4}-\d{2}-\d{2}$/));
+  assert.equal(
+    await page.getByRole("checkbox", { name: /Zusatzblock/ }).isChecked(),
+    false,
+  );
+  assert.ok(
+    (await page.getByLabel("Startdatum").inputValue()).match(
+      /^\d{4}-\d{2}-\d{2}$/,
+    ),
+  );
   await keinHorizontalScroll("Vorschau");
   await shot("2-vorschau");
   schritt("Vorschau mit 16 Auswahllisten, Studio, Zusatzblock aus");
 
   // 3. Profil Unterwegs: ZH nur eine Übung → in A und B gleich, mit Hinweis
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Unterwegs" });
+  await page
+    .getByLabel("Equipment-Profil")
+    .selectOption({ label: "Unterwegs" });
   await aktualisieren();
   await page
-    .getByText("Ziehen horizontal: Mit diesem Profil gibt es nur eine Übung, sie steht in A und B.")
+    .getByText(
+      "Ziehen horizontal: Mit diesem Profil gibt es nur eine Übung, sie steht in A und B.",
+    )
     .waitFor();
   let werte = await slotWerte(page);
   assert.equal(werte["A-1-3"], "ZH-07");
@@ -75,32 +102,54 @@ async function ablauf(browser, dbPfad) {
     ["A-Z-1", "B-Z-1"], // TR
     ["A-Z-2", "B-Z-2"], // RU
   ]) {
-    assert.notEqual(nachProfilwechsel[a], nachProfilwechsel[b], `A und B verschieden (${a}/${b})`);
+    assert.notEqual(
+      nachProfilwechsel[a],
+      nachProfilwechsel[b],
+      `A und B verschieden (${a}/${b})`,
+    );
   }
   await shot("3-unterwegs");
   schritt("Unterwegs: ZH-07 in A und B mit Hinweis");
 
   // Profil wechseln und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByText(/Du hast Eingaben geändert\. Bitte erst „Vorschau aktualisieren“/).waitFor();
-  assert.ok(!page.url().includes("ACTION"), "keine internen Framework-Felder in der URL");
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByText(
+      /Du hast Eingaben geändert\. Bitte erst „Vorschau aktualisieren“/,
+    )
+    .waitFor();
+  assert.ok(
+    !page.url().includes("ACTION"),
+    "keine internen Framework-Felder in der URL",
+  );
   assert.equal(
-    new Database(dbPfad, { readonly: true }).prepare("select count(*) c from plan").get().c,
+    new Database(dbPfad, { readonly: true })
+      .prepare("select count(*) c from plan")
+      .get().c,
     0,
   );
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Unterwegs" });
+  await page
+    .getByLabel("Equipment-Profil")
+    .selectOption({ label: "Unterwegs" });
   await aktualisieren();
   schritt("Profilwechsel ohne Aktualisieren lässt sich nicht speichern");
 
   // 4. Manuell tauschen und aktualisieren: Wahl bleibt erhalten
   const kn = page.locator("select[name='slot_A-1-1']");
-  const optionen = await kn.locator("option").evaluateAll((o) => o.map((x) => x.value));
+  const optionen = await kn
+    .locator("option")
+    .evaluateAll((o) => o.map((x) => x.value));
   assert.ok(optionen.length >= 3, "mehrere Kandidaten für KN mit Unterwegs");
   const andere = optionen.find((o) => o !== werte["A-1-1"]);
   await kn.selectOption(andere);
   await aktualisieren();
-  assert.equal(await page.locator("select[name='slot_A-1-1']").inputValue(), andere);
+  assert.equal(
+    await page.locator("select[name='slot_A-1-1']").inputValue(),
+    andere,
+  );
   schritt("Manuelle Wahl bleibt nach 'Vorschau aktualisieren' erhalten");
 
   // 5. Auch alle Slots bleiben gültig: jede gewählte Option ist ein Kandidat
@@ -110,7 +159,10 @@ async function ablauf(browser, dbPfad) {
   // 6. 'Neu vorschlagen' verwirft die manuelle Wahl
   await page.getByRole("button", { name: "Neu vorschlagen" }).click();
   await page.waitForURL(/aktion=neu/);
-  assert.notEqual(await page.locator("select[name='slot_A-1-1']").inputValue(), andere);
+  assert.notEqual(
+    await page.locator("select[name='slot_A-1-1']").inputValue(),
+    andere,
+  );
   schritt("'Neu vorschlagen' verwirft die manuelle Wahl");
 
   // 7. 'Anders mischen' ändert die Belegung (Studio hat gleichwertige Kandidaten)
@@ -140,7 +192,10 @@ async function ablauf(browser, dbPfad) {
     .waitFor();
   // Ausweg aus dem Fehlerzustand: Profil wechseln und neu abschicken (Button steckt in der Meldung)
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
-  await page.getByRole("alert").getByRole("button", { name: "Vorschau aktualisieren" }).click();
+  await page
+    .getByRole("alert")
+    .getByRole("button", { name: "Vorschau aktualisieren" })
+    .click();
   await page.locator("select[name^=slot_]").first().waitFor();
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Leer" });
   await aktualisieren();
@@ -149,7 +204,9 @@ async function ablauf(browser, dbPfad) {
     .filter({ hasText: "Mit diesem Profil gibt es keine Übung für" })
     .waitFor();
   assert.equal(
-    await page.getByRole("button", { name: "Plan speichern und aktivieren" }).count(),
+    await page
+      .getByRole("button", { name: "Plan speichern und aktivieren" })
+      .count(),
     0,
   );
   assert.equal(await page.locator("select[name^=slot_]").count(), 0);
@@ -162,20 +219,31 @@ async function ablauf(browser, dbPfad) {
   await page.getByRole("checkbox", { name: /Zusatzblock/ }).check();
   await aktualisieren();
   assert.ok(await page.getByLabel("3 Einheiten pro Woche").isChecked());
-  assert.ok(await page.getByRole("checkbox", { name: /Zusatzblock/ }).isChecked());
+  assert.ok(
+    await page.getByRole("checkbox", { name: /Zusatzblock/ }).isChecked(),
+  );
   const gewaehlt = await slotWerte(page);
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByRole("heading", { name: "Plan", level: 1, exact: true })
+    .waitFor();
   await page.getByText("3 Einheiten pro Woche").first().waitFor();
   await page.getByText("Reihenfolge im Wechsel: A-B-A, dann B-A-B").waitFor();
   await page.getByText("Zusatzblock: ja").waitFor();
   await keinHorizontalScroll("Plan");
   await shot("9-plan-aktiv");
   const sqlite = db();
-  const slots = sqlite.prepare("select einheit, block, position, exercise_id from plan_slot").all();
+  const slots = sqlite
+    .prepare("select einheit, block, position, exercise_id from plan_slot")
+    .all();
   assert.equal(slots.length, 16);
   for (const s of slots)
-    assert.equal(gewaehlt[`${s.einheit}-${s.block}-${s.position}`], s.exercise_id);
+    assert.equal(
+      gewaehlt[`${s.einheit}-${s.block}-${s.position}`],
+      s.exercise_id,
+    );
   const ersterPlan = sqlite
     .prepare("select id, einheiten_pro_woche, zusatzblock, status from plan")
     .get();
@@ -186,7 +254,9 @@ async function ablauf(browser, dbPfad) {
     status: "aktiv",
   });
   sqlite.close();
-  schritt("Plan gespeichert: 16 Slots wie in der Vorschau, Einstellungen übernommen");
+  schritt(
+    "Plan gespeichert: 16 Slots wie in der Vorschau, Einstellungen übernommen",
+  );
 
   // 10. Übungsnamen im Plan führen in den Katalog
   const link = page.locator("main a[href^='/katalog/']").first();
@@ -200,19 +270,32 @@ async function ablauf(browser, dbPfad) {
   await page.getByText(/Folgeblock: Übungen aus dem vorigen Block/).waitFor();
   const vorherige = new Set(slots.map((s) => s.exercise_id));
   const folge = await slotWerte(page);
-  const neuAnzahl = Object.values(folge).filter((v) => !vorherige.has(v)).length;
+  const neuAnzahl = Object.values(folge).filter(
+    (v) => !vorherige.has(v),
+  ).length;
   assert.ok(neuAnzahl > 0, "Folgeblock enthält mindestens eine neue Übung");
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByRole("heading", { name: "Plan", level: 1, exact: true })
+    .waitFor();
   const s2 = db();
-  assert.equal(s2.prepare("select count(*) c from plan where status='aktiv'").get().c, 1);
+  assert.equal(
+    s2.prepare("select count(*) c from plan where status='aktiv'").get().c,
+    1,
+  );
   assert.equal(s2.prepare("select count(*) c from plan").get().c, 2);
   assert.equal(s2.prepare("select count(*) c from plan_slot").get().c, 32);
-  const zweiter = s2.prepare("select id, vorgaenger_id from plan where status='aktiv'").get();
+  const zweiter = s2
+    .prepare("select id, vorgaenger_id from plan where status='aktiv'")
+    .get();
   assert.equal(zweiter.vorgaenger_id, ersterPlan.id);
   s2.close();
-  schritt("Folgeblock: genau ein aktiver Plan, Vorgänger verknüpft und abgeschlossen");
+  schritt(
+    "Folgeblock: genau ein aktiver Plan, Vorgänger verknüpft und abgeschlossen",
+  );
 
   // 12. Ungültige Wahl (Übung aus anderem Muster) wird beim Speichern abgelehnt
   await page.goto(`${BASE}/plan/neu`);
@@ -224,8 +307,12 @@ async function ablauf(browser, dbPfad) {
     s.appendChild(o);
     s.value = "HB-01";
   });
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByText(/Eine gewählte Übung ist nicht mehr verfügbar/).waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByText(/Eine gewählte Übung ist nicht mehr verfügbar/)
+    .waitFor();
   assert.ok(page.url().includes("/plan/neu"));
   const s3 = db();
   assert.equal(s3.prepare("select count(*) c from plan").get().c, 2);
@@ -235,8 +322,16 @@ async function ablauf(browser, dbPfad) {
   // 13. Tippflächen am Handy
   await page.goto(`${BASE}/plan/neu`);
   const zuKlein = await page.evaluate(() =>
-    [...document.querySelectorAll("button, select, input:not([type=checkbox]):not([type=radio])")]
-      .filter((e) => e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().height < 40)
+    [
+      ...document.querySelectorAll(
+        "button, select, input:not([type=checkbox]):not([type=radio])",
+      ),
+    ]
+      .filter(
+        (e) =>
+          e.getBoundingClientRect().height > 0 &&
+          e.getBoundingClientRect().height < 40,
+      )
       .map(
         (e) =>
           `${e.tagName} ${e.getAttribute("name") ?? ""} ${Math.round(e.getBoundingClientRect().height)}px`,
@@ -253,7 +348,9 @@ await withApp(async ({ browser, dbPfad }) => {
   await ablauf(browser, dbPfad);
 
   console.log("Desktop (1280×900)");
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
   const page = await context.newPage();
   const fehler = sammleFehler(page);
   for (const [pfad, name] of [
@@ -262,8 +359,15 @@ await withApp(async ({ browser, dbPfad }) => {
   ]) {
     await page.goto(`${BASE}${pfad}`);
     await page.getByRole("heading", { level: 1 }).waitFor();
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
-    await page.screenshot({ path: join(SHOTS, `desktop-${name}.png`), fullPage: true });
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    );
+    await page.screenshot({
+      path: join(SHOTS, `desktop-${name}.png`),
+      fullPage: true,
+    });
   }
   assert.deepEqual(fehler, [], "desktop: Browser-Fehler");
   console.log("  [desktop] Plan und Vorschau ohne horizontales Scrollen");

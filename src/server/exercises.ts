@@ -2,9 +2,15 @@ import { eq } from "drizzle-orm";
 import { exercise } from "@/db/schema";
 import type { Db, Tx } from "@/db/types";
 import { erfuellt } from "@/domain/equipment";
-import { type ExerciseFormWerte, type FormFehler, validiereExercise } from "@/domain/exercise-form";
+import {
+  type ExerciseFormWerte,
+  type FormFehler,
+  validiereExercise,
+} from "@/domain/exercise-form";
+import { videoLink } from "@/domain/youtube";
 import {
   MUSTER,
+  type Belastungsart,
   type EquipmentArt,
   type Exercise,
   type Muster,
@@ -35,7 +41,19 @@ export interface KatalogFilter {
   profilEquipment?: readonly EquipmentArt[];
   /** Inaktive Übungen mit anzeigen (Standard: nein). */
   inaktive?: boolean;
+  /** Nur inaktive Übungen. */
+  nurInaktive?: boolean;
   nurZuPruefen?: boolean;
+  pruefstatus?: Pruefstatus;
+  /** Teilstring in Name oder ID (Groß-/Kleinschreibung egal). */
+  q?: string;
+  /** Benötigt dieses Gerät (in irgendeiner Gruppe der Equipment-Bedingung). */
+  geraet?: EquipmentArt;
+  belastungsart?: Belastungsart;
+  /** true = nur mit Video, false = nur ohne. */
+  video?: boolean;
+  /** Teilstring in einem der Hauptmuskeln. */
+  muskel?: string;
 }
 
 export interface KatalogListe {
@@ -48,15 +66,37 @@ export function alleUebungen(db: Db): Exercise[] {
   return sortiert(db.select().from(exercise).all().map(zuExercise));
 }
 
-export function listExercises(db: Db, filter: KatalogFilter = {}): KatalogListe {
-  const basis = alleUebungen(db).filter((e) => filter.inaktive || e.aktiv);
+const klein = (t: string): string => t.toLocaleLowerCase("de");
+
+export function listExercises(
+  db: Db,
+  filter: KatalogFilter = {},
+): KatalogListe {
+  const basis = alleUebungen(db).filter(
+    (e) =>
+      (filter.inaktive || filter.nurInaktive || e.aktiv) &&
+      (!filter.nurInaktive || !e.aktiv),
+  );
+  const q = filter.q ? klein(filter.q) : undefined;
+  const muskel = filter.muskel ? klein(filter.muskel) : undefined;
   const items = basis.filter(
     (e) =>
       (!filter.muster || e.muster === filter.muster) &&
       (filter.stufe === undefined || e.stufe === filter.stufe) &&
       (filter.einseitig === undefined || e.einseitig === filter.einseitig) &&
-      (!filter.profilEquipment || erfuellt(e.equipment, filter.profilEquipment)) &&
-      (!filter.nurZuPruefen || e.pruefstatus === "zu_pruefen"),
+      (!filter.profilEquipment ||
+        erfuellt(e.equipment, filter.profilEquipment)) &&
+      (!filter.nurZuPruefen || e.pruefstatus === "zu_pruefen") &&
+      (!filter.pruefstatus || e.pruefstatus === filter.pruefstatus) &&
+      (!q || klein(e.name).includes(q) || klein(e.id).includes(q)) &&
+      (!filter.geraet ||
+        e.equipment.some((gruppe) =>
+          gruppe.includes(filter.geraet as never),
+        )) &&
+      (!filter.belastungsart || e.belastungsart === filter.belastungsart) &&
+      (filter.video === undefined ||
+        (videoLink(e.videoUrl) !== null) === filter.video) &&
+      (!muskel || e.hauptmuskeln.some((m) => klein(m).includes(muskel))),
   );
   return { items, gesamt: basis.length };
 }
@@ -73,13 +113,21 @@ export function getLadder(db: Db, id: string): Exercise[] {
   if (!start) return [];
   const kette: Exercise[] = [start];
   const gesehen = new Set([id]); // Schutz gegen Zyklen in manipulierten Daten
-  for (let n = start.leichterId; n && !gesehen.has(n); n = alle.get(n)?.leichterId ?? null) {
+  for (
+    let n = start.leichterId;
+    n && !gesehen.has(n);
+    n = alle.get(n)?.leichterId ?? null
+  ) {
     const e = alle.get(n);
     if (!e) break;
     gesehen.add(n);
     kette.unshift(e);
   }
-  for (let n = start.schwererId; n && !gesehen.has(n); n = alle.get(n)?.schwererId ?? null) {
+  for (
+    let n = start.schwererId;
+    n && !gesehen.has(n);
+    n = alle.get(n)?.schwererId ?? null
+  ) {
     const e = alle.get(n);
     if (!e) break;
     gesehen.add(n);
@@ -97,21 +145,31 @@ export function leiterKandidaten(
   db: Db,
   e: Pick<Exercise, "id" | "muster" | "stufe" | "leichterId" | "schwererId">,
 ): { leichter: Exercise[]; schwerer: Exercise[] } {
-  const gleiche = alleUebungen(db).filter((x) => x.muster === e.muster && x.id !== e.id);
+  const gleiche = alleUebungen(db).filter(
+    (x) => x.muster === e.muster && x.id !== e.id,
+  );
   return {
     leichter: gleiche.filter((x) => x.stufe < e.stufe || x.id === e.leichterId),
     schwerer: gleiche.filter((x) => x.stufe > e.stufe || x.id === e.schwererId),
   };
 }
 
-export type SpeicherErgebnis = { ok: true; id: string } | { ok: false; fehler: FormFehler };
+export type SpeicherErgebnis =
+  | { ok: true; id: string }
+  | { ok: false; fehler: FormFehler };
 
 export const MUSTER_FEHLER = "Bitte ein Bewegungsmuster wählen.";
 
-const nichtGefunden: SpeicherErgebnis = { ok: false, fehler: { _form: "Übung nicht gefunden." } };
+const nichtGefunden: SpeicherErgebnis = {
+  ok: false,
+  fehler: { _form: "Übung nicht gefunden." },
+};
 
 /** Regeln der Leiter: gleiches Muster, strikt steigende Stufen (macht Zyklen unmöglich). */
-function pruefeLeiter(alle: Map<string, Exercise>, kandidat: Exercise): FormFehler {
+function pruefeLeiter(
+  alle: Map<string, Exercise>,
+  kandidat: Exercise,
+): FormFehler {
   const fehler: FormFehler = {};
   const pruefe = (
     feld: "leichterId" | "schwererId",
@@ -121,7 +179,8 @@ function pruefeLeiter(alle: Map<string, Exercise>, kandidat: Exercise): FormFehl
     if (!nachbarId) return;
     const n = alle.get(nachbarId);
     if (!n) fehler[feld] = "Übung nicht gefunden.";
-    else if (n.id === kandidat.id) fehler[feld] = "Eine Übung kann nicht ihr eigener Nachbar sein.";
+    else if (n.id === kandidat.id)
+      fehler[feld] = "Eine Übung kann nicht ihr eigener Nachbar sein.";
     else if (n.muster !== kandidat.muster)
       fehler[feld] = "Nachbar muss zum gleichen Muster gehören.";
     else if ((n.stufe - kandidat.stufe) * richtung <= 0)
@@ -150,7 +209,9 @@ function haengeLeiterUm(
   const links = new Map<string, Verweise>(
     Array.from(alle, ([k, e]) => [k, { l: e.leichterId, s: e.schwererId }]),
   );
-  const vorher = new Map<string, Verweise>(Array.from(links, ([k, v]) => [k, { ...v }]));
+  const vorher = new Map<string, Verweise>(
+    Array.from(links, ([k, v]) => [k, { ...v }]),
+  );
   // Hängende Verweise (Zielzeile fehlt) dürfen das Speichern nicht blockieren: ins Leere schreiben.
   const l = (k: string): Verweise => links.get(k) ?? { l: null, s: null };
 
@@ -173,7 +234,10 @@ function haengeLeiterUm(
   for (const [k, v] of links) {
     const v0 = vorher.get(k)!;
     if (v.l !== v0.l || v.s !== v0.s) {
-      tx.update(exercise).set({ leichterId: v.l, schwererId: v.s }).where(eq(exercise.id, k)).run();
+      tx.update(exercise)
+        .set({ leichterId: v.l, schwererId: v.s })
+        .where(eq(exercise.id, k))
+        .run();
     }
   }
 }
@@ -187,12 +251,21 @@ function nextId(alle: Iterable<Exercise>, muster: Muster): string | null {
   return max >= 99 ? null : `${muster}-${String(max + 1).padStart(2, "0")}`;
 }
 
-export function createExercise(db: Db, muster: Muster, werte: ExerciseFormWerte): SpeicherErgebnis {
-  if (!MUSTER.includes(muster)) return { ok: false, fehler: { muster: MUSTER_FEHLER } };
+export function createExercise(
+  db: Db,
+  muster: Muster,
+  werte: ExerciseFormWerte,
+): SpeicherErgebnis {
+  if (!MUSTER.includes(muster))
+    return { ok: false, fehler: { muster: MUSTER_FEHLER } };
   return db.transaction((tx) => {
     const alle = tx.select().from(exercise).all().map(zuExercise);
     const id = nextId(alle, muster);
-    if (!id) return { ok: false, fehler: { _form: "Für dieses Muster sind keine IDs mehr frei." } };
+    if (!id)
+      return {
+        ok: false,
+        fehler: { _form: "Für dieses Muster sind keine IDs mehr frei." },
+      };
     // Beim Anlegen gibt es noch keine Leiter; sie wird danach über "Bearbeiten" gesetzt.
     const r = validiereExercise(
       { ...werte, leichterId: null, schwererId: null },
@@ -204,7 +277,11 @@ export function createExercise(db: Db, muster: Muster, werte: ExerciseFormWerte)
   });
 }
 
-export function updateExercise(db: Db, id: string, werte: ExerciseFormWerte): SpeicherErgebnis {
+export function updateExercise(
+  db: Db,
+  id: string,
+  werte: ExerciseFormWerte,
+): SpeicherErgebnis {
   return db.transaction((tx) => {
     const alle = new Map(
       tx
@@ -215,10 +292,15 @@ export function updateExercise(db: Db, id: string, werte: ExerciseFormWerte): Sp
     );
     const aktuell = alle.get(id);
     if (!aktuell) return nichtGefunden;
-    const r = validiereExercise(werte, { id, muster: aktuell.muster, bild: aktuell.bild });
+    const r = validiereExercise(werte, {
+      id,
+      muster: aktuell.muster,
+      bild: aktuell.bild,
+    });
     if (!r.ok) return r;
     const leiterFehler = pruefeLeiter(alle, r.exercise);
-    if (Object.keys(leiterFehler).length > 0) return { ok: false, fehler: leiterFehler };
+    if (Object.keys(leiterFehler).length > 0)
+      return { ok: false, fehler: leiterFehler };
 
     const { leichterId, schwererId, ...rest } = r.exercise;
     tx.update(exercise).set(rest).where(eq(exercise.id, id)).run();
@@ -228,11 +310,22 @@ export function updateExercise(db: Db, id: string, werte: ExerciseFormWerte): Sp
 }
 
 export function setAktiv(db: Db, id: string, aktiv: boolean): boolean {
-  return db.update(exercise).set({ aktiv }).where(eq(exercise.id, id)).run().changes > 0;
+  return (
+    db.update(exercise).set({ aktiv }).where(eq(exercise.id, id)).run()
+      .changes > 0
+  );
 }
 
-export function setPruefstatus(db: Db, id: string, status: Pruefstatus): boolean {
+export function setPruefstatus(
+  db: Db,
+  id: string,
+  status: Pruefstatus,
+): boolean {
   return (
-    db.update(exercise).set({ pruefstatus: status }).where(eq(exercise.id, id)).run().changes > 0
+    db
+      .update(exercise)
+      .set({ pruefstatus: status })
+      .where(eq(exercise.id, id))
+      .run().changes > 0
   );
 }

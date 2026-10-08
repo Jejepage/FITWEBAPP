@@ -6,7 +6,13 @@ process.env.PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS = "1";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import Database from "better-sqlite3";
-import { PORT, SHOTS, hinweisBestaetigen, sammleFehler, withApp } from "./harness.mjs";
+import {
+  PORT,
+  SHOTS,
+  hinweisBestaetigen,
+  sammleFehler,
+  withApp,
+} from "./harness.mjs";
 
 const schritt = (s) => console.log(`  ${s}`);
 
@@ -15,7 +21,10 @@ async function ablauf(browser, lanBase, dbPfad) {
   /** Netzausfall: auch die Anfragen des Service Workers brechen ab (setOffline allein erfasst sie nicht). */
   const offline = async (context, an) => {
     await context.setOffline(an);
-    if (an) await context.route("**/*", (route) => route.abort("internetdisconnected"));
+    if (an)
+      await context.route("**/*", (route) =>
+        route.abort("internetdisconnected"),
+      );
     else await context.unroute("**/*");
   };
   const zaehle = () => {
@@ -34,25 +43,43 @@ async function ablauf(browser, lanBase, dbPfad) {
   const fehlerHttp = sammleFehler(http);
   await hinweisBestaetigen(http, lanBase);
   assert.equal(await http.evaluate(() => window.isSecureContext), false);
-  assert.equal(await http.evaluate(() => typeof navigator.serviceWorker), "undefined");
-  assert.equal(await http.evaluate(() => typeof navigator.wakeLock), "undefined");
+  assert.equal(
+    await http.evaluate(() => typeof navigator.serviceWorker),
+    "undefined",
+  );
+  assert.equal(
+    await http.evaluate(() => typeof navigator.wakeLock),
+    "undefined",
+  );
   assert.equal(await http.locator('link[rel="manifest"]').count(), 1);
   assert.equal(await http.locator('link[rel="apple-touch-icon"]').count(), 1);
-  assert.ok((await http.locator('link[rel="icon"]').count()) >= 1, "Browser-Symbol verlinkt");
+  assert.ok(
+    (await http.locator('link[rel="icon"]').count()) >= 1,
+    "Browser-Symbol verlinkt",
+  );
   assert.equal(
     (await http
-      .locator('meta[name="mobile-web-app-capable"], meta[name="apple-mobile-web-app-capable"]')
+      .locator(
+        'meta[name="mobile-web-app-capable"], meta[name="apple-mobile-web-app-capable"]',
+      )
       .count()) >= 1,
     true,
   );
   await http.goto(`${lanBase}/einstellungen`);
-  await http.getByRole("heading", { name: "App auf dem Handy installieren", level: 2 }).waitFor();
+  await http
+    .getByRole("heading", { name: "App auf dem Handy installieren", level: 2 })
+    .waitFor();
   await http.getByText(/Zum Home-Bildschirm/).waitFor();
   assert.ok(
-    await http.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    await http.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
     "kein Scrollen",
   );
-  await http.screenshot({ path: join(SHOTS, "pwa-1-installieren.png"), fullPage: true });
+  await http.screenshot({
+    path: join(SHOTS, "pwa-1-installieren.png"),
+    fullPage: true,
+  });
   assert.deepEqual(fehlerHttp, []);
   await ctxHttp.close();
   schritt(
@@ -68,8 +95,12 @@ async function ablauf(browser, lanBase, dbPfad) {
   const fehler = sammleFehler(page);
   await page.goto(`${sicher}/`); // Hinweis ist über die DB schon bestätigt
   await page.goto(`${sicher}/plan/neu`);
-  await page.getByRole("button", { name: "Plan speichern und aktivieren" }).click();
-  await page.getByRole("heading", { name: "Plan", level: 1, exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByRole("heading", { name: "Plan", level: 1, exact: true })
+    .waitFor();
   await page.goto(`${sicher}/`);
   await page.getByRole("button", { name: "Training starten" }).click();
   await page.getByRole("button", { name: "Aufwärmen erledigt" }).click();
@@ -99,7 +130,10 @@ async function ablauf(browser, lanBase, dbPfad) {
   });
   assert.ok(gecacht.includes("/offline.html"));
   assert.ok(gecacht.some((p) => p.startsWith("/training/")));
-  assert.ok(!gecacht.some((p) => p.startsWith("/api/")), "keine API-Antworten im Cache");
+  assert.ok(
+    !gecacht.some((p) => p.startsWith("/api/")),
+    "keine API-Antworten im Cache",
+  );
   schritt(
     "Trainingsseite und /offline.html liegen im Cache, der Stand wird nach jedem Satz aufgefrischt",
   );
@@ -110,12 +144,17 @@ async function ablauf(browser, lanBase, dbPfad) {
   await page.reload();
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
   await page.getByText("1 von 18 Sätzen").first().waitFor();
-  await page.screenshot({ path: join(SHOTS, "pwa-2-offline-training.png"), fullPage: true });
+  await page.screenshot({
+    path: join(SHOTS, "pwa-2-offline-training.png"),
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Satz erledigt" }).click();
   await page.getByText(/noch nicht gespeichert/).waitFor();
   assert.equal(zaehle(), 1, "offline wurde nichts gespeichert");
   await offline(context, false);
-  await page.getByText(/noch nicht gespeichert/).waitFor({ state: "detached", timeout: 20000 });
+  await page
+    .getByText(/noch nicht gespeichert/)
+    .waitFor({ state: "detached", timeout: 20000 });
   assert.equal(zaehle(), 2, "nach Rückkehr des Netzes gespeichert");
   schritt(
     "Offline: laufende Einheit lädt aus dem Cache, Satz wird nach Rückkehr des Netzes gespeichert",
@@ -124,8 +163,13 @@ async function ablauf(browser, lanBase, dbPfad) {
   // --- 5. Nicht gecachte Seite ohne Netz: Offline-Seite --------------------------------------------
   await offline(context, true);
   await page.goto(`${sicher}/verlauf`);
-  await page.getByRole("heading", { name: "Keine Verbindung", level: 1 }).waitFor();
-  await page.screenshot({ path: join(SHOTS, "pwa-3-offline-seite.png"), fullPage: true });
+  await page
+    .getByRole("heading", { name: "Keine Verbindung", level: 1 })
+    .waitFor();
+  await page.screenshot({
+    path: join(SHOTS, "pwa-3-offline-seite.png"),
+    fullPage: true,
+  });
   await offline(context, false);
   schritt("Nicht gecachte Seite ohne Netz zeigt die Offline-Seite");
 
@@ -140,12 +184,18 @@ async function ablauf(browser, lanBase, dbPfad) {
   });
   assert.deepEqual(await page.evaluate(() => caches.keys()), []);
   assert.deepEqual(
-    fehler.filter((f) => !/ERR_INTERNET_DISCONNECTED|Failed to load resource/.test(f)),
+    fehler.filter(
+      (f) => !/ERR_INTERNET_DISCONNECTED|Failed to load resource/.test(f),
+    ),
     [],
   );
   await context.close();
-  schritt(`${statisch} statische Dateien im Cache, Caches vollständig löschbar`);
+  schritt(
+    `${statisch} statische Dateien im Cache, Caches vollständig löschbar`,
+  );
 }
 
 console.log("Mobil (390×844)");
-await withApp(({ browser, BASE, dbPfad }) => ablauf(browser, BASE, dbPfad), { lan: true });
+await withApp(({ browser, BASE, dbPfad }) => ablauf(browser, BASE, dbPfad), {
+  lan: true,
+});

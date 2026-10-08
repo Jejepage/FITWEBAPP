@@ -22,16 +22,21 @@ export function sammleFehler(page) {
   page.on("pageerror", (e) => fehler.push(e.message));
   page.on(
     "console",
-    (m) => m.type() === "error" && fehler.push(`${m.text()} (${m.location().url})`),
+    (m) =>
+      m.type() === "error" && fehler.push(`${m.text()} (${m.location().url})`),
   );
-  page.on("response", (r) => r.status() >= 400 && fehler.push(`HTTP ${r.status()} ${r.url()}`));
+  page.on(
+    "response",
+    (r) => r.status() >= 400 && fehler.push(`HTTP ${r.status()} ${r.url()}`),
+  );
   return fehler;
 }
 
 /** Erste nicht-lokale IPv4-Adresse dieses Rechners (für Tests im unsicheren HTTP-Kontext). */
 export function lanAdresse() {
   for (const eintraege of Object.values(networkInterfaces())) {
-    for (const e of eintraege ?? []) if (e.family === "IPv4" && !e.internal) return e.address;
+    for (const e of eintraege ?? [])
+      if (e.family === "IPv4" && !e.internal) return e.address;
   }
   return null;
 }
