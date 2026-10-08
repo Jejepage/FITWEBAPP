@@ -147,6 +147,7 @@ export interface UebungsVerlaufDaten {
   id: string;
   name: string;
   muster: Muster;
+  videoUrl: string | null;
   verlauf: UebungsVerlauf;
 }
 
@@ -184,6 +185,7 @@ export function ladeUebungsVerlauf(db: Db, exerciseId: string): UebungsVerlaufDa
     id: u.id,
     name: u.name,
     muster: u.muster,
+    videoUrl: u.videoUrl,
     verlauf: uebungsVerlauf([...einheiten.values()], u.belastungsart),
   };
 }

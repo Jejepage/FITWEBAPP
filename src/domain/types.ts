@@ -69,12 +69,14 @@ export interface Exercise {
   hinweise: string;
   /** Phase 2 */
   bild: string | null;
+  /** YouTube-Link (Standardform, siehe youtube.ts) oder null */
+  videoUrl: string | null;
   aktiv: boolean;
   pruefstatus: Pruefstatus;
 }
 
-/** Was in den Seed-Dateien steht; bild/aktiv/pruefstatus setzt der Seed-Runner. */
-export type ExerciseSeed = Omit<Exercise, "bild" | "aktiv" | "pruefstatus">;
+/** Was in den Seed-Dateien steht; bild/videoUrl/aktiv/pruefstatus setzt der Seed-Runner. */
+export type ExerciseSeed = Omit<Exercise, "bild" | "videoUrl" | "aktiv" | "pruefstatus">;
 
 export type Einheit = "A" | "B";
 export type Block = "1" | "2" | "Z";

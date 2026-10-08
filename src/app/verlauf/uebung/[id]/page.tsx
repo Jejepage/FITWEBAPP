@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/katalog/badge";
+import { VideoKnopf } from "@/components/katalog/video-knopf";
 import { karte } from "@/components/ui";
 import { VerlaufDiagramm, type DiagrammPunkt } from "@/components/verlauf/verlauf-diagramm";
 import { db } from "@/db/client";
@@ -73,6 +74,7 @@ export default async function UebungsVerlaufPage({
       >
         {t.zurUebung}
       </Link>
+      <VideoKnopf url={daten.videoUrl} className="mb-4 w-full sm:w-auto" />
 
       {verlauf.zeilen.length === 0 ? (
         <p className={`${karte} text-neutral-600 dark:text-neutral-400`}>{t.keinVerlauf}</p>

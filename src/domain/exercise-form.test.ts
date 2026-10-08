@@ -100,6 +100,52 @@ describe("validiereExercise", () => {
   });
 });
 
+describe("YouTube-Link im Formular", () => {
+  const ok = (v: string) =>
+    validiereExercise(parseExerciseForm(formular({ ...basis, videoUrl: v })), fest);
+
+  it("ohne Eingabe kein Link", () => {
+    const r = ok("");
+    expect(r.ok && r.exercise.videoUrl).toBe(null);
+  });
+
+  it("jede gültige Schreibweise wird in die Standardform gebracht", () => {
+    for (const eingabe of [
+      "https://youtu.be/dQw4w9WgXcQ?si=abc",
+      "youtube.com/watch?v=dQw4w9WgXcQ&list=x",
+      "https://www.youtube.com/shorts/dQw4w9WgXcQ",
+    ]) {
+      const r = ok(eingabe);
+      expect(r.ok && r.exercise.videoUrl).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    }
+  });
+
+  it("Startzeit bleibt erhalten", () => {
+    const r = ok("https://youtu.be/dQw4w9WgXcQ?t=1m5s");
+    expect(r.ok && r.exercise.videoUrl).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=65s");
+  });
+
+  it.each([
+    "https://example.com/video",
+    "javascript:alert(1)",
+    "kein link",
+    "https://youtube.com@evil.example/x",
+  ])("weist %j mit Fehler am Feld ab", (eingabe) => {
+    const r = ok(eingabe);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.fehler.videoUrl).toContain("YouTube-Link");
+  });
+
+  it("meldet den Link-Fehler zusammen mit anderen Feldfehlern", () => {
+    const r = validiereExercise(
+      parseExerciseForm(formular({ ...basis, name: "", videoUrl: "unsinn" })),
+      fest,
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(Object.keys(r.fehler).sort()).toEqual(["name", "videoUrl"]);
+  });
+});
+
 describe("Vorlagen", () => {
   it("leere Vorlage ist absichtlich noch ungültig (Texte fehlen)", () => {
     expect(validiereExercise(leereFormWerte(), fest).ok).toBe(false);
@@ -124,11 +170,13 @@ describe("Vorlagen", () => {
       fehler: ["a", "b"],
       hinweise: "h",
       bild: null,
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       aktiv: true,
       pruefstatus: "geprueft",
     };
     const w = exerciseZuFormWerte(e);
     expect(w.schwererId).toBe("DH-98");
+    expect(w.videoUrl).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     expect(validiereExercise(w, { id: e.id, muster: e.muster, bild: e.bild }).ok).toBe(true);
   });
 });

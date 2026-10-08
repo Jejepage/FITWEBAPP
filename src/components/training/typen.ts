@@ -14,6 +14,8 @@ export interface UebungInfo {
   ausfuehrung: string[];
   fehler: string[];
   hinweise: string;
+  /** Geprüfte YouTube-Standardadresse oder null */
+  videoUrl: string | null;
   ziel: Bereich;
   /** Zielvorgabe als Text, z. B. "8–12 Wdh pro Seite" */
   zielText: string;

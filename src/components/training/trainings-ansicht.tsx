@@ -18,6 +18,7 @@ import { liesJson, loesche, schreibeJson } from "@/lib/speicher";
 import { aktualisiereSeitenCache } from "@/lib/sw";
 import { neueUuid } from "@/lib/uuid";
 import { FehlerBanner } from "@/components/form-felder";
+import { VideoKnopf } from "@/components/katalog/video-knopf";
 import { knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { useWakeLock } from "./hooks";
 import { SatzFormular } from "./satz-formular";
@@ -587,6 +588,8 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
           phaseVorKorrektur.current = null;
         }}
       />
+
+      {info.videoUrl && <VideoKnopf url={info.videoUrl} className="mt-4 w-full" />}
 
       <details className="mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800">
         <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">

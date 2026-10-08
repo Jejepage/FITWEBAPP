@@ -118,6 +118,7 @@ Beispiel Goblet Squat: `[["kurzhanteln","kettlebell"]]`. Beispiel Kurzhantel-Ban
 | fehler | string[] | typische Fehler |
 | hinweise | string | Gelenke (Knie, Rücken, Schulter), Alternativen |
 | bild | string? | Phase 2, in Phase 1 leer |
+| video_url | string? | YouTube-Link (Änderungswunsch nach Phase 1): wird immer in die Standardform `https://www.youtube.com/watch?v=<ID>[&t=<n>s]` gebracht; nur YouTube-Adressen erlaubt; in der App nur als Link „Video ansehen“ |
 | aktiv | bool | Übung ausblenden statt löschen |
 
 ### 4.2 Startkatalog (Seed)
@@ -226,6 +227,7 @@ Stufenleitern (leichter/schwerer) verknüpfen vorrangig Übungen **mit gleichem 
 - Liste mit Filter nach Muster, Equipment-Profil, Stufe, einseitig
 - Detailansicht mit allen Feldern und Stufenleiter (leichter/schwerer anklickbar)
 - Übungen anlegen, bearbeiten, deaktivieren
+- Optionaler YouTube-Link je Übung (editierbar); Anzeige als Knopf „Video ansehen“ im Katalog und im Training, ohne eingebetteten Player
 
 ### F2 Equipment und Einstellungen
 - Profile anlegen/bearbeiten (Häkchen pro Equipment, vorhandene Gewichte)

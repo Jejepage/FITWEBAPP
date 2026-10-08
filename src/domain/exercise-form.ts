@@ -1,4 +1,5 @@
 import { exerciseSchema } from "./schemas";
+import { parseVideoEingabe } from "./youtube";
 import {
   EQUIPMENT_AUSWAHL,
   type Belastungsart,
@@ -27,6 +28,8 @@ export interface ExerciseFormWerte {
   ausfuehrung: string[];
   fehler: string[];
   hinweise: string;
+  /** Eingegebener YouTube-Link (leer = kein Link); beim Speichern in die Standardform gebracht. */
+  videoUrl: string;
   aktiv: boolean;
   pruefstatus: Pruefstatus;
   leichterId: string | null;
@@ -48,6 +51,7 @@ const FELD_FEHLER: Record<string, string> = {
   ausfuehrung: "3 bis 5 Schritte angeben, je Zeile einer.",
   fehler: "2 bis 4 typische Fehler angeben, je Zeile einer.",
   hinweise: "Bitte einen Hinweis angeben.",
+  videoUrl: "Bitte einen YouTube-Link angeben (youtube.com oder youtu.be) oder das Feld leeren.",
   pruefstatus: "Ungültiger Prüfstatus.",
 };
 
@@ -84,6 +88,7 @@ export function parseExerciseForm(fd: FormData): ExerciseFormWerte {
     ausfuehrung: zeilen(fd.get("ausfuehrung")),
     fehler: zeilen(fd.get("fehler")),
     hinweise: text(fd.get("hinweise")),
+    videoUrl: text(fd.get("videoUrl")),
     aktiv: fd.get("aktiv") === "on",
     pruefstatus: text(fd.get("pruefstatus")) as Pruefstatus,
     leichterId: text(fd.get("leichterId")) || null,
@@ -100,7 +105,20 @@ export function validiereExercise(
   werte: ExerciseFormWerte,
   fest: { id: string; muster: Muster; bild: string | null },
 ): ValidierungsErgebnis {
-  const kandidat = { ...werte, ...fest };
+  const video = parseVideoEingabe(werte.videoUrl);
+  if (!video.ok) {
+    // Weitere Fehler trotzdem mit melden, damit das Formular alles auf einmal anzeigt.
+    const rest = exerciseSchema.safeParse({ ...werte, ...fest, videoUrl: null });
+    const fehler: FormFehler = { videoUrl: FELD_FEHLER.videoUrl as string };
+    if (!rest.success) {
+      for (const issue of rest.error.issues) {
+        const feld = String(issue.path[0] ?? "_form");
+        fehler[feld] ??= FELD_FEHLER[feld] ?? "Ungültige Eingabe.";
+      }
+    }
+    return { ok: false, fehler };
+  }
+  const kandidat = { ...werte, ...fest, videoUrl: video.url };
   const r = exerciseSchema.safeParse(kandidat);
   if (!r.success) {
     const fehler: FormFehler = {};
@@ -128,6 +146,7 @@ export function exerciseZuFormWerte(e: Exercise): ExerciseFormWerte {
     ausfuehrung: e.ausfuehrung,
     fehler: e.fehler,
     hinweise: e.hinweise,
+    videoUrl: e.videoUrl ?? "",
     aktiv: e.aktiv,
     pruefstatus: e.pruefstatus,
     leichterId: e.leichterId,
@@ -150,6 +169,7 @@ export function leereFormWerte(): ExerciseFormWerte {
     ausfuehrung: [],
     fehler: [],
     hinweise: "",
+    videoUrl: "",
     aktiv: true,
     pruefstatus: "zu_pruefen",
     leichterId: null,

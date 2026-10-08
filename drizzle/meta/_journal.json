@@ -15,6 +15,13 @@
       "when": 1791407007667,
       "tag": "0001_training",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791471845362,
+      "tag": "0002_video_url",
+      "breakpoints": true
     }
   ]
 }

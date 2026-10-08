@@ -45,6 +45,7 @@ export const exercise = sqliteTable(
     fehler: json<string[]>("fehler").notNull(),
     hinweise: text("hinweise").notNull(),
     bild: text("bild"),
+    videoUrl: text("video_url"),
     aktiv: bool("aktiv").notNull().default(true),
     pruefstatus: text("pruefstatus").$type<Pruefstatus>().notNull().default("zu_pruefen"),
   },

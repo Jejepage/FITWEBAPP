@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { parseBereich } from "./bereich";
+import { istStandardYoutubeUrl } from "./youtube";
 import { BELASTUNGSARTEN, EQUIPMENT_ARTEN, MUSTER, PRUEFSTATI, STEIGERUNGSARTEN } from "./types";
 
 export const musterSchema = z.enum(MUSTER);
@@ -28,12 +29,17 @@ export const exerciseSchema = z.object({
   fehler: z.array(z.string().min(1)).min(2).max(4),
   hinweise: z.string().min(1),
   bild: z.string().nullable(),
+  videoUrl: z
+    .string()
+    .refine(istStandardYoutubeUrl, "Standardform eines YouTube-Links")
+    .nullable(),
   aktiv: z.boolean(),
   pruefstatus: z.enum(PRUEFSTATI),
 });
 
 export const exerciseSeedSchema = exerciseSchema.omit({
   bild: true,
+  videoUrl: true,
   aktiv: true,
   pruefstatus: true,
 });

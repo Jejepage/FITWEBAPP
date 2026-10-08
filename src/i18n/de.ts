@@ -155,6 +155,9 @@ export const de = {
     ausfuehrung: "Ausführung",
     fehler: "Typische Fehler",
     hinweise: "Hinweise",
+    videoAnsehen: "Video ansehen",
+    videoHinweis: "Öffnet YouTube in einem neuen Tab.",
+    videoBadge: "Video",
     stufenleiter: "Stufenleiter",
     leichterAls: "leichter",
     schwererAls: "schwerer",
@@ -185,6 +188,9 @@ export const de = {
       fehler: "Typische Fehler",
       fehlerHilfe: "2 bis 4, eine Zeile pro Fehler.",
       hinweise: "Hinweise (Gelenke, Alternativen)",
+      videoUrl: "YouTube-Link (optional)",
+      videoUrlHilfe:
+        "Link zu einem Erklärvideo, z. B. https://www.youtube.com/watch?v=… oder https://youtu.be/… Jede übliche Schreibweise geht; gespeichert wird die Standardadresse. Feld leeren entfernt den Link.",
       equipment: "Benötigtes Equipment",
       equipmentHilfe:
         "Innerhalb einer Gruppe genügt ein angekreuztes Gerät (ODER). Alle benutzten Gruppen müssen erfüllt sein (UND). Keine Auswahl bedeutet: ohne Gerät (Körpergewicht, Stuhl, Tisch).",

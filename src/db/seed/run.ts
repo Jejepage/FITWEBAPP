@@ -20,7 +20,7 @@ export function seed(db: BetterSQLite3Database): void {
   db.transaction((tx) => {
     for (const u of katalog) {
       tx.insert(exercise)
-        .values({ ...u, bild: null, aktiv: true, pruefstatus: "zu_pruefen" })
+        .values({ ...u, bild: null, videoUrl: null, aktiv: true, pruefstatus: "zu_pruefen" })
         .onConflictDoNothing({ target: exercise.id })
         .run();
     }

@@ -108,9 +108,14 @@ function katalogTransaktion(db: Db, daten: KatalogDaten): ImportErgebnis {
     let neu = 0;
     for (const u of daten.uebungen) {
       if (!vorhanden.has(u.id)) neu++;
+      // Fehlt der Video-Link in der Datei (älteres Backup), bleibt ein vorhandener Link erhalten.
+      const { videoUrl, ...rest } = u;
       tx.insert(exercise)
-        .values(u)
-        .onConflictDoUpdate({ target: exercise.id, set: { ...u } })
+        .values({ ...rest, videoUrl: videoUrl ?? null })
+        .onConflictDoUpdate({
+          target: exercise.id,
+          set: videoUrl === undefined ? rest : { ...rest, videoUrl },
+        })
         .run();
     }
     return { ok: true, bilanz: { uebungen: daten.uebungen.length, neu } };
@@ -133,7 +138,11 @@ export function importiereAlles(db: Db, daten: AllesDaten): ImportErgebnis {
       tx.delete(settings).run();
       tx.delete(exercise).run();
 
-      for (const u of daten.uebungen) tx.insert(exercise).values(u).run();
+      for (const u of daten.uebungen) {
+        tx.insert(exercise)
+          .values({ ...u, videoUrl: u.videoUrl ?? null })
+          .run();
+      }
       for (const p of daten.profile) tx.insert(equipmentProfile).values(p).run();
       tx.insert(settings)
         .values({ id: 1, ...daten.einstellungen })

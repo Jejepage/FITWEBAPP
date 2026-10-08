@@ -1,4 +1,5 @@
 import type { Db } from "@/db/types";
+import { videoLink } from "@/domain/youtube";
 import { bauSchritte, schrittKey } from "@/domain/ablauf";
 import { vorschlagFuerUebung } from "@/domain/progression";
 import { formatBereich, rpeText, zielText } from "@/domain/satz-format";
@@ -39,6 +40,7 @@ function baueUebungInfo(
     ausfuehrung: u.ausfuehrung,
     fehler: u.fehler,
     hinweise: u.hinweise,
+    videoUrl: videoLink(u.videoUrl)?.url ?? null,
     ziel,
     zielText: zielText(ziel, u.belastungsart, u.einseitig),
     vorschlag,

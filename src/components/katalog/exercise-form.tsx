@@ -137,6 +137,17 @@ export function ExerciseForm({
       <Feld label={f.hinweise} fehler={fehler.hinweise}>
         <textarea name="hinweise" rows={4} defaultValue={w.hinweise} className={eingabe} />
       </Feld>
+      <Feld label={f.videoUrl} hilfe={f.videoUrlHilfe} fehler={fehler.videoUrl}>
+        <input
+          type="url"
+          name="videoUrl"
+          inputMode="url"
+          autoComplete="off"
+          placeholder="https://www.youtube.com/watch?v=…"
+          defaultValue={w.videoUrl}
+          className={eingabe}
+        />
+      </Feld>
 
       <h2 className="mb-1 mt-6 text-lg font-semibold">{f.equipment}</h2>
       <p className="mb-3 text-sm text-neutral-500">{f.equipmentHilfe}</p>

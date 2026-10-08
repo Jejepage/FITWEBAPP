@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/katalog/badge";
 import { Ladder } from "@/components/katalog/ladder";
+import { VideoKnopf } from "@/components/katalog/video-knopf";
+import { videoLink } from "@/domain/youtube";
 import { karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import { beschreibeBedingung } from "@/domain/equipment";
@@ -68,6 +70,12 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
           </button>
         </form>
       </div>
+
+      {videoLink(e.videoUrl) && (
+        <div className="mb-4">
+          <VideoKnopf url={e.videoUrl} className="w-full sm:w-auto" />
+        </div>
+      )}
 
       <Abschnitt titel={t.ausfuehrung}>
         <ol className="list-decimal space-y-1 pl-5">

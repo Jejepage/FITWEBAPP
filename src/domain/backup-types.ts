@@ -9,8 +9,14 @@ export const BACKUP_MAX_BYTES = 20 * 1024 * 1024;
 
 export type BackupArt = "alles" | "katalog";
 
+/**
+ * Übung im Backup. `videoUrl` darf fehlen (Backups aus der Zeit vor dem Video-Link): Beim
+ * Katalogimport bedeutet "fehlt" = vorhandenen Link behalten, "null" = Link entfernen.
+ */
+export type BackupUebung = Omit<Exercise, "videoUrl"> & { videoUrl?: string | null };
+
 export interface KatalogDaten {
-  uebungen: Exercise[];
+  uebungen: BackupUebung[];
 }
 
 /** Zeilen der Tabellen, camelCase wie in Drizzle (src/db/schema.ts); Zeitstempel als ISO-Text. */

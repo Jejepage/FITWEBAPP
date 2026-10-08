@@ -1,4 +1,6 @@
+import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
+import { exercise } from "@/db/schema";
 import { neueSeedDb } from "@/db/test-utils";
 import type { AllesDaten, BackupDatei } from "@/domain/backup-types";
 import { exportiere, importiereAlles, importiereDatei, importiereKatalog } from "./backup";
@@ -186,6 +188,66 @@ describe("Vollimport", () => {
     const r = importiereDatei(db, kopie(exportiere(db, "katalog", JETZT)), "alles");
     expect(r.ok).toBe(false);
   });
+});
+
+describe("YouTube-Link im Backup", () => {
+  const LINK = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  const mitLink = () => {
+    const db = dbMitDaten();
+    db.update(exercise).set({ videoUrl: LINK }).where(eq(exercise.id, "KN-02")).run();
+    return db;
+  };
+  const link = (db: ReturnType<typeof dbMitDaten>, id: string) =>
+    alleUebungen(db).find((u) => u.id === id)!.videoUrl;
+
+  it("Round-Trip: der Link bleibt beim Vollimport erhalten", () => {
+    const quelle = mitLink();
+    const datei = kopie(exportiere(quelle, "alles", JETZT));
+    const ziel = neueSeedDb();
+    expect(importiereDatei(ziel, datei, "alles").ok).toBe(true);
+    expect(link(ziel, "KN-02")).toBe(LINK);
+    expect(exportiere(ziel, "alles", JETZT)).toEqual(datei);
+  });
+
+  it("Backup aus der Zeit vor dem Link (Feld fehlt) ist importierbar; Vollimport setzt null", () => {
+    const datei = kopie(exportiere(mitLink(), "alles", JETZT));
+    for (const u of alles(datei).uebungen) delete (u as { videoUrl?: unknown }).videoUrl;
+    const ziel = mitLink();
+    const r = importiereDatei(ziel, datei, "alles");
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    expect(link(ziel, "KN-02")).toBeNull();
+  });
+
+  it("Katalogimport ohne Feld lässt vorhandene Links unberührt", () => {
+    const db = mitLink();
+    const datei = kopie(exportiere(neueSeedDb(), "katalog", JETZT));
+    for (const u of datei.daten.uebungen) delete (u as { videoUrl?: unknown }).videoUrl;
+    expect(importiereDatei(db, datei, "katalog").ok).toBe(true);
+    expect(link(db, "KN-02")).toBe(LINK);
+  });
+
+  it("Katalogimport mit Link setzt ihn, mit null entfernt er ihn", () => {
+    const db = neueSeedDb();
+    const datei = kopie(exportiere(db, "katalog", JETZT));
+    datei.daten.uebungen.find((u) => u.id === "KN-02")!.videoUrl = LINK;
+    expect(importiereDatei(db, datei, "katalog").ok).toBe(true);
+    expect(link(db, "KN-02")).toBe(LINK);
+    datei.daten.uebungen.find((u) => u.id === "KN-02")!.videoUrl = null;
+    expect(importiereDatei(db, datei, "katalog").ok).toBe(true);
+    expect(link(db, "KN-02")).toBeNull();
+  });
+
+  it.each(["https://example.com/x", "javascript:alert(1)", "https://youtu.be/dQw4w9WgXcQ", ""])(
+    "lehnt den Wert %j ab (nur die Standardform ist erlaubt)",
+    (wert) => {
+      const db = neueSeedDb();
+      const datei = kopie(exportiere(db, "katalog", JETZT));
+      datei.daten.uebungen[0]!.videoUrl = wert;
+      const r = importiereDatei(db, datei, "katalog");
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.fehler.join(" ")).toContain("videoUrl");
+    },
+  );
 });
 
 describe("Katalogimport", () => {

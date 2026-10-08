@@ -270,6 +270,72 @@ describe("updateExercise", () => {
   });
 });
 
+describe("YouTube-Link", () => {
+  const LINK = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  const neueWerte = (videoUrl: string) => ({
+    ...leereFormWerte(),
+    name: "Mit Video",
+    hauptmuskeln: ["Gesäß"],
+    ausfuehrung: ["a", "b", "c"],
+    fehler: ["x", "y"],
+    hinweise: "Hinweis.",
+    videoUrl,
+  });
+
+  it("alle Seed-Übungen starten ohne Link", () => {
+    expect(alleUebungen(db).every((e) => e.videoUrl === null)).toBe(true);
+  });
+
+  it("Anlegen speichert die Standardform, auch aus einer anderen Schreibweise", () => {
+    const r = createExercise(db, "KN", neueWerte("https://youtu.be/dQw4w9WgXcQ?si=abc"));
+    expect(r.ok).toBe(true);
+    expect(getExercise(db, "KN-09")!.videoUrl).toBe(LINK);
+  });
+
+  it("Anlegen ohne Link: null", () => {
+    createExercise(db, "KN", neueWerte(""));
+    expect(getExercise(db, "KN-09")!.videoUrl).toBeNull();
+  });
+
+  it("Ändern setzt, ersetzt und entfernt den Link", () => {
+    const e = getExercise(db, "KN-03")!;
+    const werte = exerciseZuFormWerte(e);
+    expect(
+      updateExercise(db, "KN-03", { ...werte, videoUrl: "youtu.be/dQw4w9WgXcQ?t=30" }).ok,
+    ).toBe(true);
+    expect(getExercise(db, "KN-03")!.videoUrl).toBe(`${LINK}&t=30s`);
+    expect(
+      updateExercise(db, "KN-03", { ...werte, videoUrl: "https://youtu.be/abcdefghijk" }).ok,
+    ).toBe(true);
+    expect(getExercise(db, "KN-03")!.videoUrl).toBe("https://www.youtube.com/watch?v=abcdefghijk");
+    expect(updateExercise(db, "KN-03", { ...werte, videoUrl: "" }).ok).toBe(true);
+    expect(getExercise(db, "KN-03")!.videoUrl).toBeNull();
+  });
+
+  it("ungültiger Link: Fehler am Feld, nichts wird geändert", () => {
+    const werte = exerciseZuFormWerte(getExercise(db, "KN-03")!);
+    updateExercise(db, "KN-03", { ...werte, videoUrl: LINK });
+    const r = updateExercise(db, "KN-03", {
+      ...werte,
+      name: "Neu",
+      videoUrl: "https://evil.example/x",
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.fehler.videoUrl).toContain("YouTube-Link");
+    expect(getExercise(db, "KN-03")).toMatchObject({ videoUrl: LINK, name: werte.name });
+  });
+
+  it("Bearbeiten anderer Felder lässt einen vorhandenen Link stehen", () => {
+    const werte = exerciseZuFormWerte(getExercise(db, "KN-03")!);
+    updateExercise(db, "KN-03", { ...werte, videoUrl: LINK });
+    // Formular wird mit dem gespeicherten Link vorbelegt und unverändert abgeschickt
+    const nochmal = exerciseZuFormWerte(getExercise(db, "KN-03")!);
+    expect(nochmal.videoUrl).toBe(LINK);
+    expect(updateExercise(db, "KN-03", { ...nochmal, hinweise: "Neuer Hinweis." }).ok).toBe(true);
+    expect(getExercise(db, "KN-03")!.videoUrl).toBe(LINK);
+  });
+});
+
 describe("setAktiv / setPruefstatus", () => {
   it("ändern genau eine Übung und melden unbekannte IDs", () => {
     expect(setAktiv(db, "KN-01", false)).toBe(true);

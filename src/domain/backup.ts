@@ -8,6 +8,7 @@ import {
   type AllesDaten,
   type BackupArt,
   type BackupDatei,
+  type BackupUebung,
   type KatalogDaten,
   type ParseBackupFn,
   type ParseErgebnis,
@@ -19,7 +20,7 @@ import { MAX_ANZAHL_GEWICHTE, MAX_GEWICHT_KG } from "./gewichte";
 import { slotKey, slotVorlageVonKey } from "./plan-types";
 import { equipmentArtSchema, exerciseSchema, musterSchema } from "./schemas";
 import { MAX_AUFWAERMEN_ZEICHEN } from "./settings-form";
-import { MUSTER, type Exercise, type Muster } from "./types";
+import { MUSTER, type Muster } from "./types";
 
 /** Obergrenzen der Zeilenzahlen je Tabelle (Schutz vor absurd großen Dateien). */
 export const BACKUP_ZEILEN_LIMIT = {
@@ -153,8 +154,13 @@ export const satzZeileSchema = z
     message: "Wiederholungen, Sekunden oder Meter fehlen (mindestens ein Messwert nötig)",
   });
 
+/** Übung im Backup: wie im Katalog, aber `videoUrl` darf fehlen (ältere Backups). */
+const backupUebungSchema = exerciseSchema.extend({
+  videoUrl: exerciseSchema.shape.videoUrl.optional(),
+});
+
 export const katalogDatenSchema = z.object({
-  uebungen: z.array(exerciseSchema).max(BACKUP_ZEILEN_LIMIT.uebungen),
+  uebungen: z.array(backupUebungSchema).max(BACKUP_ZEILEN_LIMIT.uebungen),
 });
 
 export const allesDatenSchema = katalogDatenSchema.extend({
@@ -350,7 +356,7 @@ function indexiere<T, K>(
   return karte;
 }
 
-function pruefeKatalog(daten: KatalogDaten, m: Meldungen): Map<string, Exercise> {
+function pruefeKatalog(daten: KatalogDaten, m: Meldungen): Map<string, BackupUebung> {
   const nachId = indexiere(
     daten.uebungen,
     (u) => u.id,
