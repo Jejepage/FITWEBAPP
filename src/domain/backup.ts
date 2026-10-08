@@ -135,10 +135,10 @@ export const satzZeileSchema = z
     planSlotId: idSchema.nullable(),
     exerciseId: z.string().min(1),
     runde: z.number().int().min(1).max(6),
-    gewicht: z.number().min(0).max(MAX_GEWICHT_KG).nullable(),
-    wdh: z.number().int().min(1).max(200).nullable(),
-    sekunden: z.number().int().min(1).max(7200).nullable(),
-    meter: z.number().min(1).max(5000).nullable(),
+    gewicht: z.number().min(0).max(1000).nullable(),
+    wdh: z.number().int().min(0).max(500).nullable(),
+    sekunden: z.number().int().min(0).max(7200).nullable(),
+    meter: z.number().min(0).max(20000).nullable(),
     rpe: z
       .number()
       .min(1)
@@ -572,6 +572,29 @@ function pruefeKopf(roh: Record<string, unknown>, erwartet?: BackupArt): string[
   return fehler;
 }
 
+const TABELLEN_LIMITS: Record<BackupArt, readonly (readonly [string, string, number])[]> = {
+  katalog: [["uebungen", "Übungen", BACKUP_ZEILEN_LIMIT.uebungen]],
+  alles: [
+    ["uebungen", "Übungen", BACKUP_ZEILEN_LIMIT.uebungen],
+    ["profile", "Profile", BACKUP_ZEILEN_LIMIT.profile],
+    ["plaene", "Pläne", BACKUP_ZEILEN_LIMIT.plaene],
+    ["planSlots", "Plan-Slots", BACKUP_ZEILEN_LIMIT.planSlots],
+    ["einheiten", "Einheiten", BACKUP_ZEILEN_LIMIT.einheiten],
+    ["saetze", "Sätze", BACKUP_ZEILEN_LIMIT.saetze],
+  ],
+};
+
+function pruefeZeilenzahlen(daten: Record<string, unknown>, art: BackupArt): string[] {
+  const fehler: string[] = [];
+  for (const [feld, name, max] of TABELLEN_LIMITS[art]) {
+    const liste = daten[feld];
+    if (Array.isArray(liste) && liste.length > max) {
+      fehler.push(`${name}: ${liste.length} Zeilen sind zu viel (höchstens ${max}).`);
+    }
+  }
+  return fehler;
+}
+
 function parseIntern(roh: unknown, erwartet?: BackupArt): ParseErgebnis {
   if (!istObjekt(roh)) {
     return fehlschlag(["Die Datei ist kein gültiges Backup (erwartet wird ein JSON-Objekt)."]);
@@ -581,6 +604,10 @@ function parseIntern(roh: unknown, erwartet?: BackupArt): ParseErgebnis {
   if (!istObjekt(roh.daten)) return fehlschlag(["Das Feld daten fehlt oder ist kein Objekt."]);
 
   const art = roh.art as BackupArt;
+  // Zeilenzahlen vor der Schemaprüfung begrenzen: Zod sammelt sonst für jede Zeile alle Fehler,
+  // und eine kleine Datei mit sehr vielen kaputten Zeilen würde Speicher und Zeit sprengen.
+  const zuViele = pruefeZeilenzahlen(roh.daten, art);
+  if (zuViele.length > 0) return fehlschlag(zuViele);
   const schema = art === "alles" ? allesDatenSchema : katalogDatenSchema;
   const geprueft = schema.safeParse(roh.daten);
   const m = new Meldungen();

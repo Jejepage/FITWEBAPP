@@ -427,10 +427,20 @@ describe("parseBackup: Schema der Zeilen", () => {
     expect(fehlerVon(roh)).toEqual(["Satz satz-000001: Feld rpe muss mindestens 1 sein"]);
   });
 
-  it("lehnt 0 Wiederholungen ab", () => {
+  it("akzeptiert 0 Wiederholungen (der Trainingsbildschirm erlaubt sie), lehnt negative ab", () => {
     const roh = gueltigeDatei();
     roh.daten.saetze[0]!.wdh = 0;
-    expect(fehlerVon(roh)).toEqual(["Satz satz-000001: Feld wdh muss mindestens 1 sein"]);
+    expect(parseBackup(roh).ok).toBe(true);
+    roh.daten.saetze[0]!.wdh = -1;
+    expect(fehlerVon(roh)).toEqual(["Satz satz-000001: Feld wdh muss mindestens 0 sein"]);
+  });
+
+  it("akzeptiert alles, was speichereSatz speichert (Wertebereiche stimmen überein)", () => {
+    const roh = gueltigeDatei();
+    Object.assign(roh.daten.saetze[0]!, { gewicht: 1000, wdh: 500 });
+    Object.assign(roh.daten.saetze[1]!, { wdh: null, sekunden: 7200 });
+    Object.assign(roh.daten.saetze[2]!, { wdh: null, meter: 20000 });
+    expect(parseBackup(roh).ok).toBe(true);
   });
 
   it("lehnt Nachkommastellen bei ganzzahligen Feldern ab", () => {
@@ -515,15 +525,15 @@ describe("parseBackup: Schema der Zeilen", () => {
   it("lehnt ungültige Messwerte ab", () => {
     const roh = gueltigeDatei();
     const s = roh.daten.saetze;
-    s[0]!.gewicht = 500.5;
+    s[0]!.gewicht = 1000.5;
     s[1]!.gewicht = -1;
     s[2]!.sekunden = 7201;
-    s[3]!.meter = 0.5;
+    s[3]!.meter = -0.5;
     const f = fehlerVon(roh);
-    expect(f).toContain("Satz satz-000001: Feld gewicht darf höchstens 500 sein");
+    expect(f).toContain("Satz satz-000001: Feld gewicht darf höchstens 1000 sein");
     expect(f).toContain("Satz satz-000002: Feld gewicht muss mindestens 0 sein");
     expect(f).toContain("Satz satz-000003: Feld sekunden darf höchstens 7200 sein");
-    expect(f).toContain("Satz satz-000004: Feld meter muss mindestens 1 sein");
+    expect(f).toContain("Satz satz-000004: Feld meter muss mindestens 0 sein");
   });
 
   it("lehnt ungültige Satz-IDs und IDs von Zeilen ab", () => {
@@ -594,13 +604,13 @@ describe("parseBackup: Schema der Zeilen", () => {
   it("prüft die Integrität erst nach erfolgreicher Schemaprüfung", () => {
     const roh = gueltigeDatei();
     roh.daten.plaene[0]!.profilId = 99; // Integritätsfehler
-    roh.daten.saetze[0]!.wdh = 0; // Schemafehler
-    expect(fehlerVon(roh)).toEqual(["Satz satz-000001: Feld wdh muss mindestens 1 sein"]);
+    roh.daten.saetze[0]!.wdh = -1; // Schemafehler
+    expect(fehlerVon(roh)).toEqual(["Satz satz-000001: Feld wdh muss mindestens 0 sein"]);
   });
 
   it("sammelt mehrere Schemafehler, statt beim ersten abzubrechen", () => {
     const roh = gueltigeDatei();
-    roh.daten.saetze[0]!.wdh = 0;
+    roh.daten.saetze[0]!.wdh = -1;
     roh.daten.saetze[1]!.rpe = 11;
     roh.daten.plaene[0]!.startDatum = "kaputt";
     expect(fehlerVon(roh)).toHaveLength(3);
@@ -611,10 +621,10 @@ describe("parseBackup: Grenzgrößen", () => {
   it("akzeptiert die äußersten gültigen Werte", () => {
     const roh = gueltigeDatei();
     const s = roh.daten.saetze;
-    Object.assign(s[0]!, { gewicht: 500, wdh: 200, rpe: 10 });
+    Object.assign(s[0]!, { gewicht: 1000, wdh: 500, rpe: 10 });
     Object.assign(s[1]!, { gewicht: 0, wdh: 1, rpe: 1 });
     Object.assign(s[2]!, { wdh: null, sekunden: 7200, meter: null });
-    Object.assign(s[3]!, { wdh: null, sekunden: null, meter: 5000 });
+    Object.assign(s[3]!, { wdh: null, sekunden: null, meter: 20000 });
     roh.daten.einheiten[0]!.notiz = "x".repeat(BACKUP_MAX_NOTIZ_ZEICHEN);
     roh.daten.einheiten[0]!.woche = 6;
     roh.daten.plaene[0]!.stufen = stufen(5);
@@ -657,7 +667,9 @@ describe("parseBackup: Grenzgrößen", () => {
       { length: limit + 1 },
       () => zeile,
     );
-    expect(fehlerVon(roh)).toEqual([`${name}: darf höchstens ${limit} Einträge haben`]);
+    expect(fehlerVon(roh)).toEqual([
+      `${name}: ${limit + 1} Zeilen sind zu viel (höchstens ${limit}).`,
+    ]);
   });
 
   it("hält die Obergrenzen der Spezifikation ein", () => {
@@ -677,7 +689,7 @@ describe("parseBackup: Grenzgrößen", () => {
 describe("parseBackup: Meldungen kürzen", () => {
   const schlechteSaetze = (anzahl: number): AllesBackup => {
     const roh = gueltigeDatei();
-    roh.daten.saetze = Array.from({ length: anzahl }, (_, i) => satz(i + 1, { wdh: 0 }));
+    roh.daten.saetze = Array.from({ length: anzahl }, (_, i) => satz(i + 1, { wdh: -1 }));
     return roh;
   };
 
@@ -696,8 +708,8 @@ describe("parseBackup: Meldungen kürzen", () => {
   it("kürzt bei 15 Fehlern auf 10 plus Hinweis", () => {
     const f = fehlerVon(schlechteSaetze(15));
     expect(f).toHaveLength(11);
-    expect(f[0]).toBe("Satz satz-000001: Feld wdh muss mindestens 1 sein");
-    expect(f[9]).toBe("Satz satz-000010: Feld wdh muss mindestens 1 sein");
+    expect(f[0]).toBe("Satz satz-000001: Feld wdh muss mindestens 0 sein");
+    expect(f[9]).toBe("Satz satz-000010: Feld wdh muss mindestens 0 sein");
     expect(f[10]).toBe("… und 5 weitere Fehler");
   });
 

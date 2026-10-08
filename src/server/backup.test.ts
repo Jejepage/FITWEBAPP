@@ -3,7 +3,9 @@ import { neueSeedDb } from "@/db/test-utils";
 import type { AllesDaten, BackupDatei } from "@/domain/backup-types";
 import { exportiere, importiereAlles, importiereDatei, importiereKatalog } from "./backup";
 import { alleUebungen, setAktiv } from "./exercises";
+import { getPlanSlotsMitId } from "./plans";
 import { legeBlockAn } from "./test-helfer";
+import { getSaetze, speichereSatz, startWorkout } from "./workouts";
 import { updateSettings } from "./settings";
 import { MUSTER } from "@/domain/types";
 
@@ -45,6 +47,57 @@ describe("exportiere", () => {
   it("ist deterministisch (sortiert)", () => {
     const db = dbMitDaten();
     expect(exportiere(db, "alles", JETZT)).toEqual(exportiere(db, "alles", JETZT));
+  });
+});
+
+describe("Backup-Verträglichkeit mit gespeicherten Sätzen", () => {
+  it("Sätze mit den äußersten Werten, die speichereSatz akzeptiert, lassen sich exportieren und wieder importieren", () => {
+    const db = neueSeedDb();
+    const { planId } = legeBlockAn(db, { einheiten: 0 });
+    const w = startWorkout(db, { heute: "2026-10-08" });
+    if (!w.ok) throw new Error(w.code);
+    const slots = getPlanSlotsMitId(db, planId).filter((x) => x.einheit === "A" && x.block === "1");
+    const leer = { gewicht: null, wdh: null, sekunden: null, meter: null };
+    const werte = [
+      { wdh: 0, gewicht: 0 },
+      { wdh: 500, gewicht: 1000 },
+      { sekunden: 0 },
+      { sekunden: 7200 },
+      { meter: 20000 },
+    ];
+    werte.forEach((v, i) => {
+      const slot = slots[i % 3]!;
+      const r = speichereSatz(db, {
+        id: `grenze-${String(i).padStart(4, "0")}`,
+        workoutId: w.id,
+        planSlotId: slot.id,
+        exerciseId: slot.exerciseId,
+        runde: Math.floor(i / 3) + 1,
+        rpe: 7,
+        tempo: false,
+        ...leer,
+        ...v,
+      });
+      expect(r.ok, `Satz ${i}`).toBe(true);
+    });
+    expect(getSaetze(db, w.id)).toHaveLength(5);
+    const datei = kopie(exportiere(db, "alles", JETZT));
+    const r = importiereDatei(neueSeedDb(), datei, "alles");
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+  });
+
+  it("sehr viele kaputte Zeilen werden schnell abgelehnt (kein Speicherproblem)", () => {
+    const start = Date.now();
+    const roh = {
+      format: "fit-backup",
+      version: 1,
+      art: "katalog",
+      erstelltAm: JETZT.toISOString(),
+      daten: { uebungen: Array.from({ length: 300_000 }, () => ({})) },
+    };
+    const r = importiereDatei(neueSeedDb(), roh, "katalog");
+    expect(r.ok).toBe(false);
+    expect(Date.now() - start).toBeLessThan(1000);
   });
 });
 

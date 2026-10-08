@@ -32,7 +32,10 @@ export async function startTraining(fd: FormData): Promise<void> {
   if (!r.ok) {
     if (r.code === "profil_unbekannt" || r.code === "profil_unmoeglich") {
       const muster = r.code === "profil_unmoeglich" ? `&muster=${r.fehlendeMuster.join(",")}` : "";
-      redirect(`/training/start?profil=${profilId ?? ""}&fehler=${r.code}${muster}`);
+      const block = fd.get("zusatzblock") === "on" ? "&zusatzblock=on" : "";
+      redirect(
+        `/training/start?gesendet=1&profil=${profilId ?? ""}${block}&fehler=${r.code}${muster}`,
+      );
     }
     redirect(`/?fehler=${r.code}`);
   }
