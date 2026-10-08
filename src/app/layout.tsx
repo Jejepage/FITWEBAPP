@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { HinweisGate } from "@/components/hinweis-gate";
 import { MainNav } from "@/components/main-nav";
+import { SwRegistrar } from "@/components/sw-registrar";
 import { db } from "@/db/client";
+import { SESSION_COOKIE } from "@/domain/auth";
 import { de } from "@/i18n/de";
+import { istAngemeldet } from "@/server/auth";
 import { getSettings } from "@/server/settings";
 import "./globals.css";
 
@@ -13,6 +17,16 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: de.app.name,
   description: de.app.description,
+  applicationName: de.app.name,
+  // iPhone: vom Home-Bildschirm im Vollbild starten, mit eigenem Symbol
+  appleWebApp: { capable: true, title: de.app.name, statusBarStyle: "default" },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -21,12 +35,18 @@ export const viewport: Viewport = {
   themeColor: "#0f766e",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  const hinweisBestaetigt = getSettings(db).hinweisAkzeptiertAm !== null;
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Mit Passwortschutz und ohne gültige Sitzung gibt es nur die Anmeldeseite, weder Navigation
+  // noch Hinweisseite (deren Bestätigung wäre ohne Sitzung ohnehin nicht möglich).
+  const angemeldet = istAngemeldet((await cookies()).get(SESSION_COOKIE)?.value);
+  const hinweisBestaetigt = angemeldet && getSettings(db).hinweisAkzeptiertAm !== null;
   return (
     <html lang="de">
       <body className="min-h-dvh pb-20 md:pb-0">
-        {hinweisBestaetigt ? (
+        <SwRegistrar />
+        {!angemeldet ? (
+          <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
+        ) : hinweisBestaetigt ? (
           <>
             <MainNav />
             <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>

@@ -332,6 +332,28 @@ export const de = {
       vorgaenger_unbekannt: "Der Vorgängerplan existiert nicht.",
     },
   },
+  offline: {
+    titel: "Keine Verbindung",
+    text: "Die App erreicht den Server gerade nicht. Eine laufende Einheit kannst du über den Zurück-Pfeil oder die Startseite wieder öffnen, sobald das Netz zurück ist. Bereits erfasste Sätze bleiben auf dem Gerät erhalten und werden dann gespeichert.",
+  },
+  installieren: {
+    titel: "App auf dem Handy installieren",
+    iphone: "iPhone (Safari): Teilen-Symbol, dann „Zum Home-Bildschirm“.",
+    android:
+      "Android (Chrome): Menü, dann „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.",
+    hinweisHttp:
+      "Läuft die App ohne HTTPS (nur im Heimnetz oder per VPN), gibt es keinen Offline-Fallback und keinen Bildschirm-an-Schutz. Stelle dann die Automatische Sperre deines Handys für das Training auf eine längere Zeit. Auf Android ist die Installation als App nur mit HTTPS möglich.",
+  },
+  login: {
+    titel: "Anmelden",
+    hilfe: "Diese App ist mit einem Passwort geschützt.",
+    passwort: "Passwort",
+    anmelden: "Anmelden",
+    falsch: "Das Passwort stimmt nicht.",
+    gesperrt: "Zu viele Fehlversuche. Bitte warte eine Minute und versuche es dann erneut.",
+    abmelden: "Abmelden",
+    abmeldenHilfe: "Beendet die Sitzung auf diesem Gerät.",
+  },
   daten: {
     titel: "Datensicherung",
     zurueck: "Zurück zu den Einstellungen",

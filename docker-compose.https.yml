@@ -1,0 +1,40 @@
+# Optionales HTTPS-Profil: ergänzt docker-compose.yml um einen Caddy-Reverse-Proxy.
+#
+# Start:
+#   docker compose -f docker-compose.yml -f docker-compose.https.yml --profile https up -d
+#
+# Voraussetzungen und Hintergründe: docs/DEPLOYMENT.md, Anhang A.
+# Dieselben -f/--profile-Angaben gelten auch für ps, logs, down und für Updates (--build),
+# sonst bleibt der Caddy-Dienst unberücksichtigt. Alternativ in .env setzen:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.https.yml
+#   COMPOSE_PROFILES=https
+#
+# Hinweis: Die Port-Bindung des Dienstes "app" (HTTP) aus docker-compose.yml bleibt unverändert
+# bestehen (nur LAN, praktisch als Rückfallebene). Siehe Anhang A, falls du sie schließen willst.
+
+services:
+  caddy:
+    image: ${CADDY_IMAGE:-caddy:2}
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      # Pflicht: wird im Caddyfile als {$DOMAIN} verwendet.
+      DOMAIN: ${DOMAIN:?Bitte DOMAIN in .env setzen, z. B. DOMAIN=fit.example.org}
+      # Nur für Weg (a) (DNS-Challenge), sonst leer lassen.
+      DNS_API_TOKEN: ${DNS_API_TOKEN:-}
+    ports:
+      # Wie bei der App: nur an die LAN-Adresse des Docker-Hosts binden, nie ins Internet.
+      - "${BIND_ADDR:-127.0.0.1}:443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Zertifikate und die Caddy-eigene CA (bei "tls internal"): nicht löschen,
+      # sonst muss das Root-Zertifikat auf dem Handy neu installiert werden.
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:

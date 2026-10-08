@@ -38,7 +38,7 @@ export function lanAdresse() {
  * die Seiten werden über die LAN-Adresse geladen: kein sicherer Kontext, wie später im Heimnetz
  * (dort gibt es weder Wake Lock noch crypto.randomUUID).
  */
-export async function withApp(fn, { lan = false } = {}) {
+export async function withApp(fn, { lan = false, env: zusatzEnv = {} } = {}) {
   const ip = lan ? lanAdresse() : null;
   if (lan && !ip) throw new Error("Keine LAN-Adresse gefunden");
   const host = ip ?? "127.0.0.1";
@@ -49,7 +49,12 @@ export async function withApp(fn, { lan = false } = {}) {
     "npx",
     ["next", "start", "-p", String(PORT), "-H", lan ? "0.0.0.0" : "127.0.0.1"],
     {
-      env: { ...process.env, DB_PATH: join(dbDir, "fit.db"), NEXT_TELEMETRY_DISABLED: "1" },
+      env: {
+        ...process.env,
+        DB_PATH: join(dbDir, "fit.db"),
+        NEXT_TELEMETRY_DISABLED: "1",
+        ...zusatzEnv,
+      },
       stdio: ["ignore", "pipe", "pipe"],
       detached: true, // eigene Prozessgruppe, damit beim Beenden auch der next-Kindprozess stirbt
     },

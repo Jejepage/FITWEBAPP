@@ -15,6 +15,7 @@ import type { Block } from "@/domain/types";
 import { de } from "@/i18n/de";
 import { vorschlagGrundText } from "@/i18n/vorschlag-text";
 import { liesJson, loesche, schreibeJson } from "@/lib/speicher";
+import { aktualisiereSeitenCache } from "@/lib/sw";
 import { neueUuid } from "@/lib/uuid";
 import { FehlerBanner } from "@/components/form-felder";
 import { knopfPrimaer, knopfSekundaer } from "@/components/ui";
@@ -138,8 +139,10 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
             }
             wartend.current.delete(gesendet.id);
             persistiere();
-            if (r.ok) setzeStatus(gesendet.id, "ok");
-            else {
+            if (r.ok) {
+              setzeStatus(gesendet.id, "ok");
+              aktualisiereSeitenCache(`/training/${daten.workoutId}`);
+            } else {
               // Abgelehnte Sätze zählen nicht als erledigt: Der Schritt wird wieder offen.
               entferneSatz(gesendet.id);
               setMeldung(t.speichern.fehlgeschlagen(r.code));
@@ -154,7 +157,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         unterwegs.current.delete(start.id);
       }
     },
-    [persistiere, setzeStatus, entferneSatz],
+    [persistiere, setzeStatus, entferneSatz, daten.workoutId],
   );
 
   const wiederhole = useCallback(() => {

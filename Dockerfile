@@ -23,6 +23,7 @@ COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 COPY --from=build /app/drizzle ./drizzle
+COPY --from=build /app/scripts/backup-db.cjs ./scripts/backup-db.cjs
 RUN mkdir -p /data && chown -R node:node /data /app
 USER node
 VOLUME /data

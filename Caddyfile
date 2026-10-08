@@ -1,0 +1,32 @@
+# Caddyfile für das optionale HTTPS-Profil (docker-compose.https.yml).
+# Erklärung: docs/DEPLOYMENT.md, Anhang A. Nicht getestet: weder Weg (a) noch Weg (b).
+
+{
+	# Es wird nur TCP/443 veröffentlicht, daher kein HTTP/3 (UDP).
+	servers {
+		protocols h1 h2
+	}
+}
+
+# {$DOMAIN} kommt aus der Umgebungsvariable DOMAIN (.env), z. B. fit.example.org oder eine LAN-IP.
+{$DOMAIN} {
+
+	# --- Weg (b): Caddy-eigene CA (Standard) -------------------------------------------------
+	# Kein DNS-Anbieter nötig. Das Root-Zertifikat muss einmalig auf dem Handy installiert und
+	# als vertrauenswürdig markiert werden:
+	#   /data/caddy/pki/authorities/local/root.crt   (im Container caddy)
+	tls internal
+
+	# --- Weg (a): eigene Domain, vertrauenswürdiges Zertifikat per DNS-Challenge ---------------
+	# Dafür oben "tls internal" auskommentieren (Raute davor) und diesen Block aktivieren.
+	# Braucht ein Caddy-Image mit DNS-Plugin deines Anbieters (Beispiel Cloudflare, Bau-Anleitung
+	# im Anhang A), das in .env als CADDY_IMAGE eingetragen wird. Der Token kommt aus DNS_API_TOKEN.
+	# tls {
+	#	dns cloudflare {env.DNS_API_TOKEN}
+	# }
+
+	# Leitet an die App weiter. Caddy gibt den ursprünglichen Host-Header unverändert weiter und setzt
+	# X-Forwarded-For/-Proto/-Host selbst. Die App prüft beim Datenimport Origin und Host bzw.
+	# X-Forwarded-Host; es ist keine weitere Konfiguration nötig.
+	reverse_proxy app:3000
+}

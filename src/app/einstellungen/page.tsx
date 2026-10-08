@@ -7,7 +7,9 @@ import { zaehleMachbar } from "@/domain/equipment";
 import { formatGewichte } from "@/domain/gewichte";
 import { MUSTER, EQUIPMENT_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
+import { InstallierenKarte } from "@/components/einstellungen/installieren-karte";
 import { alleUebungen } from "@/server/exercises";
+import { passwortAusUmgebung } from "@/server/auth";
 import { listProfiles } from "@/server/profiles";
 import { getSettings } from "@/server/settings";
 import { speichereEinstellungen } from "./actions";
@@ -86,6 +88,8 @@ export default function EinstellungenPage() {
           })}
         </ul>
       </section>
+
+      <InstallierenKarte passwortSchutz={passwortAusUmgebung() !== ""} />
 
       <section className="mb-10">
         <Link
