@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { LoeschenKnopf } from "@/components/einstellungen/loeschen-knopf";
 import { MachbarVorschau } from "@/components/einstellungen/machbar-vorschau";
 import { ProfilForm } from "@/components/einstellungen/profil-form";
+import { IconPfeilLinks } from "@/components/icons";
+import { BREITE, PageShell } from "@/components/page-shell";
+import { knopfText, kopfzeileKlein } from "@/components/ui";
 import { db } from "@/db/client";
 import { profilZuFormWerte } from "@/domain/profile-form";
 import { de } from "@/i18n/de";
@@ -19,20 +22,32 @@ export default async function ProfilPage({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <Link href="/einstellungen" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
-        ← {de.profil.zurueck}
-      </Link>
-      <h1 className="mb-4 text-2xl font-bold">{de.profil.bearbeitenTitel(profil.name)}</h1>
-      <MachbarVorschau uebungen={alleUebungen(db)} equipment={profil.equipment} />
-      <ProfilForm
-        aktion={speichereProfil.bind(null, profil.id)}
-        werte={profilZuFormWerte(profil)}
-        istAktuellStandard={profil.istStandard}
-      />
-      <section className="mt-10 border-t border-line pt-6">
-        <h2 className="mb-3 text-lg font-semibold">{de.profil.loeschenTitel}</h2>
-        <LoeschenKnopf aktion={loescheProfil.bind(null, profil.id)} />
-      </section>
+      <div className={`mx-auto w-full ${BREITE.normal}`}>
+        <Link href="/einstellungen" className={`${knopfText} -ml-2 mb-1`}>
+          <IconPfeilLinks className="size-5" />
+          {de.profil.zurueck}
+        </Link>
+      </div>
+      <PageShell title={de.profil.bearbeitenTitel(profil.name)} breite="normal">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10">
+          <div className="fade-up lg:col-start-1 lg:row-start-1">
+            <ProfilForm
+              aktion={speichereProfil.bind(null, profil.id)}
+              werte={profilZuFormWerte(profil)}
+              istAktuellStandard={profil.istStandard}
+            />
+          </div>
+          <div className="fade-up lg:sticky lg:top-10 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <MachbarVorschau uebungen={alleUebungen(db)} equipment={profil.equipment} />
+          </div>
+          <section aria-labelledby="loeschen-titel" className="lg:col-start-1 lg:row-start-2">
+            <h2 id="loeschen-titel" className={kopfzeileKlein}>
+              {de.profil.loeschenTitel}
+            </h2>
+            <LoeschenKnopf aktion={loescheProfil.bind(null, profil.id)} />
+          </section>
+        </div>
+      </PageShell>
     </>
   );
 }

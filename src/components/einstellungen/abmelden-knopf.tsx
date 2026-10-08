@@ -2,7 +2,8 @@
 
 import { useRef } from "react";
 import { abmelden } from "@/app/login/actions";
-import { knopfSekundaer } from "@/components/ui";
+import { IconAbmelden } from "@/components/einstellungen/icons-einstellungen";
+import { knopfNeutral } from "@/components/ui";
 import { de } from "@/i18n/de";
 import { leereCaches } from "@/lib/sw";
 
@@ -13,12 +14,13 @@ export function AbmeldenKnopf() {
     <form ref={form} action={abmelden}>
       <button
         type="button"
-        className={`${knopfSekundaer} w-full`}
+        className={`${knopfNeutral} w-full`}
         onClick={async () => {
           await leereCaches();
           form.current?.requestSubmit();
         }}
       >
+        <IconAbmelden className="size-5" />
         {de.login.abmelden}
       </button>
     </form>

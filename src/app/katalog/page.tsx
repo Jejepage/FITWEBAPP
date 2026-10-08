@@ -5,6 +5,9 @@ import { FILTER_FORM_ID, KatalogTabelle } from "@/components/katalog/katalog-tab
 import { FilterForm } from "@/components/katalog/filter-form";
 import { FilterLive } from "@/components/katalog/filter-live";
 import { SpaltenWahl } from "@/components/katalog/spalten-wahl";
+import { IconPlus } from "@/components/icons";
+import { MusterPunkt } from "@/components/katalog/muster-ui";
+import { PageShell } from "@/components/page-shell";
 import { knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import {
@@ -118,30 +121,37 @@ export default async function KatalogPage({
   if (erster(sp.spalten)) kartenVersteckt.push(["spalten", spalten.join(",")]);
 
   const leer = (
-    <p className="rounded-xl border border-dashed border-line p-6 text-center text-ink-2">
-      {t.leer}
-    </p>
+    <p className="rounded-card bg-surface p-8 text-center text-ink-2 shadow-card">{t.leer}</p>
   );
 
   return (
-    <>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">{t.titel}</h1>
-        <div className="flex flex-wrap items-center gap-2">
+    <PageShell
+      title={t.titel}
+      // Tabellen mit vielen Spalten nutzen die ganze Seitenbreite, sonst genügt die breite Spalte
+      breite={zeigeTabelle && spalten.length >= 5 ? "voll" : "weit"}
+      aktionen={
+        <>
           <AnsichtUmschalter ansicht={ansicht} zurueck={zurueck.toString()} />
           <div className={tabellenKlasse ? "hidden md:block" : zeigeTabelle ? "" : "hidden"}>
             <SpaltenWahl spalten={spalten} zurueck={zurueck.toString()} />
           </div>
           <Link href="/katalog/neu" className={knopfPrimaer}>
+            <IconPlus className="size-5" />
             {t.neu}
           </Link>
-        </div>
-      </div>
-
-      <p className="mb-4 text-sm text-ink-2" aria-live="polite">
-        {t.anzahl(items.length, gesamt)}
+        </>
+      }
+    >
+      <p
+        className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[15px] text-ink-3"
+        aria-live="polite"
+      >
+        <span className="font-medium">{t.anzahl(items.length, gesamt)}</span>
         {hatFilterAktiv && (
-          <Link href="/katalog" className="ml-3 font-medium text-accent-ink">
+          <Link
+            href="/katalog"
+            className="inline-flex min-h-11 items-center font-semibold text-accent-ink hover:underline"
+          >
             {t.zuruecksetzen}
           </Link>
         )}
@@ -161,12 +171,18 @@ export default async function KatalogPage({
                 const gruppe = items.filter((e) => e.muster === m);
                 if (gruppe.length === 0) return null;
                 return (
-                  <section key={m} className="mb-6" aria-labelledby={`karten-muster-${m}`}>
-                    <h2 id={`karten-muster-${m}`} className="mb-2 text-lg font-semibold">
-                      {MUSTER_NAMEN[m]}{" "}
-                      <span className="text-sm font-normal text-ink-3">({m})</span>
+                  <section key={m} className="mb-8" aria-labelledby={`karten-muster-${m}`}>
+                    <h2
+                      id={`karten-muster-${m}`}
+                      className="mb-3 flex items-center gap-2.5 px-1 text-xl font-semibold tracking-tight lg:text-2xl"
+                    >
+                      <MusterPunkt muster={m} klasse="size-3" />
+                      <span>
+                        {MUSTER_NAMEN[m]}{" "}
+                        <span className="text-base font-normal text-ink-3">({m})</span>
+                      </span>
                     </h2>
-                    <ul className="space-y-2">
+                    <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                       {gruppe.map((e) => (
                         <li key={e.id}>
                           <ExerciseCard e={e} />
@@ -181,7 +197,7 @@ export default async function KatalogPage({
 
       {zeigeTabelle && (
         <div className={tabellenKlasse}>
-          <form id={FILTER_FORM_ID} method="get" action="/katalog" className="mb-3 flex gap-2">
+          <form id={FILTER_FORM_ID} method="get" action="/katalog">
             {auswahl.sort && <input type="hidden" name="sort" value={auswahl.sort} />}
             {auswahl.sort && <input type="hidden" name="dir" value={auswahl.dir ?? "auf"} />}
             {erster(sp.ansicht) && <input type="hidden" name="ansicht" value={ansicht} />}
@@ -190,7 +206,7 @@ export default async function KatalogPage({
               <input key={name} type="hidden" name={name} value={wert} />
             ))}
             <noscript>
-              <button type="submit" className={knopfSekundaer}>
+              <button type="submit" className={`${knopfSekundaer} mb-3`}>
                 {tt.filtern}
               </button>
             </noscript>
@@ -213,6 +229,6 @@ export default async function KatalogPage({
           </div>
         </div>
       )}
-    </>
+    </PageShell>
   );
 }

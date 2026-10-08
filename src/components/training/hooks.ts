@@ -59,3 +59,16 @@ export function useJetzt(aktiv: boolean, takt = 250): number {
   }, [aktiv, takt]);
   return jetzt;
 }
+
+/** Ist der Bildschirm breit genug für die Seitenleiste (ab 1024 px, wie Tailwind `lg`)? */
+export function useGrosserBildschirm(): boolean {
+  return useSyncExternalStore(
+    (melde) => {
+      const mq = window.matchMedia("(min-width: 1024px)");
+      mq.addEventListener("change", melde);
+      return () => mq.removeEventListener("change", melde);
+    },
+    () => window.matchMedia("(min-width: 1024px)").matches,
+    () => false,
+  );
+}

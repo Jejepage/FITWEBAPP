@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/katalog/badge";
+import { IconHakenKreis, IconZurueck } from "@/components/katalog/icons-katalog";
+import { MusterPunkt } from "@/components/katalog/muster-ui";
+import { BREITE, PageShell } from "@/components/page-shell";
 import { NaechstesMalAnsicht } from "@/components/verlauf/naechstes-mal";
-import { karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
+import { abschnittTitel, bannerOk, karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import { formatSatz } from "@/domain/satz-format";
 import { MUSTER_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
 import { datumLang } from "@/lib/anzeige-datum";
+import { MUSTER_FARBE } from "@/lib/muster-farbe";
 import type { SearchParams } from "@/server/katalog-filter";
 import { ladeNaechstesMal } from "@/server/vorschlaege";
 import { ladeEinheit } from "@/server/verlauf";
@@ -32,64 +36,102 @@ export default async function EinheitPage({
 
   return (
     <>
-      {neu ? (
-        <p role="status" className="mb-4 rounded-lg bg-ok-soft p-3 font-medium text-ok-ink">
-          {t.gespeichert}
-        </p>
-      ) : (
-        <Link href="/verlauf" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
-          ← {t.zurueck}
-        </Link>
-      )}
-      <h1 className="text-2xl font-bold">{datumLang(e.datum)}</h1>
-      <p className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-ink-2">
-        {t.einheitZeile(e.einheit, e.woche)} · {e.profilName}
-        {e.adHoc && <Badge farbe="hinweis">{t.adHoc}</Badge>}
-        {e.zusatzblock && <Badge>{t.mitZusatzblock}</Badge>}
-        {e.status === "abgebrochen" && <Badge farbe="grau">{t.abgebrochen}</Badge>}
-      </p>
-      {e.notiz && (
-        <p className={`${karte} my-3 text-sm`}>
-          <span className="font-medium">{t.notiz}:</span> {e.notiz}
-        </p>
-      )}
-
-      <div className="mt-4">
-        {e.status === "abgeschlossen" && <NaechstesMalAnsicht daten={ladeNaechstesMal(db, e.id)} />}
-      </div>
-
-      <h2 className="mb-2 text-lg font-semibold">{t.protokoll}</h2>
-      <ul className="mb-6 space-y-2">
-        {e.gruppen.map((g) => (
-          <li key={g.exerciseId} className={karte}>
-            <Link href={`/verlauf/uebung/${g.exerciseId}`} className="font-medium text-accent-ink">
-              {g.name}
-            </Link>
-            <span className="ml-2 text-sm text-ink-3">
-              {MUSTER_NAMEN[g.muster]}
-              {g.ersetzt ? ` · ${t.ersetzt}` : ""}
-            </span>
-            <ol className="mt-1 space-y-0.5 text-sm">
-              {g.saetze.map((s) => (
-                <li key={s.runde}>
-                  <span className="text-ink-3">{t.runde(s.runde)}:</span> {formatSatz(s.werte)}
-                </li>
-              ))}
-            </ol>
-          </li>
-        ))}
-      </ul>
-
-      <div className="flex gap-3">
-        <Link href="/" className={`${neu ? knopfPrimaer : knopfSekundaer} flex-1`}>
-          {t.zurStart}
-        </Link>
-        {neu && (
-          <Link href="/verlauf" className={`${knopfSekundaer} flex-1`}>
+      <div className={`mx-auto w-full ${BREITE.weit}`}>
+        {neu ? (
+          <p role="status" className={`${bannerOk} mb-4 flex items-center gap-3 font-semibold`}>
+            <IconHakenKreis className="size-6 shrink-0 text-ok-ink" />
+            {t.gespeichert}
+          </p>
+        ) : (
+          <Link
+            href="/verlauf"
+            className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-[17px] font-medium text-accent-ink hover:underline"
+          >
+            <IconZurueck className="size-5" />
             {t.zurueck}
           </Link>
         )}
       </div>
+      <PageShell
+        title={datumLang(e.datum)}
+        breite="weit"
+        untertitel={
+          <span className="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+            <span>
+              {t.einheitZeile(e.einheit, e.woche)} · {e.profilName}
+            </span>
+            {e.adHoc && <Badge farbe="hinweis">{t.adHoc}</Badge>}
+            {e.zusatzblock && <Badge>{t.mitZusatzblock}</Badge>}
+            {e.status === "abgebrochen" && <Badge farbe="grau">{t.abgebrochen}</Badge>}
+          </span>
+        }
+      >
+        {e.notiz && (
+          <p className={`${karte} mb-5 text-[15px]`}>
+            <span className="font-semibold">{t.notiz}:</span> {e.notiz}
+          </p>
+        )}
+
+        {/* PC: Protokoll links, "Nächstes Mal" rechts (am Handy zuerst) */}
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-8">
+          {e.status === "abgeschlossen" && (
+            <div className="lg:order-2 lg:sticky lg:top-8">
+              <NaechstesMalAnsicht daten={ladeNaechstesMal(db, e.id)} />
+            </div>
+          )}
+
+          <section aria-labelledby="protokoll-titel" className="min-w-0 lg:order-1">
+            <h2 id="protokoll-titel" className={`${abschnittTitel} mb-3`}>
+              {t.protokoll}
+            </h2>
+            <ul className="grid gap-3 md:grid-cols-2">
+              {e.gruppen.map((g) => (
+                <li key={g.exerciseId} className={`${karte} relative overflow-hidden pl-6`}>
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-y-0 left-0 w-1.5 ${MUSTER_FARBE[g.muster].fl}`}
+                  />
+                  <Link
+                    href={`/verlauf/uebung/${g.exerciseId}`}
+                    className="inline-flex min-h-11 items-center font-semibold text-accent-ink hover:underline"
+                  >
+                    {g.name}
+                  </Link>
+                  <p className="flex items-center gap-2 text-sm text-ink-3">
+                    <MusterPunkt muster={g.muster} klasse="size-2" />
+                    <span>
+                      {MUSTER_NAMEN[g.muster]}
+                      {g.ersetzt ? ` · ${t.ersetzt}` : ""}
+                    </span>
+                  </p>
+                  <ol className="mt-3 divide-y divide-line text-[15px]">
+                    {g.saetze.map((s) => (
+                      <li key={s.runde} className="flex items-baseline gap-2 py-2">
+                        <span className="text-ink-3">{t.runde(s.runde)}:</span>
+                        <span className="font-medium">{formatSatz(s.werte)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/"
+                className={`${neu ? knopfPrimaer : knopfSekundaer} flex-1 lg:flex-none lg:px-8`}
+              >
+                {t.zurStart}
+              </Link>
+              {neu && (
+                <Link href="/verlauf" className={`${knopfSekundaer} flex-1 lg:flex-none lg:px-8`}>
+                  {t.zurueck}
+                </Link>
+              )}
+            </div>
+          </section>
+        </div>
+      </PageShell>
     </>
   );
 }

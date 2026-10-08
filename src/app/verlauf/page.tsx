@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { IconChevron } from "@/components/katalog/icons-katalog";
+import { MusterPunkt } from "@/components/katalog/muster-ui";
+import { PageShell } from "@/components/page-shell";
 import { BlockUebersicht } from "@/components/verlauf/block-uebersicht";
 import { EinheitenListe } from "@/components/verlauf/einheiten-liste";
-import { karte, knopfSekundaer } from "@/components/ui";
+import { abschnittTitel, gruppe, karte, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import { MUSTER, MUSTER_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
@@ -24,63 +27,71 @@ export default async function VerlaufPage({
   const uebungen = uebungenMitVerlauf(db);
 
   return (
-    <>
-      <h1 className="mb-4 text-2xl font-bold">{t.titel}</h1>
-      <BlockUebersicht bloecke={blockUebersicht(db)} />
+    <PageShell title={t.titel} breite="weit">
+      {/* PC: Blöcke und Einheiten links, Übungen rechts */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start lg:gap-10">
+        <div className="min-w-0">
+          <BlockUebersicht bloecke={blockUebersicht(db)} />
 
-      <section aria-labelledby="einheiten-titel" className="mb-6">
-        <h2 id="einheiten-titel" className="mb-2 text-lg font-semibold">
-          {t.einheiten}
-        </h2>
-        {liste.length === 0 ? (
-          <div className={`${karte} text-center`}>
-            <p className="font-medium">{t.keineEinheiten}</p>
-            <p className="text-sm text-ink-2">{t.keineEinheitenHilfe}</p>
-          </div>
-        ) : (
-          <EinheitenListe einheiten={liste} />
-        )}
-        {!alle && gesamt > LIMIT && (
-          <Link href="/verlauf?alle=1" className={`${knopfSekundaer} mt-3 w-full`}>
-            {t.alleAnzeigen(gesamt)}
-          </Link>
-        )}
-      </section>
-
-      <section aria-labelledby="uebungen-titel">
-        <h2 id="uebungen-titel" className="text-lg font-semibold">
-          {t.uebungen}
-        </h2>
-        <p className="mb-2 text-sm text-ink-2">{t.uebungenHilfe}</p>
-        {uebungen.length === 0 ? (
-          <p className="text-sm text-ink-3">{t.keineUebungen}</p>
-        ) : (
-          MUSTER.map((m) => {
-            const liste = uebungen.filter((u) => u.muster === m);
-            if (liste.length === 0) return null;
-            return (
-              <div key={m} className="mb-3">
-                <h3 className="mb-1 text-sm font-medium text-ink-3">{MUSTER_NAMEN[m]}</h3>
-                <ul className="space-y-2">
-                  {liste.map((u) => (
-                    <li key={u.id}>
-                      <Link
-                        href={`/verlauf/uebung/${u.id}`}
-                        className={`${karte} flex min-h-14 items-center justify-between gap-3 hover:border-accent`}
-                      >
-                        <span className="font-medium">{u.name}</span>
-                        <span className="shrink-0 text-sm text-ink-3">
-                          {t.einheitenAnzahl(u.einheiten)}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+          <section aria-labelledby="einheiten-titel" className="mb-8">
+            <h2 id="einheiten-titel" className={`${abschnittTitel} mb-3`}>
+              {t.einheiten}
+            </h2>
+            {liste.length === 0 ? (
+              <div className={`${karte} text-center`}>
+                <p className="font-semibold">{t.keineEinheiten}</p>
+                <p className="text-[15px] text-ink-2">{t.keineEinheitenHilfe}</p>
               </div>
-            );
-          })
-        )}
-      </section>
-    </>
+            ) : (
+              <EinheitenListe einheiten={liste} />
+            )}
+            {!alle && gesamt > LIMIT && (
+              <Link href="/verlauf?alle=1" className={`${knopfSekundaer} mt-4 w-full`}>
+                {t.alleAnzeigen(gesamt)}
+              </Link>
+            )}
+          </section>
+        </div>
+
+        <section aria-labelledby="uebungen-titel" className="min-w-0">
+          <h2 id="uebungen-titel" className={abschnittTitel}>
+            {t.uebungen}
+          </h2>
+          <p className="mb-3 mt-1 text-[15px] text-ink-3">{t.uebungenHilfe}</p>
+          {uebungen.length === 0 ? (
+            <p className="text-[15px] text-ink-3">{t.keineUebungen}</p>
+          ) : (
+            MUSTER.map((m) => {
+              const liste = uebungen.filter((u) => u.muster === m);
+              if (liste.length === 0) return null;
+              return (
+                <div key={m} className="mb-5">
+                  <h3 className="mb-2 flex items-center gap-2 px-1 text-sm font-medium uppercase tracking-wide text-ink-3">
+                    <MusterPunkt muster={m} />
+                    {MUSTER_NAMEN[m]}
+                  </h3>
+                  <ul className={gruppe}>
+                    {liste.map((u) => (
+                      <li key={u.id}>
+                        <Link
+                          href={`/verlauf/uebung/${u.id}`}
+                          className="press flex min-h-14 items-center justify-between gap-3 px-4 py-3 hover:bg-fill"
+                        >
+                          <span className="font-medium">{u.name}</span>
+                          <span className="flex shrink-0 items-center gap-2 text-sm text-ink-3">
+                            {t.einheitenAnzahl(u.einheiten)}
+                            <IconChevron className="size-4" />
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })
+          )}
+        </section>
+      </div>
+    </PageShell>
   );
 }

@@ -1,3 +1,5 @@
+import { IconInfo, IconWarnung } from "@/components/katalog/icons-katalog";
+import { bannerInfo, bannerWarn } from "@/components/ui";
 import type { HinweisCode, PlanHinweis } from "@/domain/plan-types";
 import { MUSTER_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
@@ -25,22 +27,29 @@ export function PlanHinweise({ hinweise }: { hinweise: readonly PlanHinweis[] })
   if (hinweise.length === 0) return null;
   return (
     <section aria-labelledby="plan-hinweise" className="mb-4">
-      <h2 id="plan-hinweise" className="mb-1 text-sm font-semibold">
+      <h2
+        id="plan-hinweise"
+        className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-ink-3"
+      >
         {h.titel}
       </h2>
-      <ul className="space-y-1 text-sm">
-        {hinweise.map((x, i) => (
-          <li
-            key={`${x.code}-${x.muster ?? ""}-${x.tatsaechlich ?? ""}-${i}`}
-            className={
-              WARNUNG.has(x.code)
-                ? "rounded-lg bg-warn-soft px-3 py-2 text-warn-ink"
-                : "px-3 py-1 text-ink-2"
-            }
-          >
-            {hinweisText(x)}
-          </li>
-        ))}
+      <ul className="space-y-2 text-[15px]">
+        {hinweise.map((x, i) => {
+          const warnung = WARNUNG.has(x.code);
+          return (
+            <li
+              key={`${x.code}-${x.muster ?? ""}-${x.tatsaechlich ?? ""}-${i}`}
+              className={`flex items-start gap-3 ${warnung ? bannerWarn : bannerInfo}`}
+            >
+              {warnung ? (
+                <IconWarnung className="mt-0.5 size-5 shrink-0 text-warn-ink" />
+              ) : (
+                <IconInfo className="mt-0.5 size-5 shrink-0 text-accent-ink" />
+              )}
+              <span>{hinweisText(x)}</span>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

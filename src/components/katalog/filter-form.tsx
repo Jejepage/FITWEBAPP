@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { eingabe, knopfPrimaer, knopfSekundaer } from "@/components/ui";
+import { IconFilter } from "@/components/icons";
+import { eingabe, knopfNeutral, knopfPrimaer } from "@/components/ui";
 import {
   BELASTUNGSARTEN,
   EQUIPMENT_AUSWAHL,
@@ -11,6 +12,7 @@ import {
 import { de } from "@/i18n/de";
 import type { FilterAuswahl } from "@/server/katalog-filter";
 import type { Profil } from "@/server/profiles";
+import { IconChevron } from "./icons-katalog";
 
 const t = de.katalog;
 const tt = t.tabelle;
@@ -27,12 +29,48 @@ function Auswahl({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block text-sm">
-      <span className="mb-1 block">{label}</span>
+    <label className="block">
+      <span className="mb-1.5 block text-sm font-medium text-ink-2">{label}</span>
       <select name={name} defaultValue={wert} className={eingabe}>
         {children}
       </select>
     </label>
+  );
+}
+
+/** Ja/Nein/Alle als iOS-Segment (Radiofelder, Wert wie beim Auswahlfeld: "" = alle). */
+function Segmente({
+  name,
+  label,
+  wert,
+  optionen,
+}: {
+  name: string;
+  label: string;
+  wert: string;
+  optionen: readonly { wert: string; text: string }[];
+}) {
+  return (
+    <fieldset>
+      <legend className="mb-1.5 text-sm font-medium text-ink-2">{label}</legend>
+      <div className="flex rounded-xl bg-fill-2 p-0.5">
+        {optionen.map((o) => (
+          <label
+            key={o.wert}
+            className="press relative flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-[0.65rem] px-2 text-center text-[15px] font-medium text-ink-2 has-checked:bg-surface has-checked:text-ink has-checked:shadow-sm has-focus-visible:outline-2 has-focus-visible:outline-accent-ink"
+          >
+            <input
+              type="radio"
+              name={name}
+              value={o.wert}
+              defaultChecked={o.wert === wert}
+              className="absolute inset-0 size-full cursor-pointer opacity-0"
+            />
+            {o.text}
+          </label>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
@@ -53,21 +91,26 @@ export function FilterForm({
   const videoWert = filter.video === undefined ? "" : filter.video ? "mit" : "ohne";
   const alle = <option value="">{t.alle}</option>;
   return (
-    <details open={aktiv} className="mb-4 rounded-xl border border-line bg-surface">
-      <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
+    <details
+      open={aktiv}
+      className="group mb-6 rounded-card border border-line/50 bg-surface shadow-card"
+    >
+      <summary className="press flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-card px-5 py-3 text-[17px] font-semibold [&::-webkit-details-marker]:hidden">
+        <IconFilter className="size-5 text-accent-ink" />
         {t.filter}
-        {aktiv && <span className="ml-2 text-sm font-normal text-accent-ink">●</span>}
+        {aktiv && <span className="text-sm font-normal text-accent-ink">●</span>}
+        <IconChevron className="ml-auto size-5 text-ink-3 transition-transform group-open:rotate-90" />
       </summary>
       <form
         method="get"
         action="/katalog"
-        className="grid gap-3 border-t border-line p-4 sm:grid-cols-2"
+        className="grid gap-x-4 gap-y-4 border-t border-line p-5 sm:grid-cols-2 lg:grid-cols-3"
       >
         {versteckt.map(([name, wert]) => (
           <input key={name} type="hidden" name={name} value={wert} />
         ))}
-        <label className="block text-sm sm:col-span-2">
-          <span className="mb-1 block">{t.suchen}</span>
+        <label className="block sm:col-span-2 lg:col-span-3">
+          <span className="mb-1.5 block text-sm font-medium text-ink-2">{t.suchen}</span>
           <input
             type="search"
             name="q"
@@ -112,11 +155,6 @@ export function FilterForm({
             </option>
           ))}
         </Auswahl>
-        <Auswahl name="einseitig" label={t.einseitig} wert={einseitigWert}>
-          {alle}
-          <option value="ja">{t.ja}</option>
-          <option value="nein">{t.nein}</option>
-        </Auswahl>
         <Auswahl
           name="belastungsart"
           label={t.belastungsartFilter}
@@ -129,30 +167,8 @@ export function FilterForm({
             </option>
           ))}
         </Auswahl>
-        <Auswahl name="status" label={t.statusFilter} wert={filter.pruefstatus ?? ""}>
-          {alle}
-          {PRUEFSTATI.map((p) => (
-            <option key={p} value={p}>
-              {t.feld.pruefstati[p]}
-            </option>
-          ))}
-        </Auswahl>
-        <Auswahl
-          name="aktiv"
-          label={t.aktivFilter}
-          wert={filter.nurInaktive ? "inaktiv" : filter.inaktive ? "alle" : ""}
-        >
-          <option value="">{tt.aktivAktive}</option>
-          <option value="inaktiv">{tt.aktivInaktive}</option>
-          <option value="alle">{tt.aktivAlle}</option>
-        </Auswahl>
-        <Auswahl name="video" label={t.videoFilter} wert={videoWert}>
-          {alle}
-          <option value="mit">{tt.mitVideo}</option>
-          <option value="ohne">{tt.ohneVideo}</option>
-        </Auswahl>
-        <label className="block text-sm">
-          <span className="mb-1 block">{t.muskelFilter}</span>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium text-ink-2">{t.muskelFilter}</span>
           <input
             type="search"
             name="muskel"
@@ -161,11 +177,50 @@ export function FilterForm({
             className={eingabe}
           />
         </label>
-        <div className="flex gap-3 sm:col-span-2">
+        <Segmente
+          name="einseitig"
+          label={t.einseitig}
+          wert={einseitigWert}
+          optionen={[
+            { wert: "", text: t.alle },
+            { wert: "ja", text: t.ja },
+            { wert: "nein", text: t.nein },
+          ]}
+        />
+        <Segmente
+          name="video"
+          label={t.videoFilter}
+          wert={videoWert}
+          optionen={[
+            { wert: "", text: t.alle },
+            { wert: "mit", text: tt.mitVideo },
+            { wert: "ohne", text: tt.ohneVideo },
+          ]}
+        />
+        <Segmente
+          name="aktiv"
+          label={t.aktivFilter}
+          wert={filter.nurInaktive ? "inaktiv" : filter.inaktive ? "alle" : ""}
+          optionen={[
+            { wert: "", text: tt.aktivAktive },
+            { wert: "inaktiv", text: tt.aktivInaktive },
+            { wert: "alle", text: tt.aktivAlle },
+          ]}
+        />
+        <Segmente
+          name="status"
+          label={t.statusFilter}
+          wert={filter.pruefstatus ?? ""}
+          optionen={[
+            { wert: "", text: t.alle },
+            ...PRUEFSTATI.map((p) => ({ wert: p, text: t.feld.pruefstati[p] })),
+          ]}
+        />
+        <div className="flex flex-wrap gap-3 sm:col-span-2 lg:col-span-3">
           <button type="submit" className={knopfPrimaer}>
             {t.filtern}
           </button>
-          <Link href="/katalog" className={knopfSekundaer}>
+          <Link href="/katalog" className={knopfNeutral}>
             {t.zuruecksetzen}
           </Link>
         </div>

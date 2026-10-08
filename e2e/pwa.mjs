@@ -117,7 +117,7 @@ async function ablauf(browser, lanBase, dbPfad) {
   await page.getByText("1 von 18 Sätzen").first().waitFor();
   await page.waitForFunction(
     async () => {
-      const c = await caches.open("fit-v2-seiten");
+      const c = await caches.open("fit-v3-seiten");
       const t = await (await c.match(location.pathname))?.text();
       return Boolean(t && t.includes("1 von 18 Sätzen"));
     },
@@ -125,7 +125,7 @@ async function ablauf(browser, lanBase, dbPfad) {
     { timeout: 15000 },
   );
   const gecacht = await page.evaluate(async () => {
-    const c = await caches.open("fit-v2-seiten");
+    const c = await caches.open("fit-v3-seiten");
     return (await c.keys()).map((r) => new URL(r.url).pathname);
   });
   assert.ok(gecacht.includes("/offline.html"));
@@ -175,7 +175,7 @@ async function ablauf(browser, lanBase, dbPfad) {
 
   // --- 6. Statische Dateien kommen aus dem Cache; Caches lassen sich leeren ------------------------
   const statisch = await page.evaluate(async () => {
-    const c = await caches.open("fit-v2-static");
+    const c = await caches.open("fit-v3-static");
     return (await c.keys()).length;
   });
   assert.ok(statisch > 0, "statische Dateien gecacht");

@@ -2,11 +2,19 @@
 
 import { useActionState, useEffect, useState } from "react";
 import type { SettingsState } from "@/app/einstellungen/form-state";
-import { Checkbox, ErfolgBanner, FehlerBanner, Feld, Gruppe } from "@/components/form-felder";
-import { eingabe, knopfPrimaer } from "@/components/ui";
+import {
+  Checkbox,
+  ErfolgBanner,
+  FehlerBanner,
+  Feld,
+  Gruppe,
+  Radio,
+} from "@/components/form-felder";
+import { eingabe, karte, knopfPrimaer } from "@/components/ui";
 import type { SettingsFormWerte } from "@/domain/settings-form";
 import { MUSTER, MUSTER_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
+import { MUSTER_FARBE } from "@/lib/muster-farbe";
 
 const t = de.einstellungen;
 
@@ -40,52 +48,65 @@ export function SettingsForm({
       {hatFehler && <FehlerBanner>{t.formularFehler}</FehlerBanner>}
       {state.gespeichert && !geaendert && <ErfolgBanner>{t.gespeichert}</ErfolgBanner>}
 
-      <Gruppe legende={t.stufenTitel} hilfe={t.stufenHilfe} fehler={fehler.stufen}>
-        <div className="grid grid-cols-2 gap-x-3">
-          {MUSTER.map((m) => (
-            <Feld key={m} label={`${MUSTER_NAMEN[m]} (${m})`} fehler={fehler[`stufe_${m}`]}>
-              <select name={`stufe_${m}`} defaultValue={String(w.stufen[m])} className={eingabe}>
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </Feld>
-          ))}
+      <div className={karte}>
+        <Gruppe legende={t.stufenTitel} hilfe={t.stufenHilfe} fehler={fehler.stufen}>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-4 lg:grid-cols-2">
+            {MUSTER.map((m) => (
+              <Feld
+                key={m}
+                label={`${MUSTER_NAMEN[m]} (${m})`}
+                punkt={MUSTER_FARBE[m].fl}
+                fehler={fehler[`stufe_${m}`]}
+                klasse="flex flex-col justify-end"
+              >
+                <select name={`stufe_${m}`} defaultValue={String(w.stufen[m])} className={eingabe}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </Feld>
+            ))}
+          </div>
+        </Gruppe>
+
+        <Gruppe legende={t.einheiten} fehler={fehler.einheitenProWoche}>
+          <div className="grid grid-cols-2">
+            {[2, 3].map((n) => (
+              <Radio
+                key={n}
+                name="einheitenProWoche"
+                value={String(n)}
+                label={t.einheitenOption(n)}
+                checked={w.einheitenProWoche === n}
+              />
+            ))}
+          </div>
+        </Gruppe>
+
+        <div className="mb-6">
+          <Checkbox
+            name="zusatzblock"
+            label={t.zusatzblock}
+            hilfe={t.zusatzblockHilfe}
+            checked={w.zusatzblock}
+          />
         </div>
-      </Gruppe>
 
-      <Gruppe legende={t.einheiten} fehler={fehler.einheitenProWoche}>
-        {[2, 3].map((n) => (
-          <label key={n} className="flex min-h-11 items-center gap-3">
-            <input
-              type="radio"
-              name="einheitenProWoche"
-              value={n}
-              defaultChecked={w.einheitenProWoche === n}
-              className="size-5"
-            />
-            <span>{t.einheitenOption(n)}</span>
-          </label>
-        ))}
-      </Gruppe>
+        <Feld label={t.aufwaermen} hilfe={t.aufwaermenHilfe} fehler={fehler.aufwaermenText}>
+          <textarea
+            name="aufwaermenText"
+            rows={6}
+            defaultValue={w.aufwaermenText}
+            className={eingabe}
+          />
+        </Feld>
 
-      <Checkbox name="zusatzblock" label={t.zusatzblock} checked={w.zusatzblock} />
-      <p className="mb-4 text-sm text-ink-3">{t.zusatzblockHilfe}</p>
-
-      <Feld label={t.aufwaermen} hilfe={t.aufwaermenHilfe} fehler={fehler.aufwaermenText}>
-        <textarea
-          name="aufwaermenText"
-          rows={6}
-          defaultValue={w.aufwaermenText}
-          className={eingabe}
-        />
-      </Feld>
-
-      <button type="submit" disabled={pending} className={knopfPrimaer}>
-        {t.speichern}
-      </button>
+        <button type="submit" disabled={pending} className={`${knopfPrimaer} w-full`}>
+          {t.speichern}
+        </button>
+      </div>
     </form>
   );
 }

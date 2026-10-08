@@ -17,17 +17,12 @@ export function FilterLive({ formId, ziel }: { formId: string; ziel: string }) {
     const form = document.getElementById(formId);
     if (!(form instanceof HTMLFormElement)) return;
     for (const el of Array.from(form.elements)) {
-      if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement))
-        continue;
-      if (!el.name || el.type === "hidden" || el === document.activeElement)
-        continue;
+      if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) continue;
+      if (!el.name || el.type === "hidden" || el === document.activeElement) continue;
       const soll = suche.get(el.name) ?? "";
       if (el.value === soll) continue;
       // Unbekannte Werte (z. B. ?stufe=7) nicht setzen: sonst bliebe ein Auswahlfeld leer
-      if (
-        el instanceof HTMLSelectElement &&
-        !Array.from(el.options).some((o) => o.value === soll)
-      )
+      if (el instanceof HTMLSelectElement && !Array.from(el.options).some((o) => o.value === soll))
         el.value = "";
       else el.value = soll;
     }
@@ -43,15 +38,12 @@ export function FilterLive({ formId, ziel }: { formId: string; ziel: string }) {
         if (typeof wert === "string" && wert !== "") params.append(name, wert);
       });
       const query = params.toString();
-      startTransition(() =>
-        router.replace(query ? `${ziel}?${query}` : ziel, { scroll: false }),
-      );
+      startTransition(() => router.replace(query ? `${ziel}?${query}` : ziel, { scroll: false }));
     };
     const gehoertZumFormular = (
       el: EventTarget | null,
     ): el is HTMLInputElement | HTMLSelectElement =>
-      (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) &&
-      el.form === form;
+      (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) && el.form === form;
 
     const beiEingabe = (e: Event) => {
       if (!gehoertZumFormular(e.target)) return;
@@ -63,8 +55,7 @@ export function FilterLive({ formId, ziel }: { formId: string; ziel: string }) {
     };
     const beiAenderung = (e: Event) => {
       if (!gehoertZumFormular(e.target)) return;
-      if (e.target instanceof HTMLInputElement && e.target.type === "search")
-        return; // läuft über input
+      if (e.target instanceof HTMLInputElement && e.target.type === "search") return; // läuft über input
       window.clearTimeout(timer);
       senden();
     };

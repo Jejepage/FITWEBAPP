@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ExerciseForm } from "@/components/katalog/exercise-form";
+import { PageShell } from "@/components/page-shell";
 import { db } from "@/db/client";
 import { exerciseZuFormWerte } from "@/domain/exercise-form";
 import { de } from "@/i18n/de";
@@ -13,14 +14,13 @@ export default async function BearbeitenPage({ params }: { params: Promise<{ id:
   const e = getExercise(db, id);
   if (!e) notFound();
   return (
-    <>
-      <h1 className="mb-4 text-2xl font-bold">{de.katalog.bearbeitenTitel(e.name)}</h1>
+    <PageShell title={de.katalog.bearbeitenTitel(e.name)} breite="normal">
       <ExerciseForm
         aktion={speichereUebung.bind(null, id)}
         werte={exerciseZuFormWerte(e)}
         abbrechenHref={`/katalog/${id}`}
         kandidaten={leiterKandidaten(db, e)}
       />
-    </>
+    </PageShell>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IconMinus, IconPlus } from "@/components/icons";
 import { formatZahl } from "@/domain/satz-format";
 import { de } from "@/i18n/de";
 
@@ -15,7 +16,10 @@ function lies(text: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Zahleneingabe mit großen Plus/Minus-Knöpfen für das Handy. */
+const rundKnopf =
+  "press grid size-14 shrink-0 select-none place-items-center rounded-full text-ink hover:brightness-95";
+
+/** Zahleneingabe mit großen runden Plus/Minus-Knöpfen für das Handy. */
 export function Stepper({
   label,
   einheit,
@@ -53,50 +57,45 @@ export function Stepper({
     setze(neu);
   };
 
-  const knopf =
-    "flex size-12 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-2xl font-medium active:bg-fill-2";
-
   return (
-    <div className="mb-4">
-      <span className="mb-1 block text-sm font-medium">{label}</span>
-      <div className="flex items-center gap-2">
+    <div
+      className={`mb-3 rounded-card bg-surface p-4 shadow-card transition-shadow ${
+        fehler ? "ring-2 ring-bad" : ""
+      }`}
+    >
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <span className="text-sm font-medium text-ink-3">{label}</span>
+        {einheit && <span className="text-sm font-medium text-ink-3">{einheit}</span>}
+      </div>
+      <div className="flex items-center gap-3">
         <button
           type="button"
-          className={knopf}
+          className={`${rundKnopf} bg-fill-2`}
           onClick={() => aendere(-1)}
           aria-label={`${label}: ${t.verringern}`}
         >
-          −
+          <IconMinus className="size-7" />
         </button>
-        <div className="relative flex-1">
-          <input
-            type="text"
-            inputMode={dezimal ? "decimal" : "numeric"}
-            aria-label={label}
-            aria-invalid={fehler || undefined}
-            value={text}
-            placeholder={leer}
-            onChange={(e) => {
-              setText(e.target.value);
-              onChange(lies(e.target.value));
-            }}
-            className={`h-12 w-full rounded-lg border bg-surface px-3 text-center text-2xl font-semibold ${
-              fehler ? "border-bad" : "border-line"
-            }`}
-          />
-          {einheit && (
-            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-ink-3">
-              {einheit}
-            </span>
-          )}
-        </div>
+        <input
+          type="text"
+          inputMode={dezimal ? "decimal" : "numeric"}
+          aria-label={label}
+          aria-invalid={fehler || undefined}
+          value={text}
+          placeholder={leer}
+          onChange={(e) => {
+            setText(e.target.value);
+            onChange(lies(e.target.value));
+          }}
+          className="h-14 min-w-0 flex-1 rounded-xl bg-transparent text-center text-4xl font-bold tabular-nums tracking-tight text-ink placeholder:text-2xl placeholder:font-medium placeholder:text-ink-3 focus:bg-fill"
+        />
         <button
           type="button"
-          className={knopf}
+          className={`${rundKnopf} bg-accent-soft text-accent-ink`}
           onClick={() => aendere(1)}
           aria-label={`${label}: ${t.erhoehen}`}
         >
-          +
+          <IconPlus className="size-7" />
         </button>
       </div>
     </div>

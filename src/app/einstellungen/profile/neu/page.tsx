@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { ProfilForm } from "@/components/einstellungen/profil-form";
+import { IconPfeilLinks } from "@/components/icons";
+import { BREITE, PageShell } from "@/components/page-shell";
+import { knopfText } from "@/components/ui";
 import { leereProfilFormWerte } from "@/domain/profile-form";
 import { de } from "@/i18n/de";
 import { speichereNeuesProfil } from "../../actions";
@@ -7,15 +10,21 @@ import { speichereNeuesProfil } from "../../actions";
 export default function NeuesProfilPage() {
   return (
     <>
-      <Link href="/einstellungen" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
-        ← {de.profil.zurueck}
-      </Link>
-      <h1 className="mb-4 text-2xl font-bold">{de.profil.neuTitel}</h1>
-      <ProfilForm
-        aktion={speichereNeuesProfil}
-        werte={leereProfilFormWerte()}
-        istAktuellStandard={false}
-      />
+      <div className={`mx-auto w-full ${BREITE.schmal}`}>
+        <Link href="/einstellungen" className={`${knopfText} -ml-2 mb-1`}>
+          <IconPfeilLinks className="size-5" />
+          {de.profil.zurueck}
+        </Link>
+      </div>
+      <PageShell title={de.profil.neuTitel} breite="schmal">
+        <div className="fade-up">
+          <ProfilForm
+            aktion={speichereNeuesProfil}
+            werte={leereProfilFormWerte()}
+            istAktuellStandard={false}
+          />
+        </div>
+      </PageShell>
     </>
   );
 }

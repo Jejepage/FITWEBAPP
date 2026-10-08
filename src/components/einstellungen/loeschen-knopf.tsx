@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import type { LoeschState } from "@/app/einstellungen/form-state";
 import { FehlerBanner } from "@/components/form-felder";
-import { knopfSekundaer } from "@/components/ui";
+import { knopfGefahr } from "@/components/ui";
 import { de } from "@/i18n/de";
 
 export function LoeschenKnopf({ aktion }: { aktion: (prev: LoeschState) => Promise<LoeschState> }) {
@@ -16,7 +16,7 @@ export function LoeschenKnopf({ aktion }: { aktion: (prev: LoeschState) => Promi
       }}
     >
       {state.fehler && <FehlerBanner>{state.fehler}</FehlerBanner>}
-      <button type="submit" disabled={pending} className={`${knopfSekundaer} text-bad-ink`}>
+      <button type="submit" disabled={pending} className={`${knopfGefahr} w-full sm:w-auto`}>
         {de.profil.loeschen}
       </button>
     </form>

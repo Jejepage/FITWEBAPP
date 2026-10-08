@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { BackupFormulare } from "@/components/einstellungen/backup-formulare";
-import { karte } from "@/components/ui";
+import { IconKreisHaken, IconWarnung } from "@/components/einstellungen/icons-einstellungen";
+import { IconPfeilLinks } from "@/components/icons";
+import { BREITE, PageShell } from "@/components/page-shell";
+import { bannerFehler, bannerOk, knopfText } from "@/components/ui";
 import { de } from "@/i18n/de";
 import type { SearchParams } from "@/server/katalog-filter";
 
@@ -19,30 +22,55 @@ export default async function DatenPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <Link href="/einstellungen" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
-        ← {t.zurueck}
-      </Link>
-      <h1 className="mb-2 text-2xl font-bold">{t.titel}</h1>
-      <p className="mb-4 text-sm text-ink-2">{t.hilfe}</p>
+      <div className={`mx-auto w-full ${BREITE.normal}`}>
+        <Link href="/einstellungen" className={`${knopfText} -ml-2 mb-1`}>
+          <IconPfeilLinks className="size-5" />
+          {t.zurueck}
+        </Link>
+      </div>
+      <PageShell
+        title={t.titel}
+        untertitel={<span className="block max-w-2xl">{t.hilfe}</span>}
+        breite="normal"
+      >
+        {sp.ergebnis === "ok" && (
+          <section role="status" className={`${bannerOk} fade-up mb-8 flex items-start gap-3`}>
+            <IconKreisHaken className="mt-0.5 size-6 shrink-0 text-ok-ink" />
+            <div className="min-w-0">
+              <p className="text-lg font-semibold">{t.ergebnisOk}</p>
+              {bilanz.length > 0 && (
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {bilanz.map((b) => (
+                    <li
+                      key={b.k}
+                      className="rounded-full bg-surface px-3 py-1 text-sm font-medium text-ink"
+                    >
+                      {`${b.v} ${t.bilanz[b.k]}`}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        )}
+        {sp.ergebnis === "fehler" && (
+          <section role="alert" className={`${bannerFehler} fade-up mb-8 flex items-start gap-3`}>
+            <IconWarnung className="mt-0.5 size-6 shrink-0 text-bad-ink" />
+            <div className="min-w-0">
+              <p className="text-lg font-semibold text-bad-ink">{t.ergebnisFehler}</p>
+              {fehler.length > 0 && (
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px]">
+                  {fehler.map((f, i) => (
+                    <li key={i}>{f}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        )}
 
-      {sp.ergebnis === "ok" && (
-        <section role="status" className="mb-6 rounded-lg bg-ok-soft p-3 text-ok-ink">
-          <p className="font-medium">{t.ergebnisOk}</p>
-          <p className="text-sm">{bilanz.map((b) => `${b.v} ${t.bilanz[b.k]}`).join(" · ")}</p>
-        </section>
-      )}
-      {sp.ergebnis === "fehler" && (
-        <section role="alert" className={`${karte} mb-6 border-bad`}>
-          <p className="mb-2 font-medium text-bad-ink">{t.ergebnisFehler}</p>
-          <ul className="list-disc space-y-1 pl-5 text-sm">
-            {fehler.map((f, i) => (
-              <li key={i}>{f}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <BackupFormulare />
+        <BackupFormulare />
+      </PageShell>
     </>
   );
 }

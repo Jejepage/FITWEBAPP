@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { Badge } from "@/components/katalog/badge";
 import { SettingsForm } from "@/components/einstellungen/settings-form";
-import { karte, knopfPrimaer } from "@/components/ui";
+import {
+  IconDatenbank,
+  IconInfo,
+  SymbolKachel,
+} from "@/components/einstellungen/icons-einstellungen";
+import { IconHantel, IconPfeilRechts, IconPlus } from "@/components/icons";
+import { PageShell } from "@/components/page-shell";
+import { gruppe, hilfstext, karte, kopfzeileKlein } from "@/components/ui";
 import { db } from "@/db/client";
 import { zaehleMachbar } from "@/domain/equipment";
 import { formatGewichte } from "@/domain/gewichte";
@@ -22,102 +29,144 @@ export default function EinstellungenPage() {
   const s = getSettings(db);
   const profile = listProfiles(db);
   const uebungen = alleUebungen(db);
+  const aktive = uebungen.filter((u) => u.aktiv).length;
 
   return (
-    <>
-      <h1 className="mb-6 text-2xl font-bold">{t.titel}</h1>
-
-      <section className="mb-10" aria-labelledby="training">
-        <h2 id="training" className="mb-3 text-xl font-semibold">
-          {t.training}
-        </h2>
-        <SettingsForm
-          aktion={speichereEinstellungen}
-          werte={{
-            stufen: s.stufen,
-            einheitenProWoche: s.einheitenProWoche,
-            zusatzblock: s.zusatzblock,
-            aufwaermenText: s.aufwaermenText,
-          }}
-        />
-      </section>
-
-      <section className="mb-10" aria-labelledby="profile">
-        <div className="mb-1 flex items-center justify-between gap-3">
-          <h2 id="profile" className="text-xl font-semibold">
-            {t.profile}
-          </h2>
-          <Link href="/einstellungen/profile/neu" className={knopfPrimaer}>
-            {t.neuesProfil}
-          </Link>
+    <PageShell title={t.titel} breite="weit">
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-10">
+        <div className="space-y-8">
+          <section aria-labelledby="training" className="fade-up">
+            <h2 id="training" className={kopfzeileKlein}>
+              {t.training}
+            </h2>
+            <SettingsForm
+              aktion={speichereEinstellungen}
+              werte={{
+                stufen: s.stufen,
+                einheitenProWoche: s.einheitenProWoche,
+                zusatzblock: s.zusatzblock,
+                aufwaermenText: s.aufwaermenText,
+              }}
+            />
+          </section>
         </div>
-        <p className="mb-3 text-sm text-ink-3">{t.profileHilfe}</p>
-        <ul className="space-y-2">
-          {profile.map((p) => {
-            const anzahl = zaehleMachbar(uebungen, p.equipment);
-            const gesamt = MUSTER.reduce((summe, m) => summe + anzahl[m], 0);
-            const gewichte = (["kurzhanteln", "kettlebell"] as const)
-              .filter((art) => (p.gewichte[art]?.length ?? 0) > 0)
-              .map((art) => t.gewichteKurz(EQUIPMENT_NAMEN[art], formatGewichte(p.gewichte[art]!)));
-            return (
-              <li key={p.id}>
+
+        <div className="space-y-8">
+          <section aria-labelledby="profile" className="fade-up">
+            <h2 id="profile" className={kopfzeileKlein}>
+              {t.profile}
+            </h2>
+            <ul className={gruppe}>
+              {profile.map((p) => {
+                const anzahl = zaehleMachbar(uebungen, p.equipment);
+                const gesamt = MUSTER.reduce((summe, m) => summe + anzahl[m], 0);
+                const anteil = aktive > 0 ? Math.min(100, Math.round((gesamt / aktive) * 100)) : 0;
+                const gewichte = (["kurzhanteln", "kettlebell"] as const)
+                  .filter((art) => (p.gewichte[art]?.length ?? 0) > 0)
+                  .map((art) =>
+                    t.gewichteKurz(EQUIPMENT_NAMEN[art], formatGewichte(p.gewichte[art]!)),
+                  );
+                return (
+                  <li key={p.id}>
+                    <Link
+                      href={`/einstellungen/profile/${p.id}`}
+                      className="press flex min-h-16 items-center gap-3 px-4 py-3.5 hover:bg-fill"
+                    >
+                      <SymbolKachel>
+                        <IconHantel />
+                      </SymbolKachel>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="text-[17px] font-semibold text-ink">{p.name}</span>
+                          {p.istStandard && <Badge farbe="gut">{t.standard}</Badge>}
+                        </span>
+                        <span className="mt-0.5 block text-sm text-ink-2">
+                          {p.equipment.length > 0
+                            ? p.equipment.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
+                            : t.keinEquipment}
+                        </span>
+                        {gewichte.length > 0 && (
+                          <span className="block text-sm text-ink-2">{gewichte.join(" · ")}</span>
+                        )}
+                        <span className="mt-1.5 block text-sm text-ink-3">
+                          {t.machbarVonGesamt(gesamt, aktive)}
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-fill-2"
+                        >
+                          <span
+                            className="block h-full rounded-full bg-accent"
+                            style={{ width: `${anteil}%` }}
+                          />
+                        </span>
+                      </span>
+                      <IconPfeilRechts className="size-5 shrink-0 text-ink-3" />
+                    </Link>
+                  </li>
+                );
+              })}
+              <li>
                 <Link
-                  href={`/einstellungen/profile/${p.id}`}
-                  className={`${karte} block hover:border-accent`}
+                  href="/einstellungen/profile/neu"
+                  className="press flex min-h-14 items-center gap-3 px-4 py-3 font-semibold text-accent-ink hover:bg-fill"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold">{p.name}</span>
-                    {p.istStandard && <Badge farbe="gut">{t.standard}</Badge>}
-                  </div>
-                  <p className="mt-1 text-sm text-ink-2">
-                    {p.equipment.length > 0
-                      ? p.equipment.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
-                      : t.keinEquipment}
-                  </p>
-                  {gewichte.length > 0 && (
-                    <p className="text-sm text-ink-2">{gewichte.join(" · ")}</p>
-                  )}
-                  <p className="mt-1 text-sm text-ink-3">
-                    {t.machbarVonGesamt(gesamt, uebungen.filter((u) => u.aktiv).length)}
-                  </p>
+                  <IconPlus className="size-5" />
+                  {t.neuesProfil}
                 </Link>
               </li>
-            );
-          })}
-        </ul>
-      </section>
+            </ul>
+            <p className={`${hilfstext} px-1 pt-2`}>{t.profileHilfe}</p>
+          </section>
 
-      <InstallierenKarte passwortSchutz={passwortAusUmgebung() !== ""} />
+          <section className="fade-up">
+            <ul className={gruppe}>
+              <li>
+                <Link
+                  href="/einstellungen/daten"
+                  className="press flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-fill"
+                >
+                  <SymbolKachel ton="ok">
+                    <IconDatenbank />
+                  </SymbolKachel>
+                  <span className="min-w-0 flex-1 text-[17px] font-semibold text-ink">
+                    {de.daten.link}
+                  </span>
+                  <IconPfeilRechts className="size-5 shrink-0 text-ink-3" />
+                </Link>
+              </li>
+            </ul>
+          </section>
 
-      <section className="mb-10">
-        <Link
-          href="/einstellungen/daten"
-          className={`${karte} flex min-h-14 items-center justify-between gap-3 hover:border-accent`}
-        >
-          <span className="font-semibold">{de.daten.link}</span>
-          <span aria-hidden="true">→</span>
-        </Link>
-      </section>
+          <InstallierenKarte passwortSchutz={passwortAusUmgebung() !== ""} />
 
-      <section aria-labelledby="hinweis" className={karte}>
-        <h2 id="hinweis" className="mb-2 text-lg font-semibold">
-          {t.hinweisTitel}
-        </h2>
-        <p className="mb-2">{de.hinweis.text}</p>
-        <ul className="list-disc space-y-1 pl-5 text-sm">
-          {de.hinweis.zusatz.map((z) => (
-            <li key={z}>{z}</li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-ink-3">
-          {s.hinweisAkzeptiertAm &&
-            t.bestaetigtAm(
-              new Date(s.hinweisAkzeptiertAm).toLocaleDateString("de-DE", {
-                timeZone: "Europe/Berlin",
-              }),
+          <section aria-labelledby="hinweis" className={`${karte} fade-up`}>
+            <div className="mb-3 flex items-center gap-3">
+              <SymbolKachel ton="warn">
+                <IconInfo />
+              </SymbolKachel>
+              <h2 id="hinweis" className="text-lg font-semibold tracking-tight text-ink">
+                {t.hinweisTitel}
+              </h2>
+            </div>
+            <p className="mb-3 text-[15px] leading-snug text-ink">{de.hinweis.text}</p>
+            <ul className="list-disc space-y-1.5 pl-5 text-[15px] leading-snug text-ink-2">
+              {de.hinweis.zusatz.map((z) => (
+                <li key={z}>{z}</li>
+              ))}
+            </ul>
+            {s.hinweisAkzeptiertAm && (
+              <p className={`${hilfstext} mt-4`}>
+                {t.bestaetigtAm(
+                  new Date(s.hinweisAkzeptiertAm).toLocaleDateString("de-DE", {
+                    timeZone: "Europe/Berlin",
+                  }),
+                )}
+              </p>
             )}
-        </p>
-      </section>
-    </>
+          </section>
+        </div>
+      </div>
+    </PageShell>
   );
 }

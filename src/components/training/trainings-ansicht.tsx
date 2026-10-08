@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   beendeTrainingAktion,
   brecheTrainingAbAktion,
@@ -18,9 +18,25 @@ import { liesJson, loesche, schreibeJson } from "@/lib/speicher";
 import { aktualisiereSeitenCache } from "@/lib/sw";
 import { neueUuid } from "@/lib/uuid";
 import { FehlerBanner } from "@/components/form-felder";
+import { IconBlitz, IconHaken } from "@/components/icons";
 import { VideoKnopf } from "@/components/katalog/video-knopf";
-import { knopfPrimaer, knopfSekundaer } from "@/components/ui";
-import { useWakeLock } from "./hooks";
+import { bannerWarn, eingabe, gruppe, knopfNeutral } from "@/components/ui";
+import { MUSTER_FARBE } from "@/lib/muster-farbe";
+import { aktionsZeile, Aufklapp, Angeheftet, hauptKnopf, InfoKarte, MusterChip } from "./bausteine";
+import { FortschrittsRing } from "./fortschritt-ring";
+import { useGrosserBildschirm, useWakeLock } from "./hooks";
+import {
+  IconAbbrechen,
+  IconBlock,
+  IconBuch,
+  IconMehr,
+  IconPokal,
+  IconSonne,
+  IconTausch,
+  IconUhr,
+  IconZiel,
+  IconZurueck,
+} from "./icons-training";
 import { SatzFormular } from "./satz-formular";
 import type { GespeicherterSatzInfo, TrainingsDaten, UebungInfo } from "./typen";
 
@@ -65,16 +81,30 @@ function datumTagMonat(iso: string): string {
   });
 }
 
-function VorschlagHinweis({ info }: { info: UebungInfo }) {
-  const text = vorschlagGrundText(info.vorschlag.grund, info.schwererName);
-  if (!text) return null;
-  return <p className="mt-1 text-sm font-medium text-accent-ink">{text}</p>;
+/** Rahmen des Trainingsbildschirms: schmale Mitte; der Satzbildschirm ab 1024 px mit Seitenfeld. */
+function Rahmen({
+  satz = false,
+  breit = false,
+  children,
+}: {
+  satz?: boolean;
+  breit?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={`mx-auto w-full max-w-xl ${satz ? "lg:max-w-[60rem]" : ""} ${breit ? "lg:max-w-4xl" : ""}`}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   const router = useRouter();
   const { schritte } = daten;
   const { verfuegbar: wakeLockVerfuegbar } = useWakeLock(true);
+  const grossBildschirm = useGrosserBildschirm();
 
   const [gespeichert, setGespeichert] = useState<Record<string, Gespeichert>>(() =>
     Object.fromEntries(daten.gespeichert.map((g) => [g.key, { ...g, status: "ok" as const }])),
@@ -318,49 +348,44 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   };
 
   // --- Darstellung ------------------------------------------------------------------------
-  const kopf = (
-    <header className="mb-4">
-      <p className="text-sm font-medium text-ink-3">
-        {t.kopf(daten.einheit, daten.woche)}
-        {daten.adHoc && (
-          <span className="ml-2 rounded-full bg-warn-soft px-2.5 py-0.5 text-xs text-warn-ink">
-            {de.adhoc.kopfBadge(daten.profilName)}
-          </span>
-        )}
-      </p>
-      <div
-        className="mt-2 h-2 overflow-hidden rounded-full bg-fill-2"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={schritte.length}
-        aria-valuenow={erledigteKeys.size}
-        aria-label={t.fortschritt(erledigteKeys.size, schritte.length)}
-      >
-        <div
-          className="h-full bg-accent transition-all"
-          style={{
-            width: `${(erledigteKeys.size / Math.max(schritte.length, 1)) * 100}%`,
-          }}
-        />
+  const kopf = (strichKlasse?: string) => (
+    <header className="mb-5 flex items-center justify-between gap-4">
+      <div className="min-w-0">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-semibold">
+          {t.kopf(daten.einheit, daten.woche)}
+          {daten.adHoc && (
+            <span className="rounded-full bg-warn-soft px-2.5 py-0.5 text-xs font-semibold text-warn-ink">
+              {de.adhoc.kopfBadge(daten.profilName)}
+            </span>
+          )}
+        </p>
+        <p className="mt-0.5 text-sm text-ink-3">
+          {t.fortschritt(erledigteKeys.size, schritte.length)}
+        </p>
       </div>
-      <p className="mt-1 text-xs text-ink-3">
-        {t.fortschritt(erledigteKeys.size, schritte.length)}
-      </p>
+      <FortschrittsRing
+        erledigt={erledigteKeys.size}
+        gesamt={schritte.length}
+        beschriftung={t.fortschritt(erledigteKeys.size, schritte.length)}
+        strichKlasse={strichKlasse}
+      />
     </header>
   );
 
   const hinweise = (
     <>
       {!wakeLockVerfuegbar && (
-        <p className="mb-3 rounded-lg bg-fill p-3 text-sm text-ink-2">{t.bildschirm.kannNicht}</p>
+        <p className="mb-3 rounded-2xl bg-fill-2 p-4 text-sm text-ink-2">
+          {t.bildschirm.kannNicht}
+        </p>
       )}
       {wartendAnzahl > 0 && (
-        <p role="status" className="mb-3 rounded-lg bg-warn-soft p-3 text-sm text-warn-ink">
+        <p role="status" className={`${bannerWarn} mb-3 text-sm`}>
           {t.speichern.wartet(wartendAnzahl)}{" "}
           <button
             type="button"
             onClick={verwirfWartende}
-            className="min-h-11 font-medium underline"
+            className="min-h-11 font-semibold text-warn-ink underline"
           >
             {t.speichern.verwerfen}
           </button>
@@ -371,26 +396,26 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   );
 
   const mehr = (
-    <details className="mt-8 rounded-xl border border-line">
-      <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
-        {t.mehr.titel}
-      </summary>
-      <div className="flex flex-col gap-2 border-t border-line p-4">
+    <Aufklapp titel={t.mehr.titel} symbol={<IconMehr className="size-6" />} klasse="mt-6">
+      <div className="divide-y divide-line">
         {erledigteKeys.size > 0 && effektivePhase.art !== "fertig" && (
-          <button type="button" onClick={vorigenAendern} className={knopfSekundaer}>
+          <button type="button" onClick={vorigenAendern} className={`${aktionsZeile} text-ink`}>
+            <IconZurueck className="size-5 text-ink-3" />
             {t.mehr.vorigenAendern}
           </button>
         )}
         {effektivePhase.art !== "fertig" && erledigteKeys.size > 0 && (
-          <button type="button" onClick={vorzeitig} className={knopfSekundaer}>
+          <button type="button" onClick={vorzeitig} className={`${aktionsZeile} text-ink`}>
+            <IconHaken className="size-5 text-ink-3" />
             {t.mehr.vorzeitigAbschliessen}
           </button>
         )}
-        <button type="button" onClick={abbrechen} className={`${knopfSekundaer} text-bad-ink`}>
+        <button type="button" onClick={abbrechen} className={`${aktionsZeile} text-bad-ink`}>
+          <IconAbbrechen className="size-5" />
           {t.mehr.abbrechen}
         </button>
       </div>
-    </details>
+    </Aufklapp>
   );
 
   if (beendet) return <p role="status">…</p>;
@@ -398,30 +423,34 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   // Aufwärmen
   if (effektivePhase.art === "aufwaermen") {
     return (
-      <>
-        {kopf}
+      <Rahmen>
+        {kopf()}
         {hinweise}
         <section
           aria-labelledby="aufwaermen-titel"
-          className="rounded-xl border border-line bg-surface p-4"
+          className="rounded-[1.75rem] bg-surface p-6 shadow-card sm:p-8"
         >
-          <h1 id="aufwaermen-titel" className="mb-2 text-2xl font-bold">
-            {t.aufwaermenTitel}
-          </h1>
-          <p className="whitespace-pre-line">{daten.aufwaermenText}</p>
-          <p className="mt-3 text-sm text-ink-3">{t.aufwaermenHilfe}</p>
+          <div className="mb-5 flex items-center gap-4">
+            <span
+              aria-hidden="true"
+              className="grid size-14 shrink-0 place-items-center rounded-2xl bg-warn-soft text-warn-ink"
+            >
+              <IconSonne className="size-8" />
+            </span>
+            <h1 id="aufwaermen-titel" className="text-4xl font-bold tracking-tight">
+              {t.aufwaermenTitel}
+            </h1>
+          </div>
+          <p className="whitespace-pre-line text-lg leading-relaxed">{daten.aufwaermenText}</p>
+          <p className="mt-5 text-sm text-ink-3">{t.aufwaermenHilfe}</p>
         </section>
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={() => setPhase({ art: "satz" })}
-            className={`${knopfPrimaer} min-h-16 w-full text-xl`}
-          >
+        <Angeheftet>
+          <button type="button" onClick={() => setPhase({ art: "satz" })} className={hauptKnopf}>
             {t.aufwaermenErledigt}
           </button>
-        </div>
+        </Angeheftet>
         {mehr}
-      </>
+      </Rahmen>
     );
   }
 
@@ -430,33 +459,50 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     const imBlock = schritte.filter((s) => s.block === effektivePhase.naechster && s.runde === 1);
     const fertigerBlock = offenerIndex > 0 ? schritte[offenerIndex - 1]?.block : undefined;
     return (
-      <>
-        {kopf}
+      <Rahmen>
+        {kopf()}
         {hinweise}
-        <section className="rounded-xl border border-line bg-surface p-4">
-          <h1 className="mb-1 text-2xl font-bold">
-            {t.block.geschafft(BLOCK_NAME[fertigerBlock ?? "1"])}
-          </h1>
-          <p className="mb-3 text-sm text-ink-3">
-            {t.block.naechster}: {BLOCK_NAME[effektivePhase.naechster]}
-          </p>
-          <ol className="list-decimal space-y-1 pl-5">
-            {imBlock.map((s) => (
-              <li key={s.key}>{uebungen[wirksameId(s)]?.name ?? wirksameId(s)}</li>
-            ))}
+        <section>
+          <div className="mb-6 text-center">
+            <span
+              aria-hidden="true"
+              className="mx-auto mb-4 grid size-20 place-items-center rounded-full bg-ok-soft text-ok-ink"
+            >
+              <IconBlock className="size-10" />
+            </span>
+            <h1 className="text-4xl font-bold tracking-tight">
+              {t.block.geschafft(BLOCK_NAME[fertigerBlock ?? "1"])}
+            </h1>
+            <p className="mt-2 text-lg text-ink-3">
+              {t.block.naechster}: {BLOCK_NAME[effektivePhase.naechster]}
+            </p>
+          </div>
+          <ol className={gruppe}>
+            {imBlock.map((s, i) => {
+              const f = MUSTER_FARBE[s.muster];
+              return (
+                <li key={s.key} className="flex min-h-16 items-center gap-4 px-4 py-3">
+                  <span
+                    aria-hidden="true"
+                    className={`grid size-9 shrink-0 place-items-center rounded-full ${f.soft} text-base font-bold ${f.ink}`}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="min-w-0 flex-1 text-lg font-semibold leading-snug">
+                    {uebungen[wirksameId(s)]?.name ?? wirksameId(s)}
+                  </span>
+                </li>
+              );
+            })}
           </ol>
         </section>
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={() => setPhase({ art: "satz" })}
-            className={`${knopfPrimaer} min-h-16 w-full text-xl`}
-          >
+        <Angeheftet>
+          <button type="button" onClick={() => setPhase({ art: "satz" })} className={hauptKnopf}>
             {t.block.weiter}
           </button>
-        </div>
+        </Angeheftet>
         {mehr}
-      </>
+      </Rahmen>
     );
   }
 
@@ -468,57 +514,94 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
       if (g) nachUebung.set(g.exerciseId, [...(nachUebung.get(g.exerciseId) ?? []), g]);
     }
     return (
-      <>
-        {kopf}
+      <Rahmen breit>
+        {kopf()}
         {hinweise}
-        <h1 className="mb-1 text-2xl font-bold">{t.fertig.titel}</h1>
-        <p className="mb-4 text-sm text-ink-3">{t.fertig.hilfe}</p>
-        {nachUebung.size === 0 ? (
-          <FehlerBanner>{t.fertig.keineSaetze}</FehlerBanner>
-        ) : (
-          <ul className="mb-4 space-y-3">
-            {[...nachUebung.entries()].map(([id, saetze]) => (
-              <li key={id} className="rounded-xl border border-line bg-surface p-3">
-                <p className="font-semibold">{uebungen[id]?.name ?? id}</p>
-                <ol className="mt-1 list-decimal pl-5 text-sm text-ink-2">
-                  {saetze.map((g) => (
-                    <li key={g.id}>{formatSatz(g.werte)}</li>
-                  ))}
-                </ol>
-              </li>
-            ))}
-          </ul>
-        )}
-        <label className="mb-4 block">
-          <span className="mb-1 block text-sm font-medium">{t.fertig.notiz}</span>
-          <textarea
-            value={notiz}
-            onChange={(e) => setNotiz(e.target.value)}
-            rows={3}
-            maxLength={2000}
-            placeholder={t.fertig.notizPlatzhalter}
-            className="block w-full rounded-lg border border-line bg-surface px-3 py-2 text-base"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={abschliessen}
-          disabled={wartendAnzahl > 0 || nachUebung.size === 0}
-          className={`${knopfPrimaer} min-h-16 w-full text-xl disabled:opacity-50`}
-        >
-          {wartendAnzahl > 0 ? t.fertig.warteSpeichern : t.fertig.abschliessen}
-        </button>
-        {offenerIndex >= 0 && (
-          <button
-            type="button"
-            onClick={() => setPhase({ art: "satz" })}
-            className={`${knopfSekundaer} mt-3 w-full`}
-          >
-            {t.fertig.zurueck}
-          </button>
-        )}
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8">
+          <div>
+            <div className="mb-6 flex items-center gap-4">
+              <span
+                aria-hidden="true"
+                className="grid size-16 shrink-0 place-items-center rounded-full bg-gradient-to-br from-hero-from to-hero-to text-on-accent shadow-lg"
+              >
+                <IconPokal className="size-8" />
+              </span>
+              <div className="min-w-0">
+                <h1 className="text-4xl font-bold tracking-tight">{t.fertig.titel}</h1>
+                <p className="mt-1 text-base text-ink-3">{t.fertig.hilfe}</p>
+              </div>
+            </div>
+            {nachUebung.size === 0 ? (
+              <FehlerBanner>{t.fertig.keineSaetze}</FehlerBanner>
+            ) : (
+              <ul className={`${gruppe} mb-6 lg:mb-0`}>
+                {[...nachUebung.entries()].map(([id, saetze]) => {
+                  const u = uebungen[id];
+                  return (
+                    <li key={id} className="px-4 py-3.5">
+                      <p className="flex items-center gap-2.5 text-lg font-semibold leading-snug">
+                        {u && (
+                          <span
+                            aria-hidden="true"
+                            className={`size-2.5 shrink-0 rounded-full ${MUSTER_FARBE[u.muster].fl}`}
+                          />
+                        )}
+                        {u?.name ?? id}
+                      </p>
+                      <ol className="mt-2 space-y-1.5">
+                        {saetze.map((g, i) => (
+                          <li key={g.id} className="flex items-center gap-3 text-[15px] text-ink-2">
+                            <span
+                              aria-hidden="true"
+                              className="grid size-6 shrink-0 place-items-center rounded-full bg-fill-2 text-xs font-semibold text-ink"
+                            >
+                              {i + 1}
+                            </span>
+                            {formatSatz(g.werte)}
+                          </li>
+                        ))}
+                      </ol>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+          <div className="lg:sticky lg:top-6">
+            <label className="mb-1 block rounded-card bg-surface p-4 shadow-card">
+              <span className="mb-2 block text-sm font-medium text-ink-3">{t.fertig.notiz}</span>
+              <textarea
+                value={notiz}
+                onChange={(e) => setNotiz(e.target.value)}
+                rows={3}
+                maxLength={2000}
+                placeholder={t.fertig.notizPlatzhalter}
+                className={eingabe}
+              />
+            </label>
+            <Angeheftet>
+              <button
+                type="button"
+                onClick={abschliessen}
+                disabled={wartendAnzahl > 0 || nachUebung.size === 0}
+                className={hauptKnopf}
+              >
+                {wartendAnzahl > 0 ? t.fertig.warteSpeichern : t.fertig.abschliessen}
+              </button>
+              {offenerIndex >= 0 && (
+                <button
+                  type="button"
+                  onClick={() => setPhase({ art: "satz" })}
+                  className={`${knopfNeutral} mt-3 w-full`}
+                >
+                  {t.fertig.zurueck}
+                </button>
+              )}
+            </Angeheftet>
+          </div>
+        </div>
         {mehr}
-      </>
+      </Rahmen>
     );
   }
 
@@ -528,6 +611,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   const info = uebungen[exerciseId];
   if (!info) return <FehlerBanner>{t.ersetzenFehler}</FehlerBanner>;
   const ersetzt = exerciseId !== schritt.geplanteUebungId;
+  const farbe = MUSTER_FARBE[info.muster];
 
   // Satz
   const vorige = gespeichert[schrittKey(schritt.slotId, schritt.runde - 1)];
@@ -540,118 +624,160 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   const kandidaten = (daten.ersatzKandidaten[schritt.slotId] ?? []).filter(
     (k) => k.id !== exerciseId,
   );
+  const vorschlagText = vorschlagGrundText(info.vorschlag.grund, info.schwererName);
 
   return (
-    <>
-      {kopf}
-      {hinweise}
-      <section aria-labelledby="uebung-name" className="mb-4">
-        <p className="text-sm text-ink-3">
-          {t.position(
-            BLOCK_NAME[schritt.block],
-            schritt.runde,
-            schritt.runden,
-            schritt.position,
-            schritt.anzahlImBlock,
-          )}
-        </p>
-        <h1 id="uebung-name" className="text-3xl font-bold leading-tight">
-          {info.name}
-          {ersetzt && (
-            <span className="ml-2 align-middle text-sm font-medium text-warn-ink">
-              {t.ersetztBadge}
-            </span>
-          )}
-        </h1>
-        <p className="mt-2 text-base">
-          <span className="text-ink-3">{t.ziel}:</span> {info.zielText} · RPE{" "}
-          {daten.rpeMin === daten.rpeMax ? daten.rpeMin : `${daten.rpeMin}–${daten.rpeMax}`}
-        </p>
-        <VorschlagHinweis info={info} />
-        <p className="mt-1 text-sm text-ink-2">
-          <span className="font-medium">{t.letztesMal}:</span>{" "}
-          {info.letzte
-            ? `${datumTagMonat(info.letzte.datum)} · ${info.letzte.saetze.map(formatSatz).join(" | ")}`
-            : t.keinLetztesMal}
-        </p>
-      </section>
-
-      <SatzFormular
-        key={`${schritt.key}:${exerciseId}:${korrektur ? "k" : "n"}`}
-        info={info}
-        startWerte={startWerte}
-        korrektur={korrektur}
-        onErledigt={onErledigt}
-        onKorrekturVerwerfen={() => {
-          setBearbeiteKey(null);
-          setPhase(phaseVorKorrektur.current ?? { art: "satz" });
-          phaseVorKorrektur.current = null;
-        }}
-      />
-
-      {info.videoUrl && <VideoKnopf url={info.videoUrl} className="mt-4 w-full" />}
-
-      <details className="mt-4 rounded-xl border border-line">
-        <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
-          {t.ausfuehrung}
-        </summary>
-        <div className="space-y-3 border-t border-line p-4 text-sm">
-          <ol className="list-decimal space-y-1 pl-5">
-            {info.ausfuehrung.map((a, i) => (
-              <li key={i}>{a}</li>
-            ))}
-          </ol>
-          <div>
-            <p className="font-medium">{t.fehlerTitel}</p>
-            <ul className="list-disc space-y-1 pl-5">
-              {info.fehler.map((f, i) => (
-                <li key={i}>{f}</li>
-              ))}
-            </ul>
-          </div>
-          <p className="text-ink-2">{info.hinweise}</p>
+    <Rahmen satz>
+      <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,36rem)_minmax(0,22rem)] lg:justify-center lg:gap-x-8">
+        {/* Kopf, Übung und Ziel */}
+        <div className="order-1 lg:col-start-1 lg:row-start-1">
+          {kopf(farbe.stroke)}
+          {hinweise}
+          <section aria-labelledby="uebung-name" className="mb-5">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <MusterChip muster={info.muster} />
+              {ersetzt && (
+                <span className="rounded-full bg-warn-soft px-3 py-1 text-sm font-semibold text-warn-ink">
+                  {t.ersetztBadge}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-ink-3">
+              {t.position(
+                BLOCK_NAME[schritt.block],
+                schritt.runde,
+                schritt.runden,
+                schritt.position,
+                schritt.anzahlImBlock,
+              )}
+            </p>
+            <h1
+              id="uebung-name"
+              className="mt-1 text-balance text-4xl font-bold leading-tight tracking-tight lg:text-[2.75rem]"
+            >
+              {info.name}
+            </h1>
+          </section>
         </div>
-      </details>
 
-      {!korrektur && (
-        <details className="mt-3 rounded-xl border border-line">
-          <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
-            {t.ersetzen}
-          </summary>
-          <div className="space-y-2 border-t border-line p-4">
-            <p className="text-sm text-ink-3">{t.ersetzenHilfe}</p>
-            {ersetzt && (
-              <button
-                type="button"
-                onClick={() => ersetze(schritt.geplanteUebungId)}
-                className={`${knopfSekundaer} w-full`}
+        {/* Seitenfeld ab 1024 px: Vorschlag, Letztes Mal, Video, Ausführung, Ersetzen */}
+        <div className="contents lg:sticky lg:top-6 lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:block lg:self-start">
+          <div className="order-2 mb-5 space-y-3 lg:mb-3">
+            <InfoKarte symbol={<IconZiel className="size-5" />} klasse={farbe.soft}>
+              <p className="text-base">
+                <span className="font-semibold">{t.ziel}:</span> {info.zielText} · RPE{" "}
+                {daten.rpeMin === daten.rpeMax ? daten.rpeMin : `${daten.rpeMin}–${daten.rpeMax}`}
+              </p>
+            </InfoKarte>
+            {vorschlagText && (
+              <InfoKarte
+                symbol={<IconBlitz className="size-5 text-accent-ink" />}
+                klasse="bg-accent-soft"
               >
-                {t.zurueckZurGeplanten(
-                  uebungen[schritt.geplanteUebungId]?.name ?? schritt.geplanteUebungId,
-                )}
-              </button>
+                <p className="font-medium">{vorschlagText}</p>
+              </InfoKarte>
             )}
-            {kandidaten.length === 0 && !ersetzt && <p className="text-sm">{t.ersetzenKeine}</p>}
-            {kandidaten
-              .filter((k) => k.id !== schritt.geplanteUebungId || !ersetzt)
-              .map((k) => (
-                <button
-                  key={k.id}
-                  type="button"
-                  onClick={() => ersetze(k.id)}
-                  className={`${knopfSekundaer} w-full justify-between text-left`}
-                >
-                  <span>{k.name}</span>
-                  <span className="text-sm text-ink-3">
-                    Stufe {k.stufe}
-                    {k.einseitig ? " · einseitig" : ""}
-                  </span>
-                </button>
-              ))}
+            <InfoKarte
+              symbol={<IconUhr className="size-5 text-ink-3" />}
+              klasse="bg-surface shadow-card"
+            >
+              <p>
+                <span className="font-semibold">{t.letztesMal}:</span>{" "}
+                {info.letzte
+                  ? `${datumTagMonat(info.letzte.datum)} · ${info.letzte.saetze.map(formatSatz).join(" | ")}`
+                  : t.keinLetztesMal}
+              </p>
+            </InfoKarte>
           </div>
-        </details>
-      )}
-      {mehr}
-    </>
+
+          <div className="order-4 mt-2 space-y-3 lg:mt-0">
+            {info.videoUrl && <VideoKnopf url={info.videoUrl} className="w-full" />}
+
+            <Aufklapp
+              titel={t.ausfuehrung}
+              symbol={<IconBuch className="size-6" />}
+              offen={grossBildschirm}
+            >
+              <div className="space-y-4 p-4 text-[15px] leading-relaxed">
+                <ol className="list-decimal space-y-1.5 pl-5 marker:font-semibold marker:text-ink-3">
+                  {info.ausfuehrung.map((a, i) => (
+                    <li key={i}>{a}</li>
+                  ))}
+                </ol>
+                <div>
+                  <p className="mb-1.5 font-semibold">{t.fehlerTitel}</p>
+                  <ul className="list-disc space-y-1.5 pl-5 marker:text-bad">
+                    {info.fehler.map((f, i) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="text-ink-2">{info.hinweise}</p>
+              </div>
+            </Aufklapp>
+
+            {!korrektur && (
+              <Aufklapp titel={t.ersetzen} symbol={<IconTausch className="size-6" />}>
+                <p className="px-4 py-3 text-sm text-ink-3">{t.ersetzenHilfe}</p>
+                <div className="divide-y divide-line border-t border-line">
+                  {ersetzt && (
+                    <button
+                      type="button"
+                      onClick={() => ersetze(schritt.geplanteUebungId)}
+                      className={`${aktionsZeile} text-accent-ink`}
+                    >
+                      <IconZurueck className="size-5" />
+                      {t.zurueckZurGeplanten(
+                        uebungen[schritt.geplanteUebungId]?.name ?? schritt.geplanteUebungId,
+                      )}
+                    </button>
+                  )}
+                  {kandidaten.length === 0 && !ersetzt && (
+                    <p className="px-4 py-3 text-sm">{t.ersetzenKeine}</p>
+                  )}
+                  {kandidaten
+                    .filter((k) => k.id !== schritt.geplanteUebungId || !ersetzt)
+                    .map((k) => (
+                      <button
+                        key={k.id}
+                        type="button"
+                        onClick={() => ersetze(k.id)}
+                        className={`${aktionsZeile} text-ink`}
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block">{k.name}</span>
+                          <span className="block text-sm font-normal text-ink-3">
+                            Stufe {k.stufe}
+                            {k.einseitig ? " · einseitig" : ""}
+                          </span>
+                        </span>
+                        <IconTausch className="size-5 shrink-0 text-ink-3" />
+                      </button>
+                    ))}
+                </div>
+              </Aufklapp>
+            )}
+          </div>
+        </div>
+
+        {/* Eingabe */}
+        <div className="order-3 lg:col-start-1 lg:row-start-2">
+          <SatzFormular
+            key={`${schritt.key}:${exerciseId}:${korrektur ? "k" : "n"}`}
+            info={info}
+            startWerte={startWerte}
+            korrektur={korrektur}
+            onErledigt={onErledigt}
+            onKorrekturVerwerfen={() => {
+              setBearbeiteKey(null);
+              setPhase(phaseVorKorrektur.current ?? { art: "satz" });
+              phaseVorKorrektur.current = null;
+            }}
+          />
+        </div>
+
+        <div className="order-5 lg:col-start-1 lg:row-start-3">{mehr}</div>
+      </div>
+    </Rahmen>
   );
 }

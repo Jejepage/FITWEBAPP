@@ -1,4 +1,4 @@
-import { knopfSekundaer } from "@/components/ui";
+import { IconPlay } from "@/components/icons";
 import { videoLink } from "@/domain/youtube";
 import { de } from "@/i18n/de";
 
@@ -21,15 +21,14 @@ export function VideoKnopf({
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${knopfSekundaer} gap-2 ${className}`}
+      className={`press inline-flex min-h-12 select-none items-center justify-center gap-2.5 rounded-xl bg-gradient-to-br from-hero-from to-hero-to px-5 py-2.5 text-[17px] font-semibold leading-tight text-on-accent shadow-card hover:brightness-110 ${className}`}
     >
-      <svg
-        viewBox="0 0 24 24"
+      <span
         aria-hidden="true"
-        className="size-5 fill-current"
+        className="grid size-7 place-items-center rounded-full bg-on-accent/20"
       >
-        <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" />
-      </svg>
+        <IconPlay className="ml-0.5 size-4" />
+      </span>
       {de.katalog.videoAnsehen}
       <span className="sr-only"> ({de.katalog.videoHinweis})</span>
     </a>

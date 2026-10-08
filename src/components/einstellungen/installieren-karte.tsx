@@ -1,4 +1,9 @@
-import { karte } from "@/components/ui";
+import {
+  IconInstallieren,
+  IconSchloss,
+  SymbolKachel,
+} from "@/components/einstellungen/icons-einstellungen";
+import { hilfstext, karte } from "@/components/ui";
 import { de } from "@/i18n/de";
 import { AbmeldenKnopf } from "./abmelden-knopf";
 
@@ -8,22 +13,38 @@ const t = de.installieren;
 export function InstallierenKarte({ passwortSchutz }: { passwortSchutz: boolean }) {
   return (
     <>
-      <section className={`${karte} mb-10`} aria-labelledby="installieren-titel">
-        <h2 id="installieren-titel" className="mb-2 text-lg font-semibold">
-          {t.titel}
-        </h2>
-        <ul className="mb-3 list-disc space-y-1 pl-5 text-sm">
-          <li>{t.iphone}</li>
-          <li>{t.android}</li>
+      <section className={karte} aria-labelledby="installieren-titel">
+        <div className="mb-4 flex items-center gap-3">
+          <SymbolKachel ton="verlauf">
+            <IconInstallieren />
+          </SymbolKachel>
+          <h2 id="installieren-titel" className="text-lg font-semibold tracking-tight text-ink">
+            {t.titel}
+          </h2>
+        </div>
+        <ul className="mb-4 space-y-2">
+          <li className="rounded-xl bg-fill px-4 py-3 text-[15px] leading-snug text-ink">
+            {t.iphone}
+          </li>
+          <li className="rounded-xl bg-fill px-4 py-3 text-[15px] leading-snug text-ink">
+            {t.android}
+          </li>
         </ul>
-        <p className="text-sm text-ink-2">{t.hinweisHttp}</p>
+        <p className={`${hilfstext} px-1`}>{t.hinweisHttp}</p>
       </section>
       {passwortSchutz && (
-        <section className={`${karte} mb-10`} aria-labelledby="abmelden-titel">
-          <h2 id="abmelden-titel" className="mb-1 text-lg font-semibold">
-            {de.login.abmelden}
-          </h2>
-          <p className="mb-3 text-sm text-ink-2">{de.login.abmeldenHilfe}</p>
+        <section className={karte} aria-labelledby="abmelden-titel">
+          <div className="mb-4 flex items-center gap-3">
+            <SymbolKachel ton="grau">
+              <IconSchloss />
+            </SymbolKachel>
+            <div className="min-w-0">
+              <h2 id="abmelden-titel" className="text-lg font-semibold tracking-tight text-ink">
+                {de.login.abmelden}
+              </h2>
+              <p className={hilfstext}>{de.login.abmeldenHilfe}</p>
+            </div>
+          </div>
           <AbmeldenKnopf />
         </section>
       )}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconPlay } from "@/components/icons";
 import { beschreibeBedingung } from "@/domain/equipment";
 import type { Richtung, Spalte } from "@/domain/katalog-spalten";
 import {
@@ -12,16 +13,19 @@ import {
 } from "@/domain/types";
 import { videoLink } from "@/domain/youtube";
 import { de } from "@/i18n/de";
+import { MUSTER_FARBE } from "@/lib/muster-farbe";
 import type { FilterAuswahl } from "@/server/katalog-filter";
 import type { Profil } from "@/server/profiles";
 import { Badge } from "./badge";
+import { MusterPunkt, StufenPunkte } from "./muster-ui";
 
 const t = de.katalog;
 const tt = t.tabelle;
 export const FILTER_FORM_ID = "katalog-filter";
 
+// Filterfelder in der Kopfzeile im Pillen-Stil; 16 px Schrift, damit das iPad nicht zoomt
 const feld =
-  "block w-full min-h-10 rounded-lg border border-line bg-surface px-2 py-1 text-sm font-normal text-ink focus:border-brand focus:outline-2 focus:outline-brand";
+  "block w-full min-h-11 rounded-full border border-transparent bg-fill px-3.5 py-1.5 text-base font-normal text-ink placeholder:text-ink-3 transition-colors focus:border-accent focus:bg-surface focus:outline-2 focus:outline-offset-0 focus:outline-accent/40";
 
 function Auswahl({
   name,
@@ -212,16 +216,44 @@ function Zelle({
   switch (spalte) {
     case "name":
       return (
-        <Link href={`/katalog/${e.id}`} className="font-medium text-accent-ink hover:underline">
-          {e.name}
-        </Link>
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <MusterPunkt muster={e.muster} />
+          <Link
+            href={`/katalog/${e.id}`}
+            className={`text-[15px] font-semibold hover:underline ${e.aktiv ? "text-accent-ink" : "text-ink-2"}`}
+          >
+            {e.name}
+          </Link>
+          {!e.aktiv && <Badge farbe="grau">{t.inaktiv}</Badge>}
+        </span>
       );
     case "stufe":
-      return <Badge>{t.stufeBadge(e.stufe)}</Badge>;
+      return (
+        <span className="inline-flex items-center gap-2 whitespace-nowrap">
+          <StufenPunkte stufe={e.stufe} muster={e.muster} />
+          <span className="sr-only">{t.stufeBadge(e.stufe)}</span>
+          <span aria-hidden="true" className="text-sm font-semibold tabular-nums text-ink-2">
+            {e.stufe}
+          </span>
+        </span>
+      );
     case "equipment":
-      return <span>{beschreibeBedingung(e.equipment)}</span>;
+      return (
+        <span className="flex flex-wrap gap-1.5">
+          {beschreibeBedingung(e.equipment)
+            .split(" + ")
+            .map((teil) => (
+              <span
+                key={teil}
+                className="rounded-full bg-fill-2 px-2.5 py-0.5 text-[13px] font-medium text-ink-2"
+              >
+                {teil}
+              </span>
+            ))}
+        </span>
+      );
     case "einseitig":
-      return <span>{e.einseitig ? tt.ja : tt.nein}</span>;
+      return e.einseitig ? <Badge farbe="akzent">{tt.ja}</Badge> : <span>{tt.nein}</span>;
     case "belastung":
       return <span>{t.belastungsarten[e.belastungsart]}</span>;
     case "bereich":
@@ -239,7 +271,7 @@ function Zelle({
             key={richtung}
             href={`/katalog/${id}`}
             title={`${richtung}: ${ziel.name}`}
-            className="mr-2 whitespace-nowrap text-accent-ink hover:underline"
+            className={`mr-1.5 inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-[13px] font-semibold hover:brightness-95 ${MUSTER_FARBE[e.muster].soft} ${MUSTER_FARBE[e.muster].ink}`}
           >
             {richtung === tt.leiterLeichter ? "↓" : "↑"} {id}
           </Link>
@@ -269,7 +301,7 @@ function Zelle({
         <Badge farbe="gut">{t.geprueft}</Badge>
       );
     case "aktiv":
-      return <span>{e.aktiv ? tt.ja : t.inaktiv}</span>;
+      return e.aktiv ? <span>{tt.ja}</span> : <Badge farbe="grau">{t.inaktiv}</Badge>;
     case "video": {
       const v = videoLink(e.videoUrl);
       return v ? (
@@ -277,11 +309,9 @@ function Zelle({
           href={v.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-accent-ink hover:underline"
+          className="press inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-accent-soft px-3 py-1 text-sm font-semibold text-accent-ink hover:brightness-95"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current">
-            <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" />
-          </svg>
+          <IconPlay className="size-3.5" />
           {t.videoAnsehen}
           <span className="sr-only"> ({e.name})</span>
         </a>
@@ -325,22 +355,26 @@ export function KatalogTabelle({
   })).filter((g) => g.liste.length > 0);
   return (
     <div>
-      <nav aria-label={tt.sprungmarken} className="mb-3 flex flex-wrap gap-2">
-        {gruppen.map(({ m, liste }) => (
-          <a
-            key={m}
-            href={`#muster-${m}`}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-sm hover:border-accent"
-          >
-            {MUSTER_NAMEN[m]}
-            <span className="text-ink-3">{liste.length}</span>
-          </a>
-        ))}
+      <nav aria-label={tt.sprungmarken} className="mb-4 flex flex-wrap gap-2">
+        {gruppen.map(({ m, liste }) => {
+          const farbe = MUSTER_FARBE[m];
+          return (
+            <a
+              key={m}
+              href={`#muster-${m}`}
+              className={`press inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold hover:brightness-95 ${farbe.soft} ${farbe.ink}`}
+            >
+              <MusterPunkt muster={m} klasse="size-2" />
+              {MUSTER_NAMEN[m]}
+              <span className="tabular-nums">{liste.length}</span>
+            </a>
+          );
+        })}
       </nav>
-      <div className="max-h-[calc(100dvh-15rem)] overflow-auto rounded-xl border border-line bg-surface">
+      <div className="max-h-[calc(100dvh-15rem)] min-h-80 overflow-auto rounded-card border border-line/50 bg-surface shadow-card">
         <table className="w-full min-w-[40rem] border-separate border-spacing-0 text-left text-sm">
           <caption className="sr-only">{tt.tabelleBeschreibung}</caption>
-          <thead className="sticky top-0 z-10 bg-bg">
+          <thead className="sticky top-0 z-10 bg-surface">
             <tr>
               {spalten.map((s) => {
                 const aktiv = sortSpalte === s;
@@ -349,12 +383,12 @@ export function KatalogTabelle({
                     key={s}
                     scope="col"
                     aria-sort={aktiv ? (richtung === "auf" ? "ascending" : "descending") : "none"}
-                    className="whitespace-nowrap px-3 pb-1 pt-3 font-semibold"
+                    className="whitespace-nowrap px-4 pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-ink-3"
                   >
                     <Link
                       href={sortLink(s)}
                       aria-label={tt.sortieren(tt.spalten[s])}
-                      className="inline-flex min-h-8 items-center gap-1 hover:text-accent-ink"
+                      className={`inline-flex min-h-10 items-center gap-1 hover:text-ink ${aktiv ? "text-accent-ink" : ""}`}
                     >
                       {tt.spalten[s]}
                       <span aria-hidden="true" className={aktiv ? "text-accent-ink" : "text-ink-3"}>
@@ -367,45 +401,47 @@ export function KatalogTabelle({
             </tr>
             <tr>
               {spalten.map((s) => (
-                <td key={s} className="border-b border-line px-3 pb-3 align-top font-normal">
+                <td key={s} className="border-b border-line px-4 pb-3 pt-1 align-top font-normal">
                   <FilterZelle spalte={s} filter={filter} profile={profile} />
                 </td>
               ))}
             </tr>
           </thead>
-          {gruppen.map(({ m, liste }) => (
-            <tbody key={m} aria-labelledby={`muster-${m}`}>
-              <tr>
-                <th
-                  id={`muster-${m}`}
-                  scope="rowgroup"
-                  colSpan={spalten.length}
-                  className="scroll-mt-44 border-b border-line bg-fill px-3 py-2 text-left font-semibold"
-                >
-                  {MUSTER_NAMEN[m]} <span className="font-normal text-ink-3">({m})</span>
-                  <span className="ml-2 font-normal text-ink-3">
-                    · {tt.gruppeZahl(liste.length)}
-                  </span>
-                </th>
-              </tr>
-              {liste.map((e) => (
-                <tr key={e.id} className={`hover:bg-fill ${e.aktiv ? "" : "opacity-60"}`}>
-                  {spalten.map((s) => {
-                    const Zellentyp = s === "name" ? "th" : "td";
-                    return (
-                      <Zellentyp
-                        key={s}
-                        scope={s === "name" ? "row" : undefined}
-                        className="border-b border-line px-3 py-2.5 text-left align-top font-normal"
-                      >
-                        <Zelle e={e} spalte={s} alle={alle} />
-                      </Zellentyp>
-                    );
-                  })}
+          {gruppen.map(({ m, liste }) => {
+            const farbe = MUSTER_FARBE[m];
+            return (
+              <tbody key={m} aria-labelledby={`muster-${m}`}>
+                <tr>
+                  <th
+                    id={`muster-${m}`}
+                    scope="rowgroup"
+                    colSpan={spalten.length}
+                    className={`scroll-mt-52 border-b border-line px-4 py-2.5 text-left text-[15px] font-semibold ${farbe.soft} ${farbe.ink}`}
+                  >
+                    <MusterPunkt muster={m} klasse="mr-2.5 size-3" />
+                    {MUSTER_NAMEN[m]} <span className="font-normal">({m})</span>
+                    <span className="ml-2 font-normal">· {tt.gruppeZahl(liste.length)}</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          ))}
+                {liste.map((e) => (
+                  <tr key={e.id} className="transition-colors odd:bg-fill/50 hover:bg-accent-soft">
+                    {spalten.map((s) => {
+                      const Zellentyp = s === "name" ? "th" : "td";
+                      return (
+                        <Zellentyp
+                          key={s}
+                          scope={s === "name" ? "row" : undefined}
+                          className={`border-b border-line/60 px-4 py-3 text-left align-middle font-normal ${e.aktiv ? "text-ink" : "text-ink-2"}`}
+                        >
+                          <Zelle e={e} spalte={s} alle={alle} />
+                        </Zellentyp>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            );
+          })}
         </table>
       </div>
     </div>

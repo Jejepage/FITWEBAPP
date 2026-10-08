@@ -1,5 +1,7 @@
 import type { JSX } from "react";
+import type { Muster } from "@/domain/types";
 import { de } from "@/i18n/de";
+import { MUSTER_FARBE } from "@/lib/muster-farbe";
 
 export interface DiagrammPunkt {
   /** ISO-Datum yyyy-mm-dd */
@@ -12,13 +14,14 @@ export interface DiagrammPunkt {
 
 const TEXT = de.verlauf.diagramm;
 
-// viewBox nahe der Handybreite, damit die Schrift bei 390 px effektiv ≥ 11 px bleibt.
-const B = 360;
-const H = 220;
-const OBEN = 28;
-const UNTEN = 32;
-const RECHTS = 20;
-const SCHRIFT = 13;
+// viewBox nahe der Handybreite, damit die Schrift bei 390 px effektiv ≥ 11 px bleibt; am PC
+// begrenzt der Rahmen der Seite die Breite, damit die Schrift nicht unnötig groß wird.
+const B = 400;
+const H = 250;
+const OBEN = 30;
+const UNTEN = 34;
+const RECHTS = 18;
+const SCHRIFT = 12.5;
 
 const zahl = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
 const kurzesDatum = new Intl.DateTimeFormat("de-DE", {
@@ -87,21 +90,26 @@ function achsenIndizes(n: number): number[] {
 }
 
 const KLASSE_GITTER = "stroke-line";
-const KLASSE_ACHSE = "stroke-line";
-const KLASSE_TEXT = "fill-ink-2";
-const KLASSE_LINIE = "stroke-brand";
-const KLASSE_FLAECHE = "fill-white";
+const KLASSE_TEXT = "fill-ink-3";
+const KLASSE_FLAECHE = "fill-surface";
 
-/** Liniendiagramm als Inline-SVG. X-Achse nach Reihenfolge der Einheiten, nicht nach Zeitabstand. */
+/**
+ * Liniendiagramm als Inline-SVG in der Farbe des Bewegungsmusters (Linie, Punkte, sanfte Fläche
+ * darunter). X-Achse nach Reihenfolge der Einheiten, nicht nach Zeitabstand.
+ */
 export function VerlaufDiagramm({
   punkte,
   einheit,
   titel,
+  muster,
 }: {
   punkte: readonly DiagrammPunkt[];
   einheit: string;
   titel: string;
+  muster: Muster;
 }): JSX.Element {
+  const farbe = MUSTER_FARBE[muster];
+  const KLASSE_LINIE = farbe.stroke;
   const daten = punkte.filter((p) => Number.isFinite(p.wert));
   if (daten.length === 0) return <p className="text-sm text-ink-3">{TEXT.keineDaten}</p>;
 
@@ -155,8 +163,9 @@ export function VerlaufDiagramm({
               x2={B - RECHTS}
               y1={y}
               y2={y}
-              strokeWidth={1}
-              className={i === 0 ? KLASSE_ACHSE : KLASSE_GITTER}
+              strokeWidth={i === 0 ? 1.5 : 1}
+              strokeDasharray={i === 0 ? undefined : "3 4"}
+              className={KLASSE_GITTER}
             />
             <text
               x={links - 6}
@@ -193,7 +202,13 @@ export function VerlaufDiagramm({
         )}
         {hatAdHoc && hatGeplant && (
           <g transform={`translate(${B - RECHTS - 150} 9)`}>
-            <circle cx={5} cy={0} r={4.5} className="fill-brand" />
+            <circle
+              cx={5}
+              cy={0}
+              r={4.5}
+              className={`${farbe.fill} stroke-surface`}
+              strokeWidth={1.5}
+            />
             <text x={15} y={0} dy="0.32em" className={KLASSE_TEXT}>
               {TEXT.geplant}
             </text>
@@ -215,12 +230,22 @@ export function VerlaufDiagramm({
         </text>
       ))}
 
+      {/* Fläche unter der Linie */}
+      {n > 1 && (
+        <path
+          d={`${linie.join(" ")} L${px(n - 1).toFixed(1)} ${unten} L${px(0).toFixed(1)} ${unten} Z`}
+          fillOpacity={0.14}
+          stroke="none"
+          className={farbe.fill}
+        />
+      )}
+
       {/* Verlauf */}
       {n > 1 && (
         <path
           d={linie.join(" ")}
           fill="none"
-          strokeWidth={2}
+          strokeWidth={2.5}
           strokeLinejoin="round"
           strokeLinecap="round"
           className={KLASSE_LINIE}
@@ -247,8 +272,8 @@ export function VerlaufDiagramm({
               cx={px(i)}
               cy={py(p.wert)}
               r={radius}
-              strokeWidth={1.5}
-              className="fill-brand stroke-white"
+              strokeWidth={2}
+              className={`${farbe.fill} stroke-surface`}
             />
           )}
         </g>

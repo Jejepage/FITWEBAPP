@@ -4,10 +4,28 @@ import { useState } from "react";
 import { FehlerBanner } from "@/components/form-felder";
 import { SCHRITT, type FormularWerte } from "@/domain/satz-vorbelegung";
 import { de } from "@/i18n/de";
+import { knopfNeutral } from "@/components/ui";
+import { Angeheftet, hauptKnopf } from "./bausteine";
+import { IconZurueck } from "./icons-training";
+import { Schalter } from "./schalter";
 import { Stepper } from "./stepper";
 import type { UebungInfo } from "./typen";
 
 const t = de.training;
+
+/** RPE 1–10 von grün nach rot; Klassen ausgeschrieben, damit Tailwind sie findet. */
+const RPE_KLASSE: Record<number, string> = {
+  1: "bg-rpe-1 text-on-rpe",
+  2: "bg-rpe-2 text-on-rpe",
+  3: "bg-rpe-3 text-on-rpe",
+  4: "bg-rpe-4 text-on-rpe",
+  5: "bg-rpe-5 text-on-rpe",
+  6: "bg-rpe-6 text-on-rpe",
+  7: "bg-rpe-7 text-on-rpe",
+  8: "bg-rpe-8 text-on-rpe",
+  9: "bg-rpe-9 text-on-rpe",
+  10: "bg-rpe-10 text-on-rpe-hi",
+};
 
 /** Eingabe der Werte eines Satzes (Gewicht, Wdh/Sekunden/Meter, RPE, Tempo) mit großem Hauptknopf. */
 export function SatzFormular({
@@ -56,13 +74,10 @@ export function SatzFormular({
       }}
     >
       {korrektur && (
-        <div className="mb-4 rounded-lg bg-warn-soft p-3 text-sm text-warn-ink">
-          <p className="mb-2 font-medium">{t.korrekturHinweis}</p>
-          <button
-            type="button"
-            onClick={onKorrekturVerwerfen}
-            className="min-h-11 font-medium underline"
-          >
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-warn-soft p-4 text-warn-ink">
+          <p className="font-medium">{t.korrekturHinweis}</p>
+          <button type="button" onClick={onKorrekturVerwerfen} className={knopfNeutral}>
+            <IconZurueck className="size-5" />
             {t.korrekturAbbrechen}
           </button>
         </div>
@@ -116,9 +131,13 @@ export function SatzFormular({
         />
       )}
 
-      <fieldset className="mb-4">
-        <legend className="mb-1 text-sm font-medium">{t.rpe}</legend>
-        <div className="grid grid-cols-5 gap-2" role="radiogroup" aria-label={t.rpe}>
+      <fieldset className="mb-3 rounded-card bg-surface p-4 shadow-card">
+        <legend className="float-left mb-2 w-full text-sm font-medium text-ink-3">{t.rpe}</legend>
+        <div
+          className="clear-both grid grid-cols-5 gap-2 sm:grid-cols-10"
+          role="radiogroup"
+          aria-label={t.rpe}
+        >
           {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
             const gewaehlt = werte.rpe === n;
             return (
@@ -128,8 +147,10 @@ export function SatzFormular({
                 role="radio"
                 aria-checked={gewaehlt}
                 onClick={() => set("rpe", n)}
-                className={`flex h-12 items-center justify-center rounded-lg border text-lg font-semibold ${
-                  gewaehlt ? "border-accent bg-accent text-on-accent" : "border-line bg-surface"
+                className={`press flex h-14 items-center justify-center rounded-xl text-xl font-bold tabular-nums ${RPE_KLASSE[n]} ${
+                  gewaehlt
+                    ? "z-10 scale-110 shadow-lg ring-[3px] ring-ink ring-offset-2 ring-offset-surface"
+                    : "hover:brightness-95"
                 }`}
               >
                 {n}
@@ -137,29 +158,24 @@ export function SatzFormular({
             );
           })}
         </div>
-        <p className="mt-1 text-xs text-ink-3">{t.rpeHilfe}</p>
+        <p className="mt-3 text-sm text-ink-3">{t.rpeHilfe}</p>
       </fieldset>
 
       {kannTempo && (
-        <label className="mb-4 flex min-h-12 items-center gap-3">
-          <input
-            type="checkbox"
-            checked={werte.tempo}
-            onChange={(e) => set("tempo", e.target.checked)}
-            className="size-6"
-          />
-          <span>{t.tempo}</span>
-        </label>
+        <Schalter
+          klasse="mb-3 rounded-card bg-surface shadow-card"
+          checked={werte.tempo}
+          onChange={(v) => set("tempo", v)}
+        >
+          {t.tempo}
+        </Schalter>
       )}
 
-      <div className="sticky bottom-16 -mx-4 border-t border-line bg-bg px-4 py-3 md:static md:mx-0 md:border-0 md:px-0">
-        <button
-          type="submit"
-          className="flex min-h-16 w-full items-center justify-center rounded-xl bg-accent text-xl font-semibold text-on-accent active:opacity-90"
-        >
+      <Angeheftet>
+        <button type="submit" className={hauptKnopf}>
           {korrektur ? t.korrekturSpeichern : t.satzErledigt}
         </button>
-      </div>
+      </Angeheftet>
     </form>
   );
 }

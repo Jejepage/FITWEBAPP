@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { IconPlan, IconPlus } from "@/components/icons";
+import { PageShell } from "@/components/page-shell";
 import { PlanAnsicht } from "@/components/plan/plan-ansicht";
-import { karte, knopfPrimaer } from "@/components/ui";
+import { karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import { de } from "@/i18n/de";
 import { alleUebungen } from "@/server/exercises";
@@ -19,21 +21,35 @@ function datumAnzeige(iso: string): string {
   });
 }
 
+function Kachel({ name, children }: { name: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl bg-fill p-4">
+      <dt className="text-sm text-ink-3">{name}</dt>
+      <dd className="mt-0.5 text-[17px] font-semibold leading-snug">{children}</dd>
+    </div>
+  );
+}
+
 export default function PlanPage() {
   const plan = getActivePlan(db);
 
   if (!plan) {
     return (
-      <>
-        <h1 className="mb-4 text-2xl font-bold">{t.titel}</h1>
-        <section className={`${karte} text-center`}>
-          <p className="mb-2 font-medium">{t.keinPlan}</p>
-          <p className="mb-4 text-sm text-ink-2">{t.keinPlanHilfe}</p>
+      <PageShell title={t.titel} breite="normal">
+        <section className={`${karte} mx-auto max-w-xl py-10 text-center`}>
+          <span
+            aria-hidden="true"
+            className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-accent-soft text-accent-ink"
+          >
+            <IconPlan className="size-9" />
+          </span>
+          <p className="mb-2 text-xl font-semibold">{t.keinPlan}</p>
+          <p className="mx-auto mb-6 max-w-md text-[15px] text-ink-2">{t.keinPlanHilfe}</p>
           <Link href="/plan/neu" className={knopfPrimaer}>
             {t.erstellen}
           </Link>
         </section>
-      </>
+      </PageShell>
     );
   }
 
@@ -42,27 +58,35 @@ export default function PlanPage() {
   const profil = getProfile(db, plan.profilId);
 
   return (
-    <>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">{t.titel}</h1>
+    <PageShell
+      title={t.titel}
+      breite="weit"
+      aktionen={
         <Link href="/plan/neu" className={knopfPrimaer}>
+          <IconPlus className="size-5" />
           {t.neuErstellen}
         </Link>
-      </div>
-
-      <section className={`${karte} mb-4`} aria-label={t.aktiverPlan}>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-ink-3">{t.profil}</dt>
-          <dd>{profil?.name ?? "–"}</dd>
-          <dt className="text-ink-3">{t.start}</dt>
-          <dd>{datumAnzeige(plan.startDatum)}</dd>
-          <dt className="text-ink-3">{t.einheitenProWoche(plan.einheitenProWoche)}</dt>
-          <dd>{t.wochenfolge(plan.einheitenProWoche)}</dd>
-          <dt className="text-ink-3">{t.zusatzblock}</dt>
-          <dd>{plan.zusatzblock ? t.zusatzblockAn : t.zusatzblockAus}</dd>
+      }
+    >
+      <section className={`${karte} mb-6`} aria-label={t.aktiverPlan}>
+        <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Kachel name={t.profil}>{profil?.name ?? "–"}</Kachel>
+          <Kachel name={t.start}>{datumAnzeige(plan.startDatum)}</Kachel>
+          <Kachel name={t.einheitenProWoche(plan.einheitenProWoche)}>
+            {t.wochenfolge(plan.einheitenProWoche)}
+          </Kachel>
+          <Kachel name={t.zusatzblock}>
+            <span className="inline-flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className={`size-2.5 rounded-full ${plan.zusatzblock ? "bg-ok" : "bg-fill-2"}`}
+              />
+              {plan.zusatzblock ? t.zusatzblockAn : t.zusatzblockAus}
+            </span>
+          </Kachel>
         </dl>
-        <p className="mt-3 text-sm">
-          <Link href="/" className="font-medium text-accent-ink">
+        <p className="mt-4">
+          <Link href="/" className={knopfSekundaer}>
             {t.zumTraining}
           </Link>
         </p>
@@ -73,6 +97,6 @@ export default function PlanPage() {
       )}
 
       <PlanAnsicht slots={slots} uebungen={uebungen} zusatzblockAktiv={plan.zusatzblock} />
-    </>
+    </PageShell>
   );
 }
