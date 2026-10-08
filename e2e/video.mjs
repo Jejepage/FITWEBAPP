@@ -60,7 +60,7 @@ async function ablauf(browser, dbPfad) {
   await page.getByLabel("YouTube-Link (optional)").fill("https://example.com/video");
   await page.getByLabel("Name").fill("Name geändert");
   await page.getByRole("button", { name: "Speichern" }).click();
-  await page.getByText(/Bitte einen YouTube-Link angeben/).waitFor();
+  await page.getByText(/Bitte einen YouTube-Link zu einem einzelnen Video/).waitFor();
   assert.equal(
     await page.getByLabel("YouTube-Link (optional)").inputValue(),
     "https://example.com/video",
@@ -73,7 +73,7 @@ async function ablauf(browser, dbPfad) {
   assert.equal(lies("select video_url v from exercise where id = 'KN-03'").v, `${STANDARD}&t=42s`);
   await page.getByLabel("YouTube-Link (optional)").fill("javascript:alert(1)");
   await page.getByRole("button", { name: "Speichern" }).click();
-  await page.getByText(/Bitte einen YouTube-Link angeben/).waitFor();
+  await page.getByText(/Bitte einen YouTube-Link zu einem einzelnen Video/).waitFor();
   assert.equal(lies("select video_url v from exercise where id = 'KN-03'").v, `${STANDARD}&t=42s`);
   schritt("Ungültige und gefährliche Links werden mit Fehler am Feld abgelehnt");
 
