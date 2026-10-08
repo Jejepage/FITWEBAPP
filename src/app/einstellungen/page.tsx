@@ -10,6 +10,7 @@ import { IconHantel, IconPfeilRechts, IconPlus } from "@/components/icons";
 import { PageShell } from "@/components/page-shell";
 import { gruppe, hilfstext, karte, kopfzeileKlein } from "@/components/ui";
 import { db } from "@/db/client";
+import { STUFEN } from "@/domain/anstrengung";
 import { zaehleMachbar } from "@/domain/equipment";
 import { formatGewichte } from "@/domain/gewichte";
 import { MUSTER, EQUIPMENT_NAMEN } from "@/domain/types";
@@ -48,6 +49,22 @@ export default function EinstellungenPage() {
                 aufwaermenText: s.aufwaermenText,
               }}
             />
+          </section>
+
+          <section aria-labelledby="anstrengung" className="fade-up">
+            <h2 id="anstrengung" className={kopfzeileKlein}>
+              {de.training.anstrengungTitel}
+            </h2>
+            <div className={karte}>
+              <p className="mb-3 text-[15px] text-ink-2">{de.training.anstrengungHilfe}</p>
+              <ul className="space-y-1.5 text-[15px]">
+                {STUFEN.map((st) => (
+                  <li key={st.key}>
+                    <span className="font-semibold">{st.text}:</span> {st.reserveSatz}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         </div>
 

@@ -48,7 +48,7 @@ describe("ladeStartInfo", () => {
       woche: 1,
       wochenPlan: 6,
       zusatzblockStandard: false,
-      vorgabeText: "3 × 10–12 Wdh · RPE 6",
+      vorgabeText: "3 × 10–12 Wdh · Leicht",
       fokus: "technik",
     });
   });
@@ -62,7 +62,7 @@ describe("ladeStartInfo", () => {
       einheit: "A",
       woche: 2,
       zusatzblockStandard: true,
-      vorgabeText: "3 × 10–12 Wdh · RPE 7",
+      vorgabeText: "3 × 10–12 Wdh · Leicht",
       fokus: "einarbeiten",
     });
   });

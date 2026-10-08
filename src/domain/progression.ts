@@ -13,6 +13,7 @@ import type { Gewichte } from "./types";
 const SCHRITT_MASCHINE = 2.5;
 const SCHRITT_ALLTAGSLAST = 1;
 const SCHRITT_MESSWERT = 5;
+/** Bis "Gut" (gespeichert 8) darf gesteigert werden; "Schwer" (9) und "Am Limit" (10) verhindern es. */
 const RPE_GRENZE_OBEN = 8;
 const RPE_ZU_HART = 9;
 

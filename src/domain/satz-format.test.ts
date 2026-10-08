@@ -30,19 +30,19 @@ describe("zielText / formatBereich / rpeText", () => {
     expect(zielText({ min: 20, max: 40, einheit: "m" }, "strecke", true)).toBe("20–40 m pro Seite");
     expect(formatBereich({ min: 3, max: 6 })).toBe("3–6");
   });
-  it("RPE", () => {
-    expect(rpeText(7, 8)).toBe("RPE 7–8");
-    expect(rpeText(6, 6)).toBe("RPE 6");
+  it("Zielanstrengung als Text", () => {
+    expect(rpeText(7, 8)).toBe("Leicht bis Gut");
+    expect(rpeText(6, 6)).toBe("Leicht");
   });
 });
 
 describe("formatSatz", () => {
-  it("mit Gewicht, ohne Gewicht, Zeit, Strecke, Tempo, RPE", () => {
-    expect(formatSatz(satz({ gewicht: 12, wdh: 10, rpe: 7 }))).toBe("12 kg × 10 · RPE 7");
-    expect(formatSatz(satz({ gewicht: 12.5, wdh: 8, rpe: 7.5 }))).toBe("12,5 kg × 8 · RPE 7,5");
+  it("mit Gewicht, ohne Gewicht, Zeit, Strecke, Tempo, Anstrengung", () => {
+    expect(formatSatz(satz({ gewicht: 12, wdh: 10, rpe: 7 }))).toBe("12 kg × 10 · Leicht");
+    expect(formatSatz(satz({ gewicht: 12.5, wdh: 8, rpe: 7.5 }))).toBe("12,5 kg × 8 · Gut");
     expect(formatSatz(satz({ wdh: 12 }))).toBe("12 Wdh");
-    expect(formatSatz(satz({ wdh: 10, tempo: true, rpe: 8 }))).toBe("10 Wdh · Tempo · RPE 8");
-    expect(formatSatz(satz({ sekunden: 30, rpe: 6 }))).toBe("30 s · RPE 6");
+    expect(formatSatz(satz({ wdh: 10, tempo: true, rpe: 8 }))).toBe("10 Wdh · Tempo · Gut");
+    expect(formatSatz(satz({ sekunden: 30, rpe: 6 }))).toBe("30 s · Leicht");
     expect(formatSatz(satz({ meter: 25, gewicht: 16 }))).toBe("25 m · 16 kg");
   });
 });

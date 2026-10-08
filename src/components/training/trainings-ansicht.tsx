@@ -9,6 +9,7 @@ import {
   speichereSatzAktion,
 } from "@/app/training/actions";
 import { naechsterOffenerIndex, schrittKey, type Schritt } from "@/domain/ablauf";
+import { anstrengungBereichText, normiereAnstrengung, STUFEN } from "@/domain/anstrengung";
 import { formatSatz } from "@/domain/satz-format";
 import { vorbelegung, type FormularWerte } from "@/domain/satz-vorbelegung";
 import type { Block } from "@/domain/types";
@@ -617,7 +618,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   const startWerte: FormularWerte =
     korrektur && gespeichert[schritt.key]
       ? gespeichert[schritt.key]!.werte
-      : vorbelegung(info, vorigeWerte, daten.rpeMax);
+      : vorbelegung(info, vorigeWerte, normiereAnstrengung(daten.rpeMax));
   const kandidaten = (daten.ersatzKandidaten[schritt.slotId] ?? []).filter(
     (k) => k.id !== exerciseId,
   );
@@ -662,8 +663,8 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
           <div className="order-2 mb-5 space-y-3 lg:mb-3">
             <InfoKarte symbol={<IconZiel className="size-5" />} klasse={farbe.soft}>
               <p className="text-base">
-                <span className="font-semibold">{t.ziel}:</span> {info.zielText} · RPE{" "}
-                {daten.rpeMin === daten.rpeMax ? daten.rpeMin : `${daten.rpeMin}–${daten.rpeMax}`}
+                <span className="font-semibold">{t.ziel}:</span> {info.zielText} ·{" "}
+                {anstrengungBereichText(daten.rpeMin, daten.rpeMax)}
               </p>
             </InfoKarte>
             {vorschlagText && (
@@ -711,6 +712,17 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
                   </ul>
                 </div>
                 <p className="text-ink-2">{info.hinweise}</p>
+                <div>
+                  <p className="mb-1.5 font-semibold">{t.anstrengungTitel}</p>
+                  <p className="mb-2 text-ink-2">{t.anstrengungHilfe}</p>
+                  <ul className="space-y-1">
+                    {STUFEN.map((st) => (
+                      <li key={st.key}>
+                        <span className="font-semibold">{st.text}:</span> {st.reserveSatz}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </Aufklapp>
 

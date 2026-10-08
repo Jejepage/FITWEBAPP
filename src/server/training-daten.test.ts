@@ -51,7 +51,7 @@ describe("ladeTrainingsDaten", () => {
   it("liefert Schritte, Übungsinfos und Vorgaben für Einheit A, Woche 1", () => {
     const d = ladeTrainingsDaten(db, start())!;
     expect(d).toMatchObject({ einheit: "A", woche: 1, zusatzblock: false });
-    expect(d.vorgabeText).toBe("3 × 10–12 Wdh · RPE 6");
+    expect(d.vorgabeText).toBe("3 × 10–12 Wdh · Leicht");
     expect(d.schritte).toHaveLength(18);
     expect(d.gespeichert).toEqual([]);
     expect(d.aufwaermenText).toMatch(/Mobilisation/);

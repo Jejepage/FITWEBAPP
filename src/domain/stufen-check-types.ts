@@ -7,7 +7,7 @@ import type { Exercise, Muster } from "./types";
 export const STUFEN_CHECK_WOCHEN = [5, 6] as const;
 /** So viele gewertete Einheiten braucht ein Muster mindestens für eine Empfehlung ≠ halten. */
 export const STUFEN_CHECK_MIN_EINHEITEN = 2;
-/** Erhöhen nur, wenn alle Sätze höchstens diese Anstrengung hatten (fehlendes RPE zählt als erfüllt). */
+/** Erhöhen nur, wenn alle Sätze höchstens diese Anstrengung hatten (fehlende Angabe zählt als erfüllt). 7 = nur "Leicht" (siehe anstrengung.ts). */
 export const RPE_ERHOEHEN_MAX = 7;
 /** Ein Satz mit mindestens dieser Anstrengung zählt als „zu hart". */
 export const RPE_SENKEN_AB = 9;
@@ -24,9 +24,9 @@ export interface StufenCheckEinheit {
 export type StufenEmpfehlung = "erhoehen" | "halten" | "senken";
 
 export type StufenGrund =
-  | "ziel_erreicht" // alle Sätze an der Obergrenze bei RPE ≤ 7
+  | "ziel_erreicht" // alle Sätze an der Obergrenze, Anstrengung "Leicht"
   | "untergrenze_verfehlt" // Untergrenze in mehreren Einheiten verfehlt
-  | "zu_hart" // RPE ≥ 9 in mehreren Einheiten
+  | "zu_hart" // "Schwer" oder "Am Limit" in mehreren Einheiten
   | "stabil" // keine klare Tendenz
   | "zu_wenig_daten" // weniger als STUFEN_CHECK_MIN_EINHEITEN gewertete Einheiten
   | "grenze"; // Erhöhen/Senken wäre gewünscht, aber Stufe 5 bzw. 1 ist schon erreicht

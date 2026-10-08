@@ -59,12 +59,14 @@ Pausen: 30–45 s beim Wechsel innerhalb der Kombi, 60–90 s nach jeder Runde (
 
 | Woche | Fokus | Vorgabe |
 |---|---|---|
-| 1 | Technik, Startgewichte finden | 3 × 10–12, Anstrengung (RPE) ca. 6 |
-| 2 | Einarbeiten | 3 × 10–12, RPE ca. 7 |
-| 3–5 | Steigern | 3 × 8–12, RPE 7–8, Doppelprogression |
-| 6 | Entlasten und Test | 2 Runden, RPE ca. 6, Stufen-Check |
+| 1 | Technik, Startgewichte finden | 3 × 10–12, Anstrengung „Leicht" |
+| 2 | Einarbeiten | 3 × 10–12, „Leicht" |
+| 3–5 | Steigern | 3 × 8–12, „Leicht bis Gut", Doppelprogression |
+| 6 | Entlasten und Test | 2 Runden, „Leicht", Stufen-Check |
 
-**Doppelprogression:** Wenn in allen Sätzen das obere Ende des Wiederholungsbereichs bei RPE ≤ 8 erreicht wird, schlägt die App für die nächste Einheit mehr Gewicht vor (Kurzhantel/Kettlebell: nächste verfügbare Stufe, Maschine/Langhantel: +2,5 kg bzw. kleinste Stufe).
+**Anstrengung (Änderung nach Abschnitt C):** Statt RPE 1–10 wählt man pro Satz eine von vier Stufen, jeweils mit der Reserve in Wiederholungen: **Leicht** (noch 3 oder mehr, gespeichert als 6), **Gut** (noch ca. 2, gespeichert als 8), **Schwer** (noch ca. 1, gespeichert als 9), **Am Limit** (keine mehr, gespeichert als 10). Die Datenbank speichert weiter die Zahl (`set_log.rpe`), alte RPE-Werte werden in der Anzeige in die vier Stufen eingeteilt (≤ 7 Leicht, 8 Gut, 9 Schwer, 10 Am Limit). Die Regeln unten arbeiten mit diesen Zahlen und gelten unverändert (Erhöhen bei Leicht/Gut, nicht bei Schwer/Am Limit).
+
+**Doppelprogression:** Wenn in allen Sätzen das obere Ende des Wiederholungsbereichs bei „Leicht" oder „Gut" erreicht wird, schlägt die App für die nächste Einheit mehr Gewicht vor (Kurzhantel/Kettlebell: nächste verfügbare Stufe, Maschine/Langhantel: +2,5 kg bzw. kleinste Stufe).
 
 **Steigerung ohne mehr Gewicht** (Körpergewicht oder Hanteln am Limit): erst Wiederholungen bis Obergrenze, dann Tempo (3 s Absenken), dann nächste Stufe der Übung.
 
@@ -249,7 +251,7 @@ Ergebnis: Vorschau beider Einheiten. Jeder Slot lässt sich manuell tauschen (Au
 ### F4 Training durchführen (mobil optimiert)
 - Startseite zeigt die nächste fällige Einheit (A/B), Woche x von 6, Wochenvorgabe
 - Ablauf rundenweise: aktuelle Übung groß, Vorgabe (Gewicht/Wdh/Zeit), Werte vom letzten Mal
-- Pro Satz erfassen: Gewicht, Wdh oder Sekunden/Meter, RPE 1–10, erledigt; vorausgefüllt mit Vorschlag
+- Pro Satz erfassen: Gewicht, Wdh oder Sekunden/Meter, Anstrengung in vier Textstufen, erledigt; vorausgefüllt mit Vorschlag
 - Kein Pausentimer (Änderung nach Abschnitt 6): nach „erledigt" erscheint direkt der nächste Satz
 - Übung in der Einheit ersetzen (z. B. Gerät belegt) durch Kandidaten desselben Musters
 - Einheit unterbrechen und fortsetzen; Abschluss mit optionaler Notiz

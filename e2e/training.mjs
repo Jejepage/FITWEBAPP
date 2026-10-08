@@ -44,7 +44,7 @@ async function ablauf(browser, BASE, dbPfad) {
   // --- 1. Startseite ---------------------------------------------------------------------
   await page.goto(`${BASE}/`);
   await page.getByText("Einheit A · Woche 1 von 6").waitFor();
-  await page.getByText("3 × 10–12 Wdh · RPE 6").waitFor();
+  await page.getByText("3 × 10–12 Wdh · Leicht").waitFor();
   await keinHorizontalScroll("Start");
   await shot("1-start");
   const kontext = await page.evaluate(() => ({
@@ -98,7 +98,7 @@ async function ablauf(browser, BASE, dbPfad) {
 
   // --- 3. Erste Sätze: Vorgaben, Zielanzeige --------------------------------------
   await page.getByText(/Block 1 · Runde 1 von 3 · Übung 1 von 3/).waitFor();
-  await page.getByText(/Ziel:.*10–12 Wdh · RPE 6/).waitFor();
+  await page.getByText(/Ziel:.*10–12 Wdh · Leicht/).waitFor();
   await page.getByText("Noch keine Werte").waitFor();
   assert.equal(
     await page.getByLabel("Wiederholungen", { exact: true }).inputValue(),
@@ -106,7 +106,7 @@ async function ablauf(browser, BASE, dbPfad) {
   );
   assert.equal(
     await page
-      .getByRole("radio", { name: "6", exact: true })
+      .getByRole("radio", { name: "Leicht", exact: true })
       .getAttribute("aria-checked"),
     "true",
   );
@@ -188,10 +188,10 @@ async function ablauf(browser, BASE, dbPfad) {
     .waitFor();
   const wdh = page.getByLabel("Wiederholungen", { exact: true });
   await wdh.fill("12");
+  await page.getByRole("radio", { name: "Gut", exact: true }).click();
   await page
-    .getByRole("button", { name: "RPE 8", exact: true })
-    .or(page.getByRole("radio", { name: "8", exact: true }))
-    .click();
+    .locator("p[aria-live=polite]", { hasText: "noch etwa 2 Wiederholungen" })
+    .waitFor();
   await page.getByRole("button", { name: "Korrektur speichern" }).click();
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
   assert.equal(
@@ -340,7 +340,7 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByText("Einheit gespeichert. Gut gemacht!").waitFor();
   await page.getByRole("link", { name: "Zur Startseite" }).click();
   await page.getByText("Einheit A · Woche 2 von 6").waitFor();
-  await page.getByText("3 × 10–12 Wdh · RPE 7").waitFor();
+  await page.getByText("3 × 10–12 Wdh · Leicht").waitFor();
   schritt(
     "Zweite Einheit (B, mit Zusatzblock = 22 Schritte), vorzeitig abgeschlossen, danach Woche 2",
   );

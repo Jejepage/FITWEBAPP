@@ -136,7 +136,7 @@ describe("uebungsVerlauf", () => {
 describe("besterSatzText", () => {
   it("formatiert den besten Satz oder einen Strich", () => {
     expect(besterSatzText({ bester: satz({ gewicht: 12, wdh: 10, rpe: 7 }) })).toBe(
-      "12 kg × 10 · RPE 7",
+      "12 kg × 10 · Leicht",
     );
     expect(besterSatzText({ bester: null })).toBe("–");
   });

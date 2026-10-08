@@ -1,3 +1,4 @@
+import { anstrengungBereichText, anstrengungText } from "./anstrengung";
 import type { Bereich } from "./bereich";
 import type { SatzWerte } from "./training-types";
 import type { Belastungsart } from "./types";
@@ -18,11 +19,12 @@ export function zielText(b: Bereich, belastungsart: Belastungsart, einseitig: bo
   return einseitig ? `${basis} pro Seite` : basis;
 }
 
+/** Zielanstrengung einer Woche als Text, z. B. "Leicht bis Gut" (Werte als gespeicherte Zahlen). */
 export function rpeText(min: number, max: number): string {
-  return min === max ? `RPE ${min}` : `RPE ${min}–${max}`;
+  return anstrengungBereichText(min, max);
 }
 
-/** Ein Satz in einer Zeile: "12 kg × 10 · RPE 7", "30 s", "20 m · 16 kg". */
+/** Ein Satz in einer Zeile: "12 kg × 10 · Leicht", "30 s", "20 m · 16 kg". */
 export function formatSatz(s: SatzWerte): string {
   const teile: string[] = [];
   if (s.wdh !== null)
@@ -33,6 +35,6 @@ export function formatSatz(s: SatzWerte): string {
     if (s.gewicht !== null) teile.push(`${formatZahl(s.gewicht)} kg`);
   }
   if (s.tempo) teile.push("Tempo");
-  if (s.rpe !== null) teile.push(`RPE ${formatZahl(s.rpe)}`);
+  if (s.rpe !== null) teile.push(anstrengungText(s.rpe));
   return teile.join(" · ");
 }
