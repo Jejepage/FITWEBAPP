@@ -134,7 +134,7 @@ export function SatzFormular({
       <fieldset className="mb-3 rounded-card bg-surface p-4 shadow-card">
         <legend className="float-left mb-2 w-full text-sm font-medium text-ink-3">{t.rpe}</legend>
         <div
-          className="clear-both grid grid-cols-5 gap-2 sm:grid-cols-10"
+          className="clear-both grid grid-cols-5 gap-2 sm:grid-cols-10 lg:grid-cols-5 xl:grid-cols-10"
           role="radiogroup"
           aria-label={t.rpe}
         >

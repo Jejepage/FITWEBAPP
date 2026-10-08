@@ -20,6 +20,8 @@ const paare = (t: Record<string, string>): [string, string, string, number][] =>
     add("accent-ink", grund);
     for (const s of ["ok", "warn", "bad"]) add(`${s}-ink`, grund);
   }
+  add("ink", "fill-2");
+  add("ink-2", "fill-2");
   add("on-accent", "accent");
   add("on-accent", "hero-from");
   add("on-accent", "hero-to");

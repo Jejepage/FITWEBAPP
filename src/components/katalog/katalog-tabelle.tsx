@@ -424,7 +424,7 @@ export function KatalogTabelle({
                     id={`muster-${m}`}
                     scope="rowgroup"
                     colSpan={spalten.length}
-                    className={`scroll-mt-52 border-b border-line px-4 py-2.5 text-left text-[15px] font-semibold ${farbe.soft} ${farbe.ink}`}
+                    className={`scroll-mt-36 border-b border-line px-4 py-2.5 text-left text-[15px] font-semibold ${farbe.soft} ${farbe.ink}`}
                   >
                     <MusterPunkt muster={m} klasse="mr-2.5 size-3" />
                     {MUSTER_NAMEN[m]} <span className="font-normal">({m})</span>

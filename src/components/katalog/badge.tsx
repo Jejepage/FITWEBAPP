@@ -4,7 +4,7 @@ const farben = {
   neutral: "bg-fill text-ink-2",
   hinweis: "bg-warn-soft text-warn-ink",
   gut: "bg-ok-soft text-ok-ink",
-  grau: "bg-fill-2 text-ink-3",
+  grau: "bg-fill-2 text-ink-2",
   akzent: "bg-accent-soft text-accent-ink",
   fehler: "bg-bad-soft text-bad-ink",
 } as const;

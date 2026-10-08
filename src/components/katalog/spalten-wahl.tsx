@@ -17,7 +17,7 @@ export function SpaltenWahl({ spalten, zurueck }: { spalten: readonly Spalte[]; 
       </summary>
       <form
         action={speichereAnsicht}
-        className="absolute right-0 z-20 mt-2 w-80 rounded-card border border-line bg-surface p-4 shadow-xl"
+        className="absolute left-0 z-20 mt-2 w-80 max-w-[calc(100vw-2rem)] sm:left-auto sm:right-0 rounded-card border border-line bg-surface p-4 shadow-xl"
       >
         <input type="hidden" name="was" value="spalten" />
         <input type="hidden" name="zurueck" value={zurueck} />
