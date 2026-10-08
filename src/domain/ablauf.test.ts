@@ -83,30 +83,28 @@ describe("bauSchritte: Reihenfolge (Spec 2.3)", () => {
   });
 });
 
-describe("bauSchritte: Pausen", () => {
-  it("wechsel innerhalb der Runde, runde nach der Runde, block am Blockende, ende am Schluss", () => {
+describe("bauSchritte: Übergänge", () => {
+  it("block am Blockende, ende am Schluss, sonst weiter", () => {
     const s = bau();
-    expect(s.slice(0, 3).map((x) => x.pauseNach)).toEqual(["wechsel", "wechsel", "runde"]);
-    // Letzte Runde von Block 1: Blockende, kein Timer
-    expect(s.slice(6, 9).map((x) => x.pauseNach)).toEqual(["wechsel", "wechsel", "block"]);
-    expect(s.at(-1)?.pauseNach).toBe("ende");
-    expect(s.filter((x) => x.pauseNach === "ende")).toHaveLength(1);
+    expect(s.slice(0, 3).map((x) => x.danach)).toEqual(["weiter", "weiter", "weiter"]);
+    expect(s.slice(6, 9).map((x) => x.danach)).toEqual(["weiter", "weiter", "block"]);
+    expect(s.at(-1)?.danach).toBe("ende");
+    expect(s.filter((x) => x.danach === "ende")).toHaveLength(1);
   });
 
   it("ohne Zusatzblock endet die Einheit mit Block 2, mit Zusatzblock mit Z", () => {
-    expect(bau().at(-1)).toMatchObject({ block: "2", muster: "ZV", pauseNach: "ende" });
+    expect(bau().at(-1)).toMatchObject({ block: "2", muster: "ZV", danach: "ende" });
     expect(bau({ zusatzblock: true }).at(-1)).toMatchObject({
       block: "Z",
       muster: "RU",
-      pauseNach: "ende",
+      danach: "ende",
     });
-    expect(bau({ zusatzblock: true }).filter((s) => s.pauseNach === "block")).toHaveLength(2);
+    expect(bau({ zusatzblock: true }).filter((s) => s.danach === "block")).toHaveLength(2);
   });
 
-  it("Anzahl der Pausenarten stimmt (Woche 1, ohne Zusatzblock)", () => {
-    const zaehle = (art: string) => bau().filter((s) => s.pauseNach === art).length;
-    expect(zaehle("wechsel")).toBe(12); // 2 je Runde × 6 Runden
-    expect(zaehle("runde")).toBe(4); // 2 je Block
+  it("Anzahl der Übergänge stimmt (Woche 1, ohne Zusatzblock)", () => {
+    const zaehle = (art: string) => bau().filter((s) => s.danach === art).length;
+    expect(zaehle("weiter")).toBe(16);
     expect(zaehle("block")).toBe(1);
     expect(zaehle("ende")).toBe(1);
   });

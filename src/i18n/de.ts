@@ -307,14 +307,6 @@ export const de = {
       mehr_zeit: "Vorschlag: etwas länger halten.",
       mehr_strecke: "Vorschlag: etwas weiter.",
     },
-    pause: {
-      titel: "Pause",
-      sekundenKurz: (s: number) => `${s} s`,
-      naechste: "Als Nächstes",
-      ueberspringen: "Überspringen",
-      plus15: "+15 s",
-      vorbei: "Weiter geht's",
-    },
     block: {
       geschafft: (block: string) => `${block} geschafft`,
       naechster: "Als Nächstes",

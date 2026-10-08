@@ -7,10 +7,6 @@ import type { Block, Einheit, Exercise, Gewichte } from "./types";
 export const WOCHEN_PRO_BLOCK = 6;
 /** Runden des Zusatzblocks, in jeder Woche gleich (Spec 2.3). */
 export const RUNDEN_ZUSATZBLOCK = 2;
-/** Pause beim Wechsel innerhalb einer Runde: Mitte von 30–45 s (Spec 2.3). */
-export const PAUSE_WECHSEL_S = 40;
-/** Pause nach einer Runde: Mitte von 60–90 s (Spec 2.3). */
-export const PAUSE_RUNDE_S = 75;
 
 export type Fokus = "technik" | "einarbeiten" | "steigern" | "entlasten";
 

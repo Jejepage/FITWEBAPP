@@ -11,16 +11,13 @@ import {
 import { naechsterOffenerIndex, schrittKey, type Schritt } from "@/domain/ablauf";
 import { formatSatz } from "@/domain/satz-format";
 import { vorbelegung, type FormularWerte } from "@/domain/satz-vorbelegung";
-import { PAUSE_RUNDE_S, PAUSE_WECHSEL_S } from "@/domain/training-types";
 import type { Block } from "@/domain/types";
 import { de } from "@/i18n/de";
-import { bereiteSignalVor, signal } from "@/lib/signal";
 import { liesJson, loesche, schreibeJson } from "@/lib/speicher";
 import { neueUuid } from "@/lib/uuid";
 import { FehlerBanner } from "@/components/form-felder";
 import { knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { useWakeLock } from "./hooks";
-import { Pause } from "./pause";
 import { SatzFormular } from "./satz-formular";
 import type { GespeicherterSatzInfo, TrainingsDaten, UebungInfo } from "./typen";
 
@@ -33,7 +30,6 @@ type Gespeichert = GespeicherterSatzInfo & { status: Status };
 type Phase =
   | { art: "aufwaermen" }
   | { art: "satz" }
-  | { art: "pause"; bis: number; dauer: number }
   | { art: "block"; naechster: Block }
   | { art: "fertig" };
 
@@ -229,7 +225,6 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   // --- Aktionen ---------------------------------------------------------------------------
   const onErledigt = (werte: FormularWerte) => {
     if (!schritt) return;
-    bereiteSignalVor();
     const id = (bearbeiteKey ? gespeichert[bearbeiteKey]?.id : undefined) ?? neueUuid();
     const exerciseId = wirksameId(schritt);
     const payload: Payload = {
@@ -253,21 +248,12 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
       phaseVorKorrektur.current = null;
       return;
     }
-    const pause = schritt.pauseNach;
-    if (pause === "wechsel" || pause === "runde") {
-      const dauer = pause === "wechsel" ? PAUSE_WECHSEL_S : PAUSE_RUNDE_S;
-      setPhase({ art: "pause", bis: Date.now() + dauer * 1000, dauer });
-    } else if (pause === "block") {
+    if (schritt.danach === "block") {
       const idx = schritte.findIndex((s) => s.key === schritt.key);
       const naechster = schritte[idx + 1]?.block;
       setPhase(naechster ? { art: "block", naechster } : { art: "fertig" });
-    } else setPhase({ art: "fertig" });
+    } else if (schritt.danach === "ende") setPhase({ art: "fertig" });
   };
-
-  const pauseVorbei = useCallback(() => {
-    signal();
-    setPhase({ art: "satz" });
-  }, []);
 
   const ersetze = async (kandidatId: string) => {
     if (!schritt) return;
@@ -290,7 +276,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     const gespeicherteSchritte = schritte.filter((s) => gespeichert[s.key]);
     const letzter = gespeicherteSchritte[gespeicherteSchritte.length - 1];
     if (!letzter) return;
-    phaseVorKorrektur.current = phase.art === "pause" || phase.art === "block" ? phase : null;
+    phaseVorKorrektur.current = phase.art === "block" ? phase : null;
     setBearbeiteKey(letzter.key);
     setPhase({ art: "satz" });
   };
@@ -528,38 +514,12 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     );
   }
 
-  // Satz und Pause brauchen einen aktuellen Schritt
+  // Der Satz braucht einen aktuellen Schritt
   if (!schritt) return null;
   const exerciseId = wirksameId(schritt);
   const info = uebungen[exerciseId];
   if (!info) return <FehlerBanner>{t.ersetzenFehler}</FehlerBanner>;
   const ersetzt = exerciseId !== schritt.geplanteUebungId;
-
-  if (effektivePhase.art === "pause") {
-    const naechsteInfo = uebungen[wirksameId(schritt)];
-    return (
-      <>
-        {kopf}
-        {hinweise}
-        <Pause
-          bis={effektivePhase.bis}
-          dauer={effektivePhase.dauer}
-          naechsteName={naechsteInfo?.name ?? exerciseId}
-          naechsteZiel={naechsteInfo?.zielText ?? ""}
-          onEnde={pauseVorbei}
-          onUeberspringen={() => setPhase({ art: "satz" })}
-          onVerlaengern={() =>
-            setPhase({
-              ...effektivePhase,
-              bis: effektivePhase.bis + 15000,
-              dauer: effektivePhase.dauer + 15,
-            })
-          }
-        />
-        {mehr}
-      </>
-    );
-  }
 
   // Satz
   const vorige = gespeichert[schrittKey(schritt.slotId, schritt.runde - 1)];

@@ -1,4 +1,4 @@
-// Ablauf einer Einheit (Spec 2.3): Blöcke, Runden, Übungsreihenfolge und Pausen als lineare
+// Ablauf einer Einheit (Spec 2.3): Blöcke, Runden und Übungsreihenfolge als lineare
 // Schrittliste. Rein und ohne DB; der Fortschritt ergibt sich allein aus den gespeicherten Sätzen.
 import { rundenFuerBlock } from "./weeks";
 import type { Block, Muster } from "./types";
@@ -15,12 +15,10 @@ export interface AblaufSlot {
 }
 
 /** Was nach einem Satz folgt. */
-export type PauseNach =
-  /** kurze Pause beim Wechsel zur nächsten Übung der Runde */
-  | "wechsel"
-  /** längere Pause nach einer vollständigen Runde */
-  | "runde"
-  /** Blockende: keine Pause, Übergang zum nächsten Block */
+export type Danach =
+  /** nächster Satz derselben Einheit im selben Block */
+  | "weiter"
+  /** Blockende: Übergang zum nächsten Block */
   | "block"
   /** letzter Satz der Einheit */
   | "ende";
@@ -39,7 +37,7 @@ export interface Schritt {
   /** Wirksame Übung (Ersatz, falls gewählt) */
   exerciseId: string;
   geplanteUebungId: string;
-  pauseNach: PauseNach;
+  danach: Danach;
 }
 
 export interface AblaufEingabe {
@@ -69,16 +67,9 @@ export function bauSchritte(e: AblaufEingabe): Schritt[] {
     const runden = rundenFuerBlock(e.woche, block);
     for (let runde = 1; runde <= runden; runde++) {
       slots.forEach((slot, i) => {
-        const letzteInRunde = i === slots.length - 1;
-        const letzteRunde = runde === runden;
+        const letzterSchrittImBlock = i === slots.length - 1 && runde === runden;
         const letzterBlock = blockIndex === bloecke.length - 1;
-        const pauseNach: PauseNach = !letzteInRunde
-          ? "wechsel"
-          : !letzteRunde
-            ? "runde"
-            : letzterBlock
-              ? "ende"
-              : "block";
+        const danach: Danach = !letzterSchrittImBlock ? "weiter" : letzterBlock ? "ende" : "block";
         schritte.push({
           key: schrittKey(slot.slotId, runde),
           slotId: slot.slotId,
@@ -90,7 +81,7 @@ export function bauSchritte(e: AblaufEingabe): Schritt[] {
           muster: slot.muster,
           exerciseId: e.ersetzungen[String(slot.slotId)] ?? slot.exerciseId,
           geplanteUebungId: slot.exerciseId,
-          pauseNach,
+          danach,
         });
       });
     }

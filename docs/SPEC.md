@@ -40,7 +40,7 @@ Eine selbst gehostete Webapp, die aus einem Übungskatalog personalisierte 6-Woc
 3. **Block 2** – Dreier-Kombi, 3 Runden
 4. **Zusatzblock (optional)** – TR + RU, 2 Runden
 
-Pausen: 30–45 s beim Wechsel innerhalb der Kombi, 60–90 s nach jeder Runde.
+Pausen: 30–45 s beim Wechsel innerhalb der Kombi, 60–90 s nach jeder Runde (Richtwert, nach Gefühl; die App hat keinen Timer).
 
 **Variante 6 Übungen:** nur Block 1 + 2. **Variante 8 Übungen:** zusätzlich Zusatzblock. Wahl pro Plan, in jeder Einheit überschreibbar.
 
@@ -248,7 +248,7 @@ Ergebnis: Vorschau beider Einheiten. Jeder Slot lässt sich manuell tauschen (Au
 - Startseite zeigt die nächste fällige Einheit (A/B), Woche x von 6, Wochenvorgabe
 - Ablauf rundenweise: aktuelle Übung groß, Vorgabe (Gewicht/Wdh/Zeit), Werte vom letzten Mal
 - Pro Satz erfassen: Gewicht, Wdh oder Sekunden/Meter, RPE 1–10, erledigt; vorausgefüllt mit Vorschlag
-- Pausentimer, startet automatisch nach „erledigt" (30–45 s bzw. 60–90 s nach Runde), überspringbar
+- Kein Pausentimer (Änderung nach Abschnitt 6): nach „erledigt" erscheint direkt der nächste Satz
 - Übung in der Einheit ersetzen (z. B. Gerät belegt) durch Kandidaten desselben Musters
 - Einheit unterbrechen und fortsetzen; Abschluss mit optionaler Notiz
 - Bildschirm bleibt während des Trainings an (Wake Lock, wenn verfügbar)

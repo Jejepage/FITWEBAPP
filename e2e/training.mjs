@@ -58,21 +58,23 @@ async function ablauf(browser, BASE, dbPfad) {
   const fortschritt = async () =>
     Number(await page.getByRole("progressbar").getAttribute("aria-valuenow"));
   const titel = () => page.getByRole("heading", { level: 1 }).innerText();
-  const pauseWeiter = async () => {
-    const pause = page.getByRole("button", { name: "Überspringen" });
+  const naechsterSatz = async () => {
     const weiter = page.getByRole("button", { name: "Weiter", exact: true });
     const fertig = page.getByRole("heading", { name: "Geschafft", level: 1 });
-    await pause.or(weiter).or(fertig).first().waitFor();
-    if (await pause.isVisible()) await pause.click();
-    else if (await weiter.isVisible()) await weiter.click();
+    await weiter
+      .or(fertig)
+      .or(page.getByRole("button", { name: "Satz erledigt" }))
+      .first()
+      .waitFor();
+    if (await weiter.isVisible()) await weiter.click();
     await page.getByRole("button", { name: "Satz erledigt" }).or(fertig).first().waitFor();
   };
   const satzErledigt = async () => {
     await page.getByRole("button", { name: "Satz erledigt" }).click();
-    await pauseWeiter();
+    await naechsterSatz();
   };
 
-  // --- 3. Erste Sätze: Vorgaben, Pause, Zielanzeige --------------------------------------
+  // --- 3. Erste Sätze: Vorgaben, Zielanzeige --------------------------------------
   await page.getByText(/Block 1 · Runde 1 von 3 · Übung 1 von 3/).waitFor();
   await page.getByText(/Ziel:.*10–12 Wdh · RPE 6/).waitFor();
   await page.getByText("Noch keine Werte").waitFor();
@@ -96,14 +98,12 @@ async function ablauf(browser, BASE, dbPfad) {
   assert.deepEqual(zuKlein, [], "Tippflächen < 44 px");
 
   await page.getByRole("button", { name: "Satz erledigt" }).click();
-  await page.getByRole("button", { name: "Überspringen" }).waitFor();
-  await page.getByText("Als Nächstes").waitFor();
-  await shot("4-pause");
-  await page.getByRole("button", { name: "+15 s" }).click(); // Verlängern funktioniert, Timer läuft
-  await page.getByRole("button", { name: "Überspringen" }).click();
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
+  await page.getByText(/Übung 2 von 3/).waitFor();
+  assert.equal(await page.getByText("Pause", { exact: true }).count(), 0, "kein Pausenbildschirm");
   assert.equal(await fortschritt(), 1);
-  schritt("Satz gespeichert, Pause mit Vorschau, +15 s und Überspringen");
+  await shot("4-naechster-satz");
+  schritt("Satz gespeichert, direkt der nächste Satz (kein Pausentimer)");
 
   // --- 4. Übung ersetzen (zweiter Schritt, Block 1 Übung 2) ------------------------------
   const geplant = await titel();
@@ -170,16 +170,19 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByText(/noch nicht gespeichert/).waitFor({ state: "detached", timeout: 20000 });
   assert.equal(zaehle(), vorher + 1, "nach dem Netzausfall gespeichert");
   schritt("Netzausfall: Satz lokal gehalten, automatisch nachgespeichert");
-  await pauseWeiter();
+  await naechsterSatz();
 
   // --- 8. Rest der Einheit (Blockwechsel, Runden) bis zum Ende ---------------------------
   let sawBlock = false;
   while ((await fortschritt()) < 18) {
     await page.getByRole("button", { name: "Satz erledigt" }).click();
     const weiter = page.getByRole("button", { name: "Weiter", exact: true });
-    const ueberspringen = page.getByRole("button", { name: "Überspringen" });
     const fertig = page.getByRole("heading", { name: "Geschafft", level: 1 });
-    await ueberspringen.or(weiter).or(fertig).first().waitFor();
+    await weiter
+      .or(fertig)
+      .or(page.getByRole("button", { name: "Satz erledigt" }))
+      .first()
+      .waitFor();
     if (await weiter.isVisible()) {
       sawBlock = true;
       await page
@@ -188,7 +191,7 @@ async function ablauf(browser, BASE, dbPfad) {
         .waitFor();
       await shot("6-blockwechsel");
       await weiter.click();
-    } else if (await ueberspringen.isVisible()) await ueberspringen.click();
+    }
     await page.getByRole("button", { name: "Satz erledigt" }).or(fertig).first().waitFor();
   }
   assert.ok(sawBlock, "Blockwechsel wurde angezeigt");
@@ -263,7 +266,7 @@ async function ablauf(browser, BASE, dbPfad) {
 
   // --- 12. Abbrechen zählt nicht ------------------------------------------------------------
   await page.getByRole("button", { name: "Satz erledigt" }).click();
-  await page.getByRole("button", { name: "Überspringen" }).click();
+  await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
   await page.getByText("Weitere Aktionen").click();
   await page.getByRole("button", { name: "Einheit abbrechen" }).click();
   await page.getByText("Einheit A · Woche 2 von 6").waitFor();
