@@ -371,7 +371,7 @@ export function KatalogTabelle({
           );
         })}
       </nav>
-      <div className="max-h-[calc(100dvh-15rem)] min-h-80 overflow-auto rounded-card border border-line/50 bg-surface shadow-card">
+      <div className="relative max-h-[calc(100dvh-15rem)] min-h-80 overflow-auto rounded-card border border-line/50 bg-surface shadow-card">
         <table className="w-full min-w-[40rem] border-separate border-spacing-0 text-left text-sm">
           <caption className="sr-only">{tt.tabelleBeschreibung}</caption>
           <thead className="sticky top-0 z-10 bg-surface">

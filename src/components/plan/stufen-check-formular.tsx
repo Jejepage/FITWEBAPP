@@ -45,7 +45,7 @@ export function StufenCheckFormular({
                   </span>
                   <div>
                     <p className="text-[17px] font-semibold">{MUSTER_NAMEN[e.muster]}</p>
-                    <p className="flex flex-wrap items-center gap-x-2 text-sm text-ink-3">
+                    <p className="flex flex-wrap items-center gap-x-2 text-sm text-ink-2">
                       <StufenPunkte stufe={e.aktuell} muster={e.muster} klasse="size-1.5" />
                       <span>
                         {t.aktuell}: {t.stufe(e.aktuell)} · {t.einheitenGewertet(e.einheiten)}

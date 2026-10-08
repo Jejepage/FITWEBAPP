@@ -13,11 +13,11 @@ export function SpaltenWahl({ spalten, zurueck }: { spalten: readonly Spalte[]; 
       <summary className="press inline-flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-xl bg-fill-2 px-4 text-[15px] font-semibold text-ink hover:brightness-95 [&::-webkit-details-marker]:hidden">
         <IconTabelle className="size-5 text-ink-2" />
         {t.spaltenKnopf}
-        <span className="font-medium text-ink-3">({spalten.length})</span>
+        <span className="font-medium text-ink-2">({spalten.length})</span>
       </summary>
       <form
         action={speichereAnsicht}
-        className="fade-up absolute right-0 z-20 mt-2 w-80 rounded-card border border-line bg-surface p-4 shadow-xl"
+        className="absolute right-0 z-20 mt-2 w-80 rounded-card border border-line bg-surface p-4 shadow-xl"
       >
         <input type="hidden" name="was" value="spalten" />
         <input type="hidden" name="zurueck" value={zurueck} />

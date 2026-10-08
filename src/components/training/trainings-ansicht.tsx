@@ -548,15 +548,12 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
                         )}
                         {u?.name ?? id}
                       </p>
-                      <ol className="mt-2 space-y-1.5">
-                        {saetze.map((g, i) => (
-                          <li key={g.id} className="flex items-center gap-3 text-[15px] text-ink-2">
-                            <span
-                              aria-hidden="true"
-                              className="grid size-6 shrink-0 place-items-center rounded-full bg-fill-2 text-xs font-semibold text-ink"
-                            >
-                              {i + 1}
-                            </span>
+                      <ol className="mt-2.5 flex flex-wrap gap-2">
+                        {saetze.map((g) => (
+                          <li
+                            key={g.id}
+                            className="rounded-full bg-fill px-3 py-1 text-sm font-medium text-ink-2"
+                          >
                             {formatSatz(g.werte)}
                           </li>
                         ))}
@@ -628,7 +625,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
 
   return (
     <Rahmen satz>
-      <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,36rem)_minmax(0,22rem)] lg:justify-center lg:gap-x-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,36rem)_minmax(0,22rem)] lg:grid-rows-[auto_auto_1fr] lg:justify-center lg:gap-x-8">
         {/* Kopf, Übung und Ziel */}
         <div className="order-1 lg:col-start-1 lg:row-start-1">
           {kopf(farbe.stroke)}
@@ -690,13 +687,14 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
             </InfoKarte>
           </div>
 
-          <div className="order-4 mt-2 space-y-3 lg:mt-0">
+          <div className="order-4 mt-2 flex flex-col gap-3 lg:mt-0">
             {info.videoUrl && <VideoKnopf url={info.videoUrl} className="w-full" />}
 
             <Aufklapp
               titel={t.ausfuehrung}
               symbol={<IconBuch className="size-6" />}
               offen={grossBildschirm}
+              klasse="lg:order-last"
             >
               <div className="space-y-4 p-4 text-[15px] leading-relaxed">
                 <ol className="list-decimal space-y-1.5 pl-5 marker:font-semibold marker:text-ink-3">

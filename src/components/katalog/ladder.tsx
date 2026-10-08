@@ -40,7 +40,7 @@ export function Ladder({ kette, aktuellId }: { kette: Exercise[]; aktuellId: str
               }`}
             >
               <span className="min-w-0">{e.name}</span>
-              <span className="shrink-0 text-right text-sm text-ink-3">
+              <span className="shrink-0 text-right text-sm text-ink-2">
                 {e.id} · {de.katalog.stufeBadge(e.stufe)}
               </span>
             </Link>
