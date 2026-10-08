@@ -20,16 +20,16 @@ export function EinheitenListe({ einheiten }: { einheiten: EinheitKurz[] }) {
     <div className="space-y-4">
       {gruppen.map((g) => (
         <section key={g.monat} aria-label={g.monat}>
-          <h3 className="mb-1 text-sm font-medium text-neutral-500">{g.monat}</h3>
+          <h3 className="mb-1 text-sm font-medium text-ink-3">{g.monat}</h3>
           <ul className="space-y-2">
             {g.liste.map((e) => (
               <li key={e.id}>
                 <Link
                   href={`/verlauf/einheit/${e.id}`}
-                  className={`${karte} block min-h-14 hover:border-brand`}
+                  className={`${karte} block min-h-14 hover:border-accent`}
                 >
                   <span className="block font-medium">{datumLang(e.datum)}</span>
-                  <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-600 dark:text-neutral-400">
+                  <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-2">
                     {t.einheitZeile(e.einheit, e.woche)} · {t.saetze(e.saetze)}
                     {e.adHoc && <Badge farbe="hinweis">{t.adHoc}</Badge>}
                     {e.zusatzblock && <Badge>{t.mitZusatzblock}</Badge>}

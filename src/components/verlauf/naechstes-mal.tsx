@@ -12,9 +12,7 @@ export function NaechstesMalAnsicht({ daten }: { daten: NaechstesMal }) {
     return (
       <section className={`${karte} mb-4`}>
         <h2 className="mb-1 text-lg font-semibold">{t.naechstesMal}</h2>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          {t.keineVorschlaege[daten.grund]}
-        </p>
+        <p className="text-sm text-ink-2">{t.keineVorschlaege[daten.grund]}</p>
       </section>
     );
   }
@@ -25,19 +23,20 @@ export function NaechstesMalAnsicht({ daten }: { daten: NaechstesMal }) {
         {t.naechstesMal}
       </h2>
       {woche !== undefined && (
-        <p className="mb-2 text-sm text-neutral-600 dark:text-neutral-400">
-          {t.naechstesMalHilfe(woche)}
-        </p>
+        <p className="mb-2 text-sm text-ink-2">{t.naechstesMalHilfe(woche)}</p>
       )}
       <ul className="space-y-2">
         {daten.eintraege.map((e) => {
           const grund = vorschlagGrundText(e.vorschlag.grund, e.schwererName);
           return (
             <li key={e.exerciseId} className={karte}>
-              <Link href={`/verlauf/uebung/${e.exerciseId}`} className="font-medium text-brand">
+              <Link
+                href={`/verlauf/uebung/${e.exerciseId}`}
+                className="font-medium text-accent-ink"
+              >
                 {e.name}
               </Link>
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-ink-3">
                 {t.zielLabel}: {e.zielText}
               </p>
               <p className="mt-1 text-lg font-semibold">
@@ -50,7 +49,7 @@ export function NaechstesMalAnsicht({ daten }: { daten: NaechstesMal }) {
                   tempo: e.vorschlag.tempo,
                 })}
               </p>
-              {grund && <p className="text-sm text-brand">{grund}</p>}
+              {grund && <p className="text-sm text-accent-ink">{grund}</p>}
             </li>
           );
         })}

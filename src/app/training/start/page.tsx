@@ -70,12 +70,12 @@ export default async function AdHocStartPage({
 
   return (
     <>
-      <Link href="/" className="mb-3 inline-block min-h-11 py-2 text-brand">
+      <Link href="/" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
         ← {t.zurueck}
       </Link>
       <h1 className="mb-2 text-2xl font-bold">{t.titel}</h1>
-      <p className="mb-1 text-sm text-neutral-600 dark:text-neutral-400">{t.hilfe}</p>
-      <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">{t.zaehlt}</p>
+      <p className="mb-1 text-sm text-ink-2">{t.hilfe}</p>
+      <p className="mb-4 text-sm text-ink-2">{t.zaehlt}</p>
       {fehlerText && <FehlerBanner>{fehlerText}</FehlerBanner>}
 
       <form method="get" className={`${karte} mb-4`}>
@@ -111,9 +111,7 @@ export default async function AdHocStartPage({
             {vorschau.profilName}
           </h2>
           {vorschau.istPlanProfil && (
-            <p className="mb-2 text-sm text-neutral-600 dark:text-neutral-400">
-              {t.planProfilHinweis}
-            </p>
+            <p className="mb-2 text-sm text-ink-2">{t.planProfilHinweis}</p>
           )}
           {vorschau.fehlendeMuster.length > 0 && (
             <FehlerBanner>
@@ -125,12 +123,12 @@ export default async function AdHocStartPage({
           <ul className="mb-4 space-y-2">
             {vorschau.zeilen.map((z) => (
               <li key={z.slotId} className={karte}>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-ink-3">
                   {BLOCK_NAME[z.block]} · {MUSTER_NAMEN[z.muster]}
                 </p>
                 {z.ersetzt ? (
                   <>
-                    <p className="text-sm text-neutral-500 line-through">
+                    <p className="text-sm text-ink-3 line-through">
                       {t.planUebung}: {z.geplantName}
                     </p>
                     <p className="font-medium">
@@ -140,7 +138,7 @@ export default async function AdHocStartPage({
                 ) : (
                   <p className="font-medium">
                     {z.heuteName}{" "}
-                    <span className="text-sm font-normal text-neutral-500">({t.bleibt})</span>
+                    <span className="text-sm font-normal text-ink-3">({t.bleibt})</span>
                   </p>
                 )}
               </li>

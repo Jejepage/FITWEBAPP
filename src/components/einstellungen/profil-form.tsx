@@ -67,7 +67,7 @@ export function ProfilForm({
           />
         </Feld>
       ))}
-      <p className="-mt-2 mb-4 text-sm text-neutral-500">{t.gewichteHilfe}</p>
+      <p className="-mt-2 mb-4 text-sm text-ink-3">{t.gewichteHilfe}</p>
 
       <Checkbox
         name="istStandard"
@@ -75,7 +75,7 @@ export function ProfilForm({
         checked={istAktuellStandard || w.istStandard}
         disabled={istAktuellStandard}
       />
-      {istAktuellStandard && <p className="mb-4 text-sm text-neutral-500">{t.istStandardFest}</p>}
+      {istAktuellStandard && <p className="mb-4 text-sm text-ink-3">{t.istStandardFest}</p>}
 
       <div className="mt-6 flex gap-3">
         <button type="submit" disabled={pending} className={knopfPrimaer}>

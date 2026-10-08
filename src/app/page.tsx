@@ -25,7 +25,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
       {fehler && (
         <p
           role="alert"
-          className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-800 dark:bg-red-950 dark:text-red-200"
+          className="mb-4 rounded-lg bg-bad-soft p-3 text-sm font-medium text-bad-ink"
         >
           {t.fehler[fehler]}
         </p>
@@ -34,7 +34,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
       {info.art === "kein_plan" && (
         <section className={`${karte} text-center`}>
           <p className="mb-2 font-medium">{t.keinPlan}</p>
-          <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">{t.keinPlanHilfe}</p>
+          <p className="mb-4 text-sm text-ink-2">{t.keinPlanHilfe}</p>
           <Link href="/plan/neu" className={knopfPrimaer}>
             {t.planErstellen}
           </Link>
@@ -46,9 +46,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           <h2 id="laufend-titel" className="mb-1 text-lg font-semibold">
             {t.laufendTitel}
           </h2>
-          <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
-            {t.laufendHilfe(info.einheit, info.woche)}
-          </p>
+          <p className="mb-4 text-sm text-ink-2">{t.laufendHilfe(info.einheit, info.woche)}</p>
           <Link
             href={`/training/${info.workoutId}`}
             className={`${knopfPrimaer} w-full min-h-14 text-lg`}
@@ -60,16 +58,14 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
       {info.art === "faellig" && (
         <section className={karte} aria-labelledby="naechste-titel">
-          <p className="text-sm text-neutral-500">{t.naechsteEinheit}</p>
+          <p className="text-sm text-ink-3">{t.naechsteEinheit}</p>
           <h2 id="naechste-titel" className="text-2xl font-bold">
             {t.einheitWoche(info.einheit, info.woche, info.wochenPlan)}
           </h2>
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-ink-2">
             <span className="font-medium">{t.wochenvorgabe}:</span> {info.vorgabeText}
           </p>
-          <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
-            {t.fokus[info.fokus]}
-          </p>
+          <p className="mb-4 text-sm text-ink-2">{t.fokus[info.fokus]}</p>
           <form action={startTraining}>
             <label className="mb-4 flex min-h-12 items-center gap-3">
               <input
@@ -87,7 +83,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           {profile.length > 1 && (
             <Link
               href="/training/start"
-              className="mt-3 flex min-h-11 items-center justify-center text-brand"
+              className="mt-3 flex min-h-11 items-center justify-center text-accent-ink"
             >
               {de.adhoc.link}
             </Link>
@@ -98,9 +94,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
       {info.art === "block_fertig" && (
         <section className={`${karte} text-center`}>
           <p className="mb-2 text-lg font-semibold">{t.blockFertig}</p>
-          <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
-            {t.blockFertigHilfe}
-          </p>
+          <p className="mb-4 text-sm text-ink-2">{t.blockFertigHilfe}</p>
           <Link href="/plan" className={knopfSekundaer}>
             {t.zumPlan}
           </Link>

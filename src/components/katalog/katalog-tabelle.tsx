@@ -21,7 +21,7 @@ const tt = t.tabelle;
 export const FILTER_FORM_ID = "katalog-filter";
 
 const feld =
-  "block w-full min-h-10 rounded-lg border border-neutral-300 bg-white px-2 py-1 text-sm font-normal text-neutral-900 focus:border-brand focus:outline-2 focus:outline-brand dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100";
+  "block w-full min-h-10 rounded-lg border border-line bg-surface px-2 py-1 text-sm font-normal text-ink focus:border-brand focus:outline-2 focus:outline-brand";
 
 function Auswahl({
   name,
@@ -129,11 +129,7 @@ function FilterZelle({
           name="einseitig"
           label={`${t.einseitig} filtern`}
           wert={jaNein(filter.einseitig, "ja", "nein")}
-          optionen={[
-            alle,
-            { wert: "ja", text: t.ja },
-            { wert: "nein", text: t.nein },
-          ]}
+          optionen={[alle, { wert: "ja", text: t.ja }, { wert: "nein", text: t.nein }]}
         />
       );
     case "belastung":
@@ -170,10 +166,7 @@ function FilterZelle({
           name="status"
           label={t.statusFilter}
           wert={filter.pruefstatus ?? ""}
-          optionen={[
-            alle,
-            ...PRUEFSTATI.map((p) => ({ wert: p, text: t.feld.pruefstati[p] })),
-          ]}
+          optionen={[alle, ...PRUEFSTATI.map((p) => ({ wert: p, text: t.feld.pruefstati[p] }))]}
         />
       );
     case "aktiv":
@@ -219,10 +212,7 @@ function Zelle({
   switch (spalte) {
     case "name":
       return (
-        <Link
-          href={`/katalog/${e.id}`}
-          className="font-medium text-brand hover:underline"
-        >
+        <Link href={`/katalog/${e.id}`} className="font-medium text-accent-ink hover:underline">
           {e.name}
         </Link>
       );
@@ -239,11 +229,7 @@ function Zelle({
     case "muskeln":
       return <span>{e.hauptmuskeln.join(", ")}</span>;
     case "steigerung":
-      return (
-        <span>
-          {e.steigerungsart.map((s) => t.steigerungsarten[s]).join(" → ")}
-        </span>
-      );
+      return <span>{e.steigerungsart.map((s) => t.steigerungsarten[s]).join(" → ")}</span>;
     case "leiter": {
       const teil = (id: string | null, richtung: string) => {
         const ziel = id ? alle.get(id) : undefined;
@@ -253,7 +239,7 @@ function Zelle({
             key={richtung}
             href={`/katalog/${id}`}
             title={`${richtung}: ${ziel.name}`}
-            className="mr-2 whitespace-nowrap text-brand hover:underline"
+            className="mr-2 whitespace-nowrap text-accent-ink hover:underline"
           >
             {richtung === tt.leiterLeichter ? "↓" : "↑"} {id}
           </Link>
@@ -273,9 +259,7 @@ function Zelle({
     case "last":
       return (
         <span>
-          {e.optionaleLast.length
-            ? e.optionaleLast.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
-            : "–"}
+          {e.optionaleLast.length ? e.optionaleLast.map((a) => EQUIPMENT_NAMEN[a]).join(", ") : "–"}
         </span>
       );
     case "status":
@@ -293,13 +277,9 @@ function Zelle({
           href={v.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-brand hover:underline"
+          className="inline-flex items-center gap-1 text-accent-ink hover:underline"
         >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            className="size-4 fill-current"
-          >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current">
             <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" />
           </svg>
           {t.videoAnsehen}
@@ -310,11 +290,7 @@ function Zelle({
       );
     }
     case "id":
-      return (
-        <span className="whitespace-nowrap tabular-nums text-neutral-500">
-          {e.id}
-        </span>
-      );
+      return <span className="whitespace-nowrap tabular-nums text-ink-3">{e.id}</span>;
   }
 }
 
@@ -354,17 +330,17 @@ export function KatalogTabelle({
           <a
             key={m}
             href={`#muster-${m}`}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3 text-sm hover:border-brand dark:border-neutral-700 dark:bg-neutral-900"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-sm hover:border-accent"
           >
             {MUSTER_NAMEN[m]}
-            <span className="text-neutral-500">{liste.length}</span>
+            <span className="text-ink-3">{liste.length}</span>
           </a>
         ))}
       </nav>
-      <div className="max-h-[calc(100dvh-15rem)] overflow-auto rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="max-h-[calc(100dvh-15rem)] overflow-auto rounded-xl border border-line bg-surface">
         <table className="w-full min-w-[40rem] border-separate border-spacing-0 text-left text-sm">
           <caption className="sr-only">{tt.tabelleBeschreibung}</caption>
-          <thead className="sticky top-0 z-10 bg-neutral-50 dark:bg-neutral-950">
+          <thead className="sticky top-0 z-10 bg-bg">
             <tr>
               {spalten.map((s) => {
                 const aktiv = sortSpalte === s;
@@ -372,25 +348,16 @@ export function KatalogTabelle({
                   <th
                     key={s}
                     scope="col"
-                    aria-sort={
-                      aktiv
-                        ? richtung === "auf"
-                          ? "ascending"
-                          : "descending"
-                        : "none"
-                    }
+                    aria-sort={aktiv ? (richtung === "auf" ? "ascending" : "descending") : "none"}
                     className="whitespace-nowrap px-3 pb-1 pt-3 font-semibold"
                   >
                     <Link
                       href={sortLink(s)}
                       aria-label={tt.sortieren(tt.spalten[s])}
-                      className="inline-flex min-h-8 items-center gap-1 hover:text-brand"
+                      className="inline-flex min-h-8 items-center gap-1 hover:text-accent-ink"
                     >
                       {tt.spalten[s]}
-                      <span
-                        aria-hidden="true"
-                        className={aktiv ? "text-brand" : "text-neutral-400"}
-                      >
+                      <span aria-hidden="true" className={aktiv ? "text-accent-ink" : "text-ink-3"}>
                         {aktiv ? (richtung === "auf" ? "▲" : "▼") : "↕"}
                       </span>
                     </Link>
@@ -400,10 +367,7 @@ export function KatalogTabelle({
             </tr>
             <tr>
               {spalten.map((s) => (
-                <td
-                  key={s}
-                  className="border-b border-neutral-200 px-3 pb-3 align-top font-normal dark:border-neutral-800"
-                >
+                <td key={s} className="border-b border-line px-3 pb-3 align-top font-normal">
                   <FilterZelle spalte={s} filter={filter} profile={profile} />
                 </td>
               ))}
@@ -416,27 +380,23 @@ export function KatalogTabelle({
                   id={`muster-${m}`}
                   scope="rowgroup"
                   colSpan={spalten.length}
-                  className="scroll-mt-44 border-b border-neutral-200 bg-neutral-100 px-3 py-2 text-left font-semibold dark:border-neutral-800 dark:bg-neutral-800"
+                  className="scroll-mt-44 border-b border-line bg-fill px-3 py-2 text-left font-semibold"
                 >
-                  {MUSTER_NAMEN[m]}{" "}
-                  <span className="font-normal text-neutral-500">({m})</span>
-                  <span className="ml-2 font-normal text-neutral-500">
+                  {MUSTER_NAMEN[m]} <span className="font-normal text-ink-3">({m})</span>
+                  <span className="ml-2 font-normal text-ink-3">
                     · {tt.gruppeZahl(liste.length)}
                   </span>
                 </th>
               </tr>
               {liste.map((e) => (
-                <tr
-                  key={e.id}
-                  className={`hover:bg-neutral-50 dark:hover:bg-neutral-800/60 ${e.aktiv ? "" : "opacity-60"}`}
-                >
+                <tr key={e.id} className={`hover:bg-fill ${e.aktiv ? "" : "opacity-60"}`}>
                   {spalten.map((s) => {
                     const Zellentyp = s === "name" ? "th" : "td";
                     return (
                       <Zellentyp
                         key={s}
                         scope={s === "name" ? "row" : undefined}
-                        className="border-b border-neutral-100 px-3 py-2.5 text-left align-top font-normal dark:border-neutral-800"
+                        className="border-b border-line px-3 py-2.5 text-left align-top font-normal"
                       >
                         <Zelle e={e} spalte={s} alle={alle} />
                       </Zellentyp>

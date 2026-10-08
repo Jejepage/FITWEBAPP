@@ -29,7 +29,7 @@ export function PlanAnsicht({
         <section
           key={einheit}
           aria-labelledby={`einheit-${einheit}`}
-          className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+          className="rounded-xl border border-line bg-surface p-4"
         >
           <h2 id={`einheit-${einheit}`} className="mb-3 text-xl font-semibold">
             {t.einheit(einheit)}
@@ -39,7 +39,7 @@ export function PlanAnsicht({
             const aus = block === "Z" && !zusatzblockAktiv;
             return (
               <div key={block} className={`mb-4 last:mb-0 ${aus ? "opacity-60" : ""}`}>
-                <h3 className="mb-1 text-sm font-semibold text-neutral-600 dark:text-neutral-400">
+                <h3 className="mb-1 text-sm font-semibold text-ink-2">
                   {t.block[block]} · {t.runden(BLOCK_RUNDEN[block])}
                 </h3>
                 <ol className="space-y-2">
@@ -48,7 +48,7 @@ export function PlanAnsicht({
                     const key = slotKey(s);
                     return (
                       <li key={key}>
-                        <div className="text-xs text-neutral-500">{MUSTER_NAMEN[s.muster]}</div>
+                        <div className="text-xs text-ink-3">{MUSTER_NAMEN[s.muster]}</div>
                         {kandidaten ? (
                           <select
                             name={`slot_${key}`}
@@ -66,7 +66,7 @@ export function PlanAnsicht({
                         ) : (
                           <Link
                             href={`/katalog/${s.exerciseId}`}
-                            className="inline-flex min-h-11 items-center font-medium text-brand"
+                            className="inline-flex min-h-11 items-center font-medium text-accent-ink"
                           >
                             {u?.name ?? s.exerciseId}
                           </Link>
@@ -76,7 +76,7 @@ export function PlanAnsicht({
                   })}
                 </ol>
                 {aus && !kandidaten && (
-                  <p className="mt-1 text-xs text-neutral-500">{t.zusatzAusHinweis}</p>
+                  <p className="mt-1 text-xs text-ink-3">{t.zusatzAusHinweis}</p>
                 )}
               </div>
             );

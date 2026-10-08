@@ -25,7 +25,11 @@ import { SatzFormular } from "./satz-formular";
 import type { GespeicherterSatzInfo, TrainingsDaten, UebungInfo } from "./typen";
 
 const t = de.training;
-const BLOCK_NAME: Record<Block, string> = { "1": t.block1, "2": t.block2, Z: t.blockZ };
+const BLOCK_NAME: Record<Block, string> = {
+  "1": t.block1,
+  "2": t.block2,
+  Z: t.blockZ,
+};
 
 type Status = "ok" | "wartet" | "abgelehnt";
 type Gespeichert = GespeicherterSatzInfo & { status: Status };
@@ -64,7 +68,7 @@ function datumTagMonat(iso: string): string {
 function VorschlagHinweis({ info }: { info: UebungInfo }) {
   const text = vorschlagGrundText(info.vorschlag.grund, info.schwererName);
   if (!text) return null;
-  return <p className="mt-1 text-sm font-medium text-brand">{text}</p>;
+  return <p className="mt-1 text-sm font-medium text-accent-ink">{text}</p>;
 }
 
 export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
@@ -238,7 +242,13 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     };
     setGespeichert((prev) => ({
       ...prev,
-      [schritt.key]: { id, key: schritt.key, exerciseId, werte, status: "wartet" },
+      [schritt.key]: {
+        id,
+        key: schritt.key,
+        exerciseId,
+        werte,
+        status: "wartet",
+      },
     }));
     setMeldung(null);
     void sende(payload);
@@ -310,16 +320,16 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   // --- Darstellung ------------------------------------------------------------------------
   const kopf = (
     <header className="mb-4">
-      <p className="text-sm font-medium text-neutral-500">
+      <p className="text-sm font-medium text-ink-3">
         {t.kopf(daten.einheit, daten.woche)}
         {daten.adHoc && (
-          <span className="ml-2 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+          <span className="ml-2 rounded-full bg-warn-soft px-2.5 py-0.5 text-xs text-warn-ink">
             {de.adhoc.kopfBadge(daten.profilName)}
           </span>
         )}
       </p>
       <div
-        className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800"
+        className="mt-2 h-2 overflow-hidden rounded-full bg-fill-2"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={schritte.length}
@@ -327,11 +337,13 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         aria-label={t.fortschritt(erledigteKeys.size, schritte.length)}
       >
         <div
-          className="h-full bg-brand transition-all"
-          style={{ width: `${(erledigteKeys.size / Math.max(schritte.length, 1)) * 100}%` }}
+          className="h-full bg-accent transition-all"
+          style={{
+            width: `${(erledigteKeys.size / Math.max(schritte.length, 1)) * 100}%`,
+          }}
         />
       </div>
-      <p className="mt-1 text-xs text-neutral-500">
+      <p className="mt-1 text-xs text-ink-3">
         {t.fortschritt(erledigteKeys.size, schritte.length)}
       </p>
     </header>
@@ -340,15 +352,10 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   const hinweise = (
     <>
       {!wakeLockVerfuegbar && (
-        <p className="mb-3 rounded-lg bg-neutral-100 p-3 text-sm text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-          {t.bildschirm.kannNicht}
-        </p>
+        <p className="mb-3 rounded-lg bg-fill p-3 text-sm text-ink-2">{t.bildschirm.kannNicht}</p>
       )}
       {wartendAnzahl > 0 && (
-        <p
-          role="status"
-          className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <p role="status" className="mb-3 rounded-lg bg-warn-soft p-3 text-sm text-warn-ink">
           {t.speichern.wartet(wartendAnzahl)}{" "}
           <button
             type="button"
@@ -364,11 +371,11 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
   );
 
   const mehr = (
-    <details className="mt-8 rounded-xl border border-neutral-200 dark:border-neutral-800">
+    <details className="mt-8 rounded-xl border border-line">
       <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
         {t.mehr.titel}
       </summary>
-      <div className="flex flex-col gap-2 border-t border-neutral-200 p-4 dark:border-neutral-800">
+      <div className="flex flex-col gap-2 border-t border-line p-4">
         {erledigteKeys.size > 0 && effektivePhase.art !== "fertig" && (
           <button type="button" onClick={vorigenAendern} className={knopfSekundaer}>
             {t.mehr.vorigenAendern}
@@ -379,11 +386,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
             {t.mehr.vorzeitigAbschliessen}
           </button>
         )}
-        <button
-          type="button"
-          onClick={abbrechen}
-          className={`${knopfSekundaer} text-red-700 dark:text-red-400`}
-        >
+        <button type="button" onClick={abbrechen} className={`${knopfSekundaer} text-bad-ink`}>
           {t.mehr.abbrechen}
         </button>
       </div>
@@ -400,13 +403,13 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         {hinweise}
         <section
           aria-labelledby="aufwaermen-titel"
-          className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+          className="rounded-xl border border-line bg-surface p-4"
         >
           <h1 id="aufwaermen-titel" className="mb-2 text-2xl font-bold">
             {t.aufwaermenTitel}
           </h1>
           <p className="whitespace-pre-line">{daten.aufwaermenText}</p>
-          <p className="mt-3 text-sm text-neutral-500">{t.aufwaermenHilfe}</p>
+          <p className="mt-3 text-sm text-ink-3">{t.aufwaermenHilfe}</p>
         </section>
         <div className="mt-4">
           <button
@@ -430,11 +433,11 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
       <>
         {kopf}
         {hinweise}
-        <section className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <section className="rounded-xl border border-line bg-surface p-4">
           <h1 className="mb-1 text-2xl font-bold">
             {t.block.geschafft(BLOCK_NAME[fertigerBlock ?? "1"])}
           </h1>
-          <p className="mb-3 text-sm text-neutral-500">
+          <p className="mb-3 text-sm text-ink-3">
             {t.block.naechster}: {BLOCK_NAME[effektivePhase.naechster]}
           </p>
           <ol className="list-decimal space-y-1 pl-5">
@@ -469,18 +472,15 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         {kopf}
         {hinweise}
         <h1 className="mb-1 text-2xl font-bold">{t.fertig.titel}</h1>
-        <p className="mb-4 text-sm text-neutral-500">{t.fertig.hilfe}</p>
+        <p className="mb-4 text-sm text-ink-3">{t.fertig.hilfe}</p>
         {nachUebung.size === 0 ? (
           <FehlerBanner>{t.fertig.keineSaetze}</FehlerBanner>
         ) : (
           <ul className="mb-4 space-y-3">
             {[...nachUebung.entries()].map(([id, saetze]) => (
-              <li
-                key={id}
-                className="rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900"
-              >
+              <li key={id} className="rounded-xl border border-line bg-surface p-3">
                 <p className="font-semibold">{uebungen[id]?.name ?? id}</p>
-                <ol className="mt-1 list-decimal pl-5 text-sm text-neutral-600 dark:text-neutral-400">
+                <ol className="mt-1 list-decimal pl-5 text-sm text-ink-2">
                   {saetze.map((g) => (
                     <li key={g.id}>{formatSatz(g.werte)}</li>
                   ))}
@@ -497,7 +497,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
             rows={3}
             maxLength={2000}
             placeholder={t.fertig.notizPlatzhalter}
-            className="block w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base dark:border-neutral-700 dark:bg-neutral-900"
+            className="block w-full rounded-lg border border-line bg-surface px-3 py-2 text-base"
           />
         </label>
         <button
@@ -546,7 +546,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
       {kopf}
       {hinweise}
       <section aria-labelledby="uebung-name" className="mb-4">
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-ink-3">
           {t.position(
             BLOCK_NAME[schritt.block],
             schritt.runde,
@@ -558,17 +558,17 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         <h1 id="uebung-name" className="text-3xl font-bold leading-tight">
           {info.name}
           {ersetzt && (
-            <span className="ml-2 align-middle text-sm font-medium text-amber-700 dark:text-amber-300">
+            <span className="ml-2 align-middle text-sm font-medium text-warn-ink">
               {t.ersetztBadge}
             </span>
           )}
         </h1>
         <p className="mt-2 text-base">
-          <span className="text-neutral-500">{t.ziel}:</span> {info.zielText} · RPE{" "}
+          <span className="text-ink-3">{t.ziel}:</span> {info.zielText} · RPE{" "}
           {daten.rpeMin === daten.rpeMax ? daten.rpeMin : `${daten.rpeMin}–${daten.rpeMax}`}
         </p>
         <VorschlagHinweis info={info} />
-        <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-ink-2">
           <span className="font-medium">{t.letztesMal}:</span>{" "}
           {info.letzte
             ? `${datumTagMonat(info.letzte.datum)} · ${info.letzte.saetze.map(formatSatz).join(" | ")}`
@@ -591,11 +591,11 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
 
       {info.videoUrl && <VideoKnopf url={info.videoUrl} className="mt-4 w-full" />}
 
-      <details className="mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800">
+      <details className="mt-4 rounded-xl border border-line">
         <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
           {t.ausfuehrung}
         </summary>
-        <div className="space-y-3 border-t border-neutral-200 p-4 text-sm dark:border-neutral-800">
+        <div className="space-y-3 border-t border-line p-4 text-sm">
           <ol className="list-decimal space-y-1 pl-5">
             {info.ausfuehrung.map((a, i) => (
               <li key={i}>{a}</li>
@@ -609,17 +609,17 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
               ))}
             </ul>
           </div>
-          <p className="text-neutral-600 dark:text-neutral-400">{info.hinweise}</p>
+          <p className="text-ink-2">{info.hinweise}</p>
         </div>
       </details>
 
       {!korrektur && (
-        <details className="mt-3 rounded-xl border border-neutral-200 dark:border-neutral-800">
+        <details className="mt-3 rounded-xl border border-line">
           <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
             {t.ersetzen}
           </summary>
-          <div className="space-y-2 border-t border-neutral-200 p-4 dark:border-neutral-800">
-            <p className="text-sm text-neutral-500">{t.ersetzenHilfe}</p>
+          <div className="space-y-2 border-t border-line p-4">
+            <p className="text-sm text-ink-3">{t.ersetzenHilfe}</p>
             {ersetzt && (
               <button
                 type="button"
@@ -642,7 +642,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
                   className={`${knopfSekundaer} w-full justify-between text-left`}
                 >
                   <span>{k.name}</span>
-                  <span className="text-sm text-neutral-500">
+                  <span className="text-sm text-ink-3">
                     Stufe {k.stufe}
                     {k.einseitig ? " · einseitig" : ""}
                   </span>

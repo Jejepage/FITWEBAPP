@@ -45,7 +45,11 @@ export default async function PlanNeuPage({
     profile.find((p) => p.id === aufgeloest.profilId) ??
     profile.find((p) => p.id === standard.profilId)!;
   const vorgaenger = aufgeloest.vorgaengerId ? getPlan(db, aufgeloest.vorgaengerId) : null;
-  const werte = { ...aufgeloest, profilId: profil.id, vorgaengerId: vorgaenger?.id ?? null };
+  const werte = {
+    ...aufgeloest,
+    profilId: profil.id,
+    vorgaengerId: vorgaenger?.id ?? null,
+  };
   const basis = planBasis(werte);
 
   const fehlerParam = typeof sp.fehler === "string" ? sp.fehler : undefined;
@@ -81,7 +85,7 @@ export default async function PlanNeuPage({
 
   return (
     <>
-      <Link href="/plan" className="mb-3 inline-block min-h-11 py-2 text-brand">
+      <Link href="/plan" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
         ← {t.zurueck}
       </Link>
       <h1 className="mb-4 text-2xl font-bold">{t.neuTitel}</h1>
@@ -94,16 +98,13 @@ export default async function PlanNeuPage({
         <input type="hidden" name="seed" value={werte.seed} />
         <input type="hidden" name="basis" value={basis} />
         {vorgaenger && <input type="hidden" name="vorgaenger" value={vorgaenger.id} />}
-        {vorgaenger && <p className="mb-3 text-sm text-neutral-500">{f.folgeblock}</p>}
+        {vorgaenger && <p className="mb-3 text-sm text-ink-3">{f.folgeblock}</p>}
 
-        <details
-          open
-          className="mb-4 rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
-        >
+        <details open className="mb-4 rounded-xl border border-line bg-surface">
           <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
             {f.eingaben}
           </summary>
-          <div className="border-t border-neutral-200 p-4 dark:border-neutral-800">
+          <div className="border-t border-line p-4">
             <div className="grid gap-x-4 sm:grid-cols-2">
               <Feld label={f.profil}>
                 <select name="profil" defaultValue={String(profil.id)} className={eingabe}>
@@ -169,10 +170,7 @@ export default async function PlanNeuPage({
         </details>
 
         {!ergebnis.ok ? (
-          <section
-            role="alert"
-            className="mb-4 rounded-xl bg-red-50 p-4 text-red-900 dark:bg-red-950 dark:text-red-200"
-          >
+          <section role="alert" className="mb-4 rounded-xl bg-bad-soft p-4 text-bad-ink">
             <p className="font-medium">
               {t.fehlendeMuster(ergebnis.fehlendeMuster.map((m) => MUSTER_NAMEN[m]).join(", "))}
             </p>
@@ -200,15 +198,15 @@ export default async function PlanNeuPage({
                 {f.neu}
               </button>
             </div>
-            <p className="mb-3 text-sm text-neutral-500">{f.auswahlHilfe}</p>
+            <p className="mb-3 text-sm text-ink-3">{f.auswahlHilfe}</p>
             <PlanAnsicht
               slots={slots}
               uebungen={uebungenNachId}
               zusatzblockAktiv={werte.zusatzblock}
               kandidaten={kandidaten}
             />
-            <div className="sticky bottom-16 -mx-4 mt-6 border-t border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-950 md:static md:mx-0 md:border-0 md:px-0">
-              <p className="mb-2 text-sm text-neutral-500">{f.speichernHilfe}</p>
+            <div className="sticky bottom-16 -mx-4 mt-6 border-t border-line bg-bg px-4 py-3 md:static md:mx-0 md:border-0 md:px-0">
+              <p className="mb-2 text-sm text-ink-3">{f.speichernHilfe}</p>
               <button
                 type="submit"
                 formAction={planSpeichern}

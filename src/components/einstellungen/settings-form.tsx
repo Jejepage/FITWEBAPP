@@ -72,7 +72,7 @@ export function SettingsForm({
       </Gruppe>
 
       <Checkbox name="zusatzblock" label={t.zusatzblock} checked={w.zusatzblock} />
-      <p className="mb-4 text-sm text-neutral-500">{t.zusatzblockHilfe}</p>
+      <p className="mb-4 text-sm text-ink-3">{t.zusatzblockHilfe}</p>
 
       <Feld label={t.aufwaermen} hilfe={t.aufwaermenHilfe} fehler={fehler.aufwaermenText}>
         <textarea

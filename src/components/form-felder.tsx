@@ -19,9 +19,9 @@ export function Feld({
         <span className="mb-1 block text-sm font-medium">{label}</span>
         {children}
       </label>
-      {hilfe && <p className="mt-1 text-sm text-neutral-500">{hilfe}</p>}
+      {hilfe && <p className="mt-1 text-sm text-ink-3">{hilfe}</p>}
       {fehler && (
-        <p role="alert" className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-1 text-sm font-medium text-bad-ink">
           {fehler}
         </p>
       )}
@@ -69,12 +69,12 @@ export function Gruppe({
   children: ReactNode;
 }) {
   return (
-    <fieldset className="mb-4 rounded-lg border border-neutral-200 p-3 dark:border-neutral-800">
+    <fieldset className="mb-4 rounded-lg border border-line p-3">
       <legend className="px-1 text-sm font-medium">{legende}</legend>
-      {hilfe && <p className="mb-1 text-sm text-neutral-500">{hilfe}</p>}
+      {hilfe && <p className="mb-1 text-sm text-ink-3">{hilfe}</p>}
       {children}
       {fehler && (
-        <p role="alert" className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-1 text-sm font-medium text-bad-ink">
           {fehler}
         </p>
       )}
@@ -84,10 +84,7 @@ export function Gruppe({
 
 export function FehlerBanner({ children }: { children: ReactNode }) {
   return (
-    <p
-      role="alert"
-      className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-800 dark:bg-red-950 dark:text-red-200"
-    >
+    <p role="alert" className="mb-4 rounded-lg bg-bad-soft p-3 text-sm font-medium text-bad-ink">
       {children}
     </p>
   );
@@ -95,10 +92,7 @@ export function FehlerBanner({ children }: { children: ReactNode }) {
 
 export function ErfolgBanner({ children }: { children: ReactNode }) {
   return (
-    <p
-      role="status"
-      className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
-    >
+    <p role="status" className="mb-4 rounded-lg bg-ok-soft p-3 text-sm font-medium text-ok-ink">
       {children}
     </p>
   );

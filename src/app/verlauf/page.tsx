@@ -35,9 +35,7 @@ export default async function VerlaufPage({
         {liste.length === 0 ? (
           <div className={`${karte} text-center`}>
             <p className="font-medium">{t.keineEinheiten}</p>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
-              {t.keineEinheitenHilfe}
-            </p>
+            <p className="text-sm text-ink-2">{t.keineEinheitenHilfe}</p>
           </div>
         ) : (
           <EinheitenListe einheiten={liste} />
@@ -53,25 +51,25 @@ export default async function VerlaufPage({
         <h2 id="uebungen-titel" className="text-lg font-semibold">
           {t.uebungen}
         </h2>
-        <p className="mb-2 text-sm text-neutral-600 dark:text-neutral-400">{t.uebungenHilfe}</p>
+        <p className="mb-2 text-sm text-ink-2">{t.uebungenHilfe}</p>
         {uebungen.length === 0 ? (
-          <p className="text-sm text-neutral-500">{t.keineUebungen}</p>
+          <p className="text-sm text-ink-3">{t.keineUebungen}</p>
         ) : (
           MUSTER.map((m) => {
             const liste = uebungen.filter((u) => u.muster === m);
             if (liste.length === 0) return null;
             return (
               <div key={m} className="mb-3">
-                <h3 className="mb-1 text-sm font-medium text-neutral-500">{MUSTER_NAMEN[m]}</h3>
+                <h3 className="mb-1 text-sm font-medium text-ink-3">{MUSTER_NAMEN[m]}</h3>
                 <ul className="space-y-2">
                   {liste.map((u) => (
                     <li key={u.id}>
                       <Link
                         href={`/verlauf/uebung/${u.id}`}
-                        className={`${karte} flex min-h-14 items-center justify-between gap-3 hover:border-brand`}
+                        className={`${karte} flex min-h-14 items-center justify-between gap-3 hover:border-accent`}
                       >
                         <span className="font-medium">{u.name}</span>
-                        <span className="shrink-0 text-sm text-neutral-500">
+                        <span className="shrink-0 text-sm text-ink-3">
                           {t.einheitenAnzahl(u.einheiten)}
                         </span>
                       </Link>

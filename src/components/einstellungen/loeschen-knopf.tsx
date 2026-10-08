@@ -16,11 +16,7 @@ export function LoeschenKnopf({ aktion }: { aktion: (prev: LoeschState) => Promi
       }}
     >
       {state.fehler && <FehlerBanner>{state.fehler}</FehlerBanner>}
-      <button
-        type="submit"
-        disabled={pending}
-        className={`${knopfSekundaer} text-red-700 dark:text-red-400`}
-      >
+      <button type="submit" disabled={pending} className={`${knopfSekundaer} text-bad-ink`}>
         {de.profil.loeschen}
       </button>
     </form>

@@ -51,7 +51,7 @@ export default function EinstellungenPage() {
             {t.neuesProfil}
           </Link>
         </div>
-        <p className="mb-3 text-sm text-neutral-500">{t.profileHilfe}</p>
+        <p className="mb-3 text-sm text-ink-3">{t.profileHilfe}</p>
         <ul className="space-y-2">
           {profile.map((p) => {
             const anzahl = zaehleMachbar(uebungen, p.equipment);
@@ -63,23 +63,21 @@ export default function EinstellungenPage() {
               <li key={p.id}>
                 <Link
                   href={`/einstellungen/profile/${p.id}`}
-                  className={`${karte} block hover:border-brand`}
+                  className={`${karte} block hover:border-accent`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold">{p.name}</span>
                     {p.istStandard && <Badge farbe="gut">{t.standard}</Badge>}
                   </div>
-                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="mt-1 text-sm text-ink-2">
                     {p.equipment.length > 0
                       ? p.equipment.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
                       : t.keinEquipment}
                   </p>
                   {gewichte.length > 0 && (
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {gewichte.join(" · ")}
-                    </p>
+                    <p className="text-sm text-ink-2">{gewichte.join(" · ")}</p>
                   )}
-                  <p className="mt-1 text-sm text-neutral-500">
+                  <p className="mt-1 text-sm text-ink-3">
                     {t.machbarVonGesamt(gesamt, uebungen.filter((u) => u.aktiv).length)}
                   </p>
                 </Link>
@@ -94,7 +92,7 @@ export default function EinstellungenPage() {
       <section className="mb-10">
         <Link
           href="/einstellungen/daten"
-          className={`${karte} flex min-h-14 items-center justify-between gap-3 hover:border-brand`}
+          className={`${karte} flex min-h-14 items-center justify-between gap-3 hover:border-accent`}
         >
           <span className="font-semibold">{de.daten.link}</span>
           <span aria-hidden="true">→</span>
@@ -111,7 +109,7 @@ export default function EinstellungenPage() {
             <li key={z}>{z}</li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-neutral-500">
+        <p className="mt-3 text-xs text-ink-3">
           {s.hinweisAkzeptiertAm &&
             t.bestaetigtAm(
               new Date(s.hinweisAkzeptiertAm).toLocaleDateString("de-DE", {

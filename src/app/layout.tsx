@@ -32,7 +32,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0f766e",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -42,17 +45,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const hinweisBestaetigt = angemeldet && getSettings(db).hinweisAkzeptiertAm !== null;
   return (
     <html lang="de">
-      <body className="min-h-dvh pb-20 md:pb-0">
+      <body className="min-h-dvh">
         <SwRegistrar />
         {!angemeldet ? (
-          <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
+          <main className="mx-auto w-full max-w-md px-4 py-10 sm:py-16">{children}</main>
         ) : hinweisBestaetigt ? (
           <>
             <MainNav />
-            <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
+            <main className="px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[calc(1.5rem+env(safe-area-inset-top))] sm:px-6 lg:pb-12 lg:pl-[calc(16rem+2.5rem)] lg:pr-10 lg:pt-10">
+              {children}
+            </main>
           </>
         ) : (
-          <main className="mx-auto max-w-3xl px-4 py-6">
+          <main className="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
             <HinweisGate />
           </main>
         )}

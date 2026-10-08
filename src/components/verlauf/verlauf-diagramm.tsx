@@ -49,7 +49,11 @@ function schoenerSchritt(roh: number): number {
 const runden = (v: number) => Math.round(v * 1e9) / 1e9;
 
 /** Y-Skala mit 3 bis 5 runden Gitterwerten. */
-function skala(werte: readonly number[]): { ticks: number[]; min: number; max: number } {
+function skala(werte: readonly number[]): {
+  ticks: number[];
+  min: number;
+  max: number;
+} {
   const dataMin = Math.min(...werte);
   const dataMax = Math.max(...werte);
   let lo = dataMin;
@@ -82,11 +86,11 @@ function achsenIndizes(n: number): number[] {
   return [...set];
 }
 
-const KLASSE_GITTER = "stroke-neutral-200 dark:stroke-neutral-800";
-const KLASSE_ACHSE = "stroke-neutral-300 dark:stroke-neutral-600";
-const KLASSE_TEXT = "fill-neutral-600 dark:fill-neutral-400";
-const KLASSE_LINIE = "stroke-brand dark:stroke-teal-400";
-const KLASSE_FLAECHE = "fill-white dark:fill-neutral-900";
+const KLASSE_GITTER = "stroke-line";
+const KLASSE_ACHSE = "stroke-line";
+const KLASSE_TEXT = "fill-ink-2";
+const KLASSE_LINIE = "stroke-brand";
+const KLASSE_FLAECHE = "fill-white";
 
 /** Liniendiagramm als Inline-SVG. X-Achse nach Reihenfolge der Einheiten, nicht nach Zeitabstand. */
 export function VerlaufDiagramm({
@@ -99,7 +103,7 @@ export function VerlaufDiagramm({
   titel: string;
 }): JSX.Element {
   const daten = punkte.filter((p) => Number.isFinite(p.wert));
-  if (daten.length === 0) return <p className="text-sm text-neutral-500">{TEXT.keineDaten}</p>;
+  if (daten.length === 0) return <p className="text-sm text-ink-3">{TEXT.keineDaten}</p>;
 
   const n = daten.length;
   const { ticks, min, max } = skala(daten.map((p) => p.wert));
@@ -189,7 +193,7 @@ export function VerlaufDiagramm({
         )}
         {hatAdHoc && hatGeplant && (
           <g transform={`translate(${B - RECHTS - 150} 9)`}>
-            <circle cx={5} cy={0} r={4.5} className="fill-brand dark:fill-teal-400" />
+            <circle cx={5} cy={0} r={4.5} className="fill-brand" />
             <text x={15} y={0} dy="0.32em" className={KLASSE_TEXT}>
               {TEXT.geplant}
             </text>
@@ -244,7 +248,7 @@ export function VerlaufDiagramm({
               cy={py(p.wert)}
               r={radius}
               strokeWidth={1.5}
-              className="fill-brand stroke-white dark:fill-teal-400 dark:stroke-neutral-900"
+              className="fill-brand stroke-white"
             />
           )}
         </g>

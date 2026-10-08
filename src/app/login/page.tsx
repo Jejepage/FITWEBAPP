@@ -22,7 +22,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <div className="mx-auto max-w-sm pt-10">
       <h1 className="mb-2 text-2xl font-bold">{t.titel}</h1>
-      <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">{t.hilfe}</p>
+      <p className="mb-4 text-sm text-ink-2">{t.hilfe}</p>
       {fehler && <FehlerBanner>{fehler}</FehlerBanner>}
       <form action={anmelden} className={karte}>
         <input type="hidden" name="weiter" value={weiter} />

@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Nur für parallele Entwicklungsläufe (jeder Lauf baut in einen eigenen Ordner); Standard: .next
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   serverExternalPackages: ["better-sqlite3"],
   poweredByHeader: false,
   async headers() {

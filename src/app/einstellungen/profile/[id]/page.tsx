@@ -19,7 +19,7 @@ export default async function ProfilPage({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <Link href="/einstellungen" className="mb-3 inline-block min-h-11 py-2 text-brand">
+      <Link href="/einstellungen" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
         ← {de.profil.zurueck}
       </Link>
       <h1 className="mb-4 text-2xl font-bold">{de.profil.bearbeitenTitel(profil.name)}</h1>
@@ -29,7 +29,7 @@ export default async function ProfilPage({ params }: { params: Promise<{ id: str
         werte={profilZuFormWerte(profil)}
         istAktuellStandard={profil.istStandard}
       />
-      <section className="mt-10 border-t border-neutral-200 pt-6 dark:border-neutral-800">
+      <section className="mt-10 border-t border-line pt-6">
         <h2 className="mb-3 text-lg font-semibold">{de.profil.loeschenTitel}</h2>
         <LoeschenKnopf aktion={loescheProfil.bind(null, profil.id)} />
       </section>

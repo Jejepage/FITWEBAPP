@@ -22,11 +22,11 @@ function Wochen({ block }: { block: BlockZeile }) {
             {Array.from({ length: block.einheitenProWoche }, (_, k) => (
               <span
                 key={k}
-                className={`h-3 w-3 rounded-sm ${k < erledigt ? "bg-brand" : "border border-neutral-400 dark:border-neutral-600"}`}
+                className={`h-3 w-3 rounded-sm ${k < erledigt ? "bg-accent" : "border border-line"}`}
               />
             ))}
           </div>
-          <span className="text-xs text-neutral-500">W{i + 1}</span>
+          <span className="text-xs text-ink-3">W{i + 1}</span>
         </li>
       ))}
     </ol>
@@ -45,17 +45,17 @@ export function BlockUebersicht({ bloecke }: { bloecke: BlockZeile[] }) {
       <div className={karte}>
         <p className="font-medium">
           {t.blockTitel(datumKurz(aktuell.startDatum))}
-          <span className="ml-2 text-sm font-normal text-neutral-500">
+          <span className="ml-2 text-sm font-normal text-ink-3">
             {aktuell.status === "aktiv" ? t.aktiv : t.abgeschlossen}
           </span>
         </p>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-ink-2">
           {t.blockStand(aktuell.absolviert, aktuell.geplant)} · {aktuell.profilName}
         </p>
         <Wochen block={aktuell} />
       </div>
       {frueher.length > 0 && (
-        <ul className="mt-2 space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
+        <ul className="mt-2 space-y-1 text-sm text-ink-2">
           {frueher.map((b) => (
             <li key={b.planId} className="flex justify-between gap-3 px-1">
               <span>{t.blockTitel(datumKurz(b.startDatum))}</span>

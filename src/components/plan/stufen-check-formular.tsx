@@ -22,16 +22,16 @@ export function StufenCheckFormular({
       <h2 id="stufencheck-titel" className="text-lg font-semibold">
         {t.titel}
       </h2>
-      <p className="mb-3 text-sm text-neutral-600 dark:text-neutral-400">{t.hilfe}</p>
+      <p className="mb-3 text-sm text-ink-2">{t.hilfe}</p>
       <form method="get" action="/plan/neu">
         <input type="hidden" name="vorgaenger" value={planId} />
-        <ul className="divide-y divide-neutral-200 dark:divide-neutral-800">
+        <ul className="divide-y divide-line">
           {ergebnisse.map((e) => (
             <li key={e.muster} className="py-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">{MUSTER_NAMEN[e.muster]}</p>
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-ink-3">
                     {t.aktuell}: {t.stufe(e.aktuell)} · {t.einheitenGewertet(e.einheiten)}
                   </p>
                 </div>
@@ -53,8 +53,8 @@ export function StufenCheckFormular({
                 </label>
               </div>
               <p className="mt-1 text-sm">
-                <span className="font-medium text-brand">{t.empfehlung[e.empfehlung]}.</span>{" "}
-                <span className="text-neutral-600 dark:text-neutral-400">{t.grund[e.grund]}</span>
+                <span className="font-medium text-accent-ink">{t.empfehlung[e.empfehlung]}.</span>{" "}
+                <span className="text-ink-2">{t.grund[e.grund]}</span>
               </p>
             </li>
           ))}
@@ -62,7 +62,7 @@ export function StufenCheckFormular({
         <button type="submit" className={`${knopfPrimaer} mt-3 w-full min-h-14 text-lg`}>
           {t.knopf}
         </button>
-        <p className="mt-2 text-center text-sm text-neutral-500">{t.knopfHilfe}</p>
+        <p className="mt-2 text-center text-sm text-ink-3">{t.knopfHilfe}</p>
       </form>
     </section>
   );

@@ -56,7 +56,7 @@ export function SatzFormular({
       }}
     >
       {korrektur && (
-        <div className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <div className="mb-4 rounded-lg bg-warn-soft p-3 text-sm text-warn-ink">
           <p className="mb-2 font-medium">{t.korrekturHinweis}</p>
           <button
             type="button"
@@ -129,9 +129,7 @@ export function SatzFormular({
                 aria-checked={gewaehlt}
                 onClick={() => set("rpe", n)}
                 className={`flex h-12 items-center justify-center rounded-lg border text-lg font-semibold ${
-                  gewaehlt
-                    ? "border-brand bg-brand text-white"
-                    : "border-neutral-300 bg-white dark:border-neutral-700 dark:bg-neutral-900"
+                  gewaehlt ? "border-accent bg-accent text-on-accent" : "border-line bg-surface"
                 }`}
               >
                 {n}
@@ -139,7 +137,7 @@ export function SatzFormular({
             );
           })}
         </div>
-        <p className="mt-1 text-xs text-neutral-500">{t.rpeHilfe}</p>
+        <p className="mt-1 text-xs text-ink-3">{t.rpeHilfe}</p>
       </fieldset>
 
       {kannTempo && (
@@ -154,10 +152,10 @@ export function SatzFormular({
         </label>
       )}
 
-      <div className="sticky bottom-16 -mx-4 border-t border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-950 md:static md:mx-0 md:border-0 md:px-0">
+      <div className="sticky bottom-16 -mx-4 border-t border-line bg-bg px-4 py-3 md:static md:mx-0 md:border-0 md:px-0">
         <button
           type="submit"
-          className="flex min-h-16 w-full items-center justify-center rounded-xl bg-brand text-xl font-semibold text-white active:opacity-90"
+          className="flex min-h-16 w-full items-center justify-center rounded-xl bg-accent text-xl font-semibold text-on-accent active:opacity-90"
         >
           {korrektur ? t.korrekturSpeichern : t.satzErledigt}
         </button>

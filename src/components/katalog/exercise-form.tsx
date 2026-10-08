@@ -46,25 +46,16 @@ export function ExerciseForm({
 
   // Nach einem Fehler zur ersten Meldung scrollen (das Formular ist am Handy lang).
   useEffect(() => {
-    if (hatFehler)
-      document
-        .querySelector("form [role=alert]")
-        ?.scrollIntoView({ block: "center" });
+    if (hatFehler) document.querySelector("form [role=alert]")?.scrollIntoView({ block: "center" });
   }, [state, hatFehler]);
 
   return (
     <form key={formKey} action={formAction} noValidate>
-      {hatFehler && (
-        <FehlerBanner>{fehler._form ?? t.formularFehler}</FehlerBanner>
-      )}
+      {hatFehler && <FehlerBanner>{fehler._form ?? t.formularFehler}</FehlerBanner>}
 
       {muster !== undefined && (
         <Feld label={f.muster} fehler={fehler.muster}>
-          <select
-            name="muster"
-            defaultValue={state.muster ?? muster}
-            className={eingabe}
-          >
+          <select name="muster" defaultValue={state.muster ?? muster} className={eingabe}>
             <option value="">{f.keine}</option>
             {MUSTER.map((m) => (
               <option key={m} value={m}>
@@ -92,11 +83,7 @@ export function ExerciseForm({
           />
         </Feld>
         <Feld label={f.belastungsart} fehler={fehler.belastungsart}>
-          <select
-            name="belastungsart"
-            defaultValue={w.belastungsart}
-            className={eingabe}
-          >
+          <select name="belastungsart" defaultValue={w.belastungsart} className={eingabe}>
             {BELASTUNGSARTEN.map((b) => (
               <option key={b} value={b}>
                 {t.belastungsarten[b]}
@@ -113,11 +100,7 @@ export function ExerciseForm({
         hilfe={f.standardBereichHilfe}
         fehler={fehler.standardBereich}
       >
-        <input
-          name="standardBereich"
-          defaultValue={w.standardBereich}
-          className={eingabe}
-        />
+        <input name="standardBereich" defaultValue={w.standardBereich} className={eingabe} />
       </Feld>
 
       <Gruppe legende={f.steigerungsart} fehler={fehler.steigerungsart}>
@@ -132,11 +115,7 @@ export function ExerciseForm({
         ))}
       </Gruppe>
 
-      <Feld
-        label={f.hauptmuskeln}
-        hilfe={f.hauptmuskelnHilfe}
-        fehler={fehler.hauptmuskeln}
-      >
+      <Feld label={f.hauptmuskeln} hilfe={f.hauptmuskelnHilfe} fehler={fehler.hauptmuskeln}>
         <textarea
           name="hauptmuskeln"
           rows={3}
@@ -144,11 +123,7 @@ export function ExerciseForm({
           className={eingabe}
         />
       </Feld>
-      <Feld
-        label={f.ausfuehrung}
-        hilfe={f.ausfuehrungHilfe}
-        fehler={fehler.ausfuehrung}
-      >
+      <Feld label={f.ausfuehrung} hilfe={f.ausfuehrungHilfe} fehler={fehler.ausfuehrung}>
         <textarea
           name="ausfuehrung"
           rows={6}
@@ -157,20 +132,10 @@ export function ExerciseForm({
         />
       </Feld>
       <Feld label={f.fehler} hilfe={f.fehlerHilfe} fehler={fehler.fehler}>
-        <textarea
-          name="fehler"
-          rows={4}
-          defaultValue={w.fehler.join("\n")}
-          className={eingabe}
-        />
+        <textarea name="fehler" rows={4} defaultValue={w.fehler.join("\n")} className={eingabe} />
       </Feld>
       <Feld label={f.hinweise} fehler={fehler.hinweise}>
-        <textarea
-          name="hinweise"
-          rows={4}
-          defaultValue={w.hinweise}
-          className={eingabe}
-        />
+        <textarea name="hinweise" rows={4} defaultValue={w.hinweise} className={eingabe} />
       </Feld>
       <Feld label={f.videoUrl} hilfe={f.videoUrlHilfe} fehler={fehler.videoUrl}>
         <input
@@ -187,13 +152,9 @@ export function ExerciseForm({
       </Feld>
 
       <h2 className="mb-1 mt-6 text-lg font-semibold">{f.equipment}</h2>
-      <p className="mb-3 text-sm text-neutral-500">{f.equipmentHilfe}</p>
+      <p className="mb-3 text-sm text-ink-3">{f.equipmentHilfe}</p>
       {Array.from({ length: GRUPPEN_ANZAHL }, (_, i) => (
-        <Gruppe
-          key={i}
-          legende={f.gruppe(i + 1)}
-          fehler={i === 0 ? fehler.equipment : undefined}
-        >
+        <Gruppe key={i} legende={f.gruppe(i + 1)} fehler={i === 0 ? fehler.equipment : undefined}>
           <div className="grid sm:grid-cols-2">
             {EQUIPMENT_AUSWAHL.map((art) => (
               <Checkbox
@@ -226,11 +187,7 @@ export function ExerciseForm({
       {kandidaten ? (
         <div className="grid gap-x-4 sm:grid-cols-2">
           <Feld label={f.leichter} fehler={fehler.leichterId}>
-            <select
-              name="leichterId"
-              defaultValue={w.leichterId ?? ""}
-              className={eingabe}
-            >
+            <select name="leichterId" defaultValue={w.leichterId ?? ""} className={eingabe}>
               <option value="">{f.keine}</option>
               {kandidaten.leichter.map((k) => (
                 <option key={k.id} value={k.id}>
@@ -240,11 +197,7 @@ export function ExerciseForm({
             </select>
           </Feld>
           <Feld label={f.schwerer} fehler={fehler.schwererId}>
-            <select
-              name="schwererId"
-              defaultValue={w.schwererId ?? ""}
-              className={eingabe}
-            >
+            <select name="schwererId" defaultValue={w.schwererId ?? ""} className={eingabe}>
               <option value="">{f.keine}</option>
               {kandidaten.schwerer.map((k) => (
                 <option key={k.id} value={k.id}>
@@ -255,19 +208,13 @@ export function ExerciseForm({
           </Feld>
         </div>
       ) : (
-        <p className="mb-4 text-sm text-neutral-500">
-          {f.leiterNurBeimBearbeiten}
-        </p>
+        <p className="mb-4 text-sm text-ink-3">{f.leiterNurBeimBearbeiten}</p>
       )}
 
       <h2 className="mb-2 mt-6 text-lg font-semibold">Status</h2>
       <Checkbox name="aktiv" label={f.aktiv} checked={w.aktiv} />
       <Feld label={f.pruefstatus} fehler={fehler.pruefstatus}>
-        <select
-          name="pruefstatus"
-          defaultValue={w.pruefstatus}
-          className={eingabe}
-        >
+        <select name="pruefstatus" defaultValue={w.pruefstatus} className={eingabe}>
           {PRUEFSTATI.map((p) => (
             <option key={p} value={p}>
               {f.pruefstati[p]}
@@ -276,7 +223,7 @@ export function ExerciseForm({
         </select>
       </Feld>
 
-      <div className="sticky bottom-16 -mx-4 mt-6 flex gap-3 border-t border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-950 md:static md:mx-0 md:border-0 md:px-0">
+      <div className="sticky bottom-16 -mx-4 mt-6 flex gap-3 border-t border-line bg-bg px-4 py-3 md:static md:mx-0 md:border-0 md:px-0">
         <button type="submit" disabled={pending} className={knopfPrimaer}>
           {t.speichern}
         </button>

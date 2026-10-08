@@ -5,7 +5,10 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
 
-const FARBE = "#0f766e";
+// Frischer Blau-Violett-Verlauf (wie Hero-Karte und Seitenleiste der App)
+const FARBE = "url(#g)";
+const VERLAUF =
+  '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a84ff"/><stop offset="1" stop-color="#5e5ce6"/></linearGradient></defs>';
 const HANTEL = `
   <rect x="10" y="26" width="6" height="12" rx="2" fill="#fff"/>
   <rect x="18" y="20" width="6" height="24" rx="2" fill="#fff"/>
@@ -15,13 +18,13 @@ const HANTEL = `
 
 /** Abgerundetes Symbol wie icon.svg (transparente Ecken). */
 const rund = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="${FARBE}"/>${HANTEL}</svg>`;
+  ${VERLAUF}<rect width="64" height="64" rx="14" fill="${FARBE}"/>${HANTEL}</svg>`;
 /** Randlos: iOS und Android runden selbst; transparente Ecken würden schwarz. */
 const voll = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="${FARBE}"/>${HANTEL}</svg>`;
+  ${VERLAUF}<rect width="64" height="64" fill="${FARBE}"/>${HANTEL}</svg>`;
 /** Maskierbar: Motiv im inneren Sicherheitsbereich (ca. 70 %). */
 const maskierbar = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="${FARBE}"/>
+  ${VERLAUF}<rect width="64" height="64" fill="${FARBE}"/>
   <g transform="translate(32 32) scale(0.7) translate(-32 -32)">${HANTEL}</g></svg>`;
 
 const ZIELE = [

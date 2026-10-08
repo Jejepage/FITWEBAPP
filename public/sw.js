@@ -5,7 +5,7 @@
 //    bei fehlendem Netz von dort, sonst die Offline-Seite
 //  - alles andere (API, Server Actions = POST, fremde Herkunft) wird nicht angefasst
 // Bei Änderungen an sw.js oder offline.html die Version erhöhen (räumt alte Caches auf).
-const VERSION = "fit-v2";
+const VERSION = "fit-v3";
 const STATISCH = `${VERSION}-static`;
 const SEITEN = `${VERSION}-seiten`;
 

@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { AnsichtUmschalter } from "@/components/katalog/ansicht-umschalter";
 import { ExerciseCard } from "@/components/katalog/exercise-card";
-import {
-  FILTER_FORM_ID,
-  KatalogTabelle,
-} from "@/components/katalog/katalog-tabelle";
+import { FILTER_FORM_ID, KatalogTabelle } from "@/components/katalog/katalog-tabelle";
 import { FilterForm } from "@/components/katalog/filter-form";
 import { FilterLive } from "@/components/katalog/filter-live";
 import { SpaltenWahl } from "@/components/katalog/spalten-wahl";
@@ -34,8 +31,7 @@ export const dynamic = "force-dynamic";
 const t = de.katalog;
 const tt = t.tabelle;
 
-const erster = (v: string | string[] | undefined) =>
-  Array.isArray(v) ? v[0] : v;
+const erster = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function KatalogPage({
   searchParams,
@@ -66,12 +62,8 @@ export default async function KatalogPage({
 
   // Ansicht und Spalten: Adresse vor Cookie vor Vorgabe
   const gemerkt = await liesAnsichtsWahl();
-  const ansicht: Ansicht = erster(sp.ansicht)
-    ? parseAnsicht(erster(sp.ansicht))
-    : gemerkt.ansicht;
-  const spalten: Spalte[] = erster(sp.spalten)
-    ? parseSpalten(erster(sp.spalten))
-    : gemerkt.spalten;
+  const ansicht: Ansicht = erster(sp.ansicht) ? parseAnsicht(erster(sp.ansicht)) : gemerkt.ansicht;
+  const spalten: Spalte[] = erster(sp.spalten) ? parseSpalten(erster(sp.spalten)) : gemerkt.spalten;
   const sortiert = sortiereKatalog(items, auswahl.sort, auswahl.dir ?? "auf");
 
   // Adressen, die Filter (und Sortierung) behalten
@@ -85,10 +77,7 @@ export default async function KatalogPage({
   }
   const sortLink = (spalte: Spalte): string => {
     const p = new URLSearchParams(basis);
-    const richtung =
-      auswahl.sort === spalte && (auswahl.dir ?? "auf") === "auf"
-        ? "ab"
-        : "auf";
+    const richtung = auswahl.sort === spalte && (auswahl.dir ?? "auf") === "auf" ? "ab" : "auf";
     p.set("sort", spalte);
     p.set("dir", richtung);
     return `/katalog?${p}`;
@@ -124,13 +113,12 @@ export default async function KatalogPage({
     ([name]) => !sichtbareFelder.has(name),
   );
   const kartenVersteckt: [string, string][] = [];
-  if (auswahl.sort)
-    kartenVersteckt.push(["sort", auswahl.sort], ["dir", auswahl.dir ?? "auf"]);
+  if (auswahl.sort) kartenVersteckt.push(["sort", auswahl.sort], ["dir", auswahl.dir ?? "auf"]);
   if (erster(sp.ansicht)) kartenVersteckt.push(["ansicht", ansicht]);
   if (erster(sp.spalten)) kartenVersteckt.push(["spalten", spalten.join(",")]);
 
   const leer = (
-    <p className="rounded-xl border border-dashed border-neutral-300 p-6 text-center text-neutral-600 dark:border-neutral-700 dark:text-neutral-400">
+    <p className="rounded-xl border border-dashed border-line p-6 text-center text-ink-2">
       {t.leer}
     </p>
   );
@@ -141,11 +129,7 @@ export default async function KatalogPage({
         <h1 className="text-2xl font-bold">{t.titel}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <AnsichtUmschalter ansicht={ansicht} zurueck={zurueck.toString()} />
-          <div
-            className={
-              tabellenKlasse ? "hidden md:block" : zeigeTabelle ? "" : "hidden"
-            }
-          >
+          <div className={tabellenKlasse ? "hidden md:block" : zeigeTabelle ? "" : "hidden"}>
             <SpaltenWahl spalten={spalten} zurueck={zurueck.toString()} />
           </div>
           <Link href="/katalog/neu" className={knopfPrimaer}>
@@ -154,13 +138,10 @@ export default async function KatalogPage({
         </div>
       </div>
 
-      <p
-        className="mb-4 text-sm text-neutral-600 dark:text-neutral-400"
-        aria-live="polite"
-      >
+      <p className="mb-4 text-sm text-ink-2" aria-live="polite">
         {t.anzahl(items.length, gesamt)}
         {hatFilterAktiv && (
-          <Link href="/katalog" className="ml-3 font-medium text-brand">
+          <Link href="/katalog" className="ml-3 font-medium text-accent-ink">
             {t.zuruecksetzen}
           </Link>
         )}
@@ -180,19 +161,10 @@ export default async function KatalogPage({
                 const gruppe = items.filter((e) => e.muster === m);
                 if (gruppe.length === 0) return null;
                 return (
-                  <section
-                    key={m}
-                    className="mb-6"
-                    aria-labelledby={`karten-muster-${m}`}
-                  >
-                    <h2
-                      id={`karten-muster-${m}`}
-                      className="mb-2 text-lg font-semibold"
-                    >
+                  <section key={m} className="mb-6" aria-labelledby={`karten-muster-${m}`}>
+                    <h2 id={`karten-muster-${m}`} className="mb-2 text-lg font-semibold">
                       {MUSTER_NAMEN[m]}{" "}
-                      <span className="text-sm font-normal text-neutral-500">
-                        ({m})
-                      </span>
+                      <span className="text-sm font-normal text-ink-3">({m})</span>
                     </h2>
                     <ul className="space-y-2">
                       {gruppe.map((e) => (
@@ -209,24 +181,11 @@ export default async function KatalogPage({
 
       {zeigeTabelle && (
         <div className={tabellenKlasse}>
-          <form
-            id={FILTER_FORM_ID}
-            method="get"
-            action="/katalog"
-            className="mb-3 flex gap-2"
-          >
-            {auswahl.sort && (
-              <input type="hidden" name="sort" value={auswahl.sort} />
-            )}
-            {auswahl.sort && (
-              <input type="hidden" name="dir" value={auswahl.dir ?? "auf"} />
-            )}
-            {erster(sp.ansicht) && (
-              <input type="hidden" name="ansicht" value={ansicht} />
-            )}
-            {erster(sp.spalten) && (
-              <input type="hidden" name="spalten" value={spalten.join(",")} />
-            )}
+          <form id={FILTER_FORM_ID} method="get" action="/katalog" className="mb-3 flex gap-2">
+            {auswahl.sort && <input type="hidden" name="sort" value={auswahl.sort} />}
+            {auswahl.sort && <input type="hidden" name="dir" value={auswahl.dir ?? "auf"} />}
+            {erster(sp.ansicht) && <input type="hidden" name="ansicht" value={ansicht} />}
+            {erster(sp.spalten) && <input type="hidden" name="spalten" value={spalten.join(",")} />}
             {versteckteFilter.map(([name, wert]) => (
               <input key={name} type="hidden" name={name} value={wert} />
             ))}

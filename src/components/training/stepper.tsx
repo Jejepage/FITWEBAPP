@@ -54,7 +54,7 @@ export function Stepper({
   };
 
   const knopf =
-    "flex size-12 shrink-0 items-center justify-center rounded-lg border border-neutral-300 bg-white text-2xl font-medium active:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:active:bg-neutral-800";
+    "flex size-12 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-2xl font-medium active:bg-fill-2";
 
   return (
     <div className="mb-4">
@@ -80,12 +80,12 @@ export function Stepper({
               setText(e.target.value);
               onChange(lies(e.target.value));
             }}
-            className={`h-12 w-full rounded-lg border bg-white px-3 text-center text-2xl font-semibold dark:bg-neutral-900 ${
-              fehler ? "border-red-500" : "border-neutral-300 dark:border-neutral-700"
+            className={`h-12 w-full rounded-lg border bg-surface px-3 text-center text-2xl font-semibold ${
+              fehler ? "border-bad" : "border-line"
             }`}
           />
           {einheit && (
-            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-neutral-500">
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-ink-3">
               {einheit}
             </span>
           )}

@@ -49,26 +49,19 @@ export function FilterForm({
   /** Parameter, die beim Absenden erhalten bleiben sollen (Sortierung, Ansicht, Spalten) */
   versteckt?: readonly (readonly [string, string])[];
 }) {
-  const einseitigWert =
-    filter.einseitig === undefined ? "" : filter.einseitig ? "ja" : "nein";
-  const videoWert =
-    filter.video === undefined ? "" : filter.video ? "mit" : "ohne";
+  const einseitigWert = filter.einseitig === undefined ? "" : filter.einseitig ? "ja" : "nein";
+  const videoWert = filter.video === undefined ? "" : filter.video ? "mit" : "ohne";
   const alle = <option value="">{t.alle}</option>;
   return (
-    <details
-      open={aktiv}
-      className="mb-4 rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
-    >
+    <details open={aktiv} className="mb-4 rounded-xl border border-line bg-surface">
       <summary className="min-h-11 cursor-pointer list-none px-4 py-3 font-medium">
         {t.filter}
-        {aktiv && (
-          <span className="ml-2 text-sm font-normal text-brand">●</span>
-        )}
+        {aktiv && <span className="ml-2 text-sm font-normal text-accent-ink">●</span>}
       </summary>
       <form
         method="get"
         action="/katalog"
-        className="grid gap-3 border-t border-neutral-200 p-4 dark:border-neutral-800 sm:grid-cols-2"
+        className="grid gap-3 border-t border-line p-4 sm:grid-cols-2"
       >
         {versteckt.map(([name, wert]) => (
           <input key={name} type="hidden" name={name} value={wert} />
@@ -111,11 +104,7 @@ export function FilterForm({
             </option>
           ))}
         </Auswahl>
-        <Auswahl
-          name="stufe"
-          label={t.stufe}
-          wert={filter.stufe ? String(filter.stufe) : ""}
-        >
+        <Auswahl name="stufe" label={t.stufe} wert={filter.stufe ? String(filter.stufe) : ""}>
           {alle}
           {[1, 2, 3, 4, 5].map((s) => (
             <option key={s} value={s}>
@@ -140,11 +129,7 @@ export function FilterForm({
             </option>
           ))}
         </Auswahl>
-        <Auswahl
-          name="status"
-          label={t.statusFilter}
-          wert={filter.pruefstatus ?? ""}
-        >
+        <Auswahl name="status" label={t.statusFilter} wert={filter.pruefstatus ?? ""}>
           {alle}
           {PRUEFSTATI.map((p) => (
             <option key={p} value={p}>

@@ -1,21 +1,285 @@
 @import "tailwindcss";
 
-@theme {
+/*
+ * Design-Tokens. Hell und Dunkel folgen dem System (prefers-color-scheme); alle Komponenten
+ * benutzen nur die Token-Klassen (bg-surface, text-ink, ...), nie feste Farben oder dark:-Paare.
+ * Text steht immer in den Textfarben (ink*, *-ink); Farbflächen dienen als Fläche, Punkt und Tönung.
+ * Kontrastpaare prüft src/lib/kontrast.test.ts direkt gegen diese Datei.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Flächen */
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --fill: #f2f2f7;
+  --fill-2: #e5e5ea;
+  --line: #e0e0e5;
+  --overlay: rgb(255 255 255 / 0.72);
+
+  /* Text */
+  --ink: #1c1c1e;
+  --ink-2: #48484a;
+  --ink-3: #6c6c70;
+
+  /* Akzent (iOS-Blau): --accent ist Knopffläche (Weiß darauf), --accent-ink Text/Link auf Flächen */
+  --accent: #0071e3;
+  --accent-ink: #0066cc;
+  --accent-soft: #e3f0fd;
+  --on-accent: #ffffff;
+
+  /* Status */
+  --ok: #34c759;
+  --ok-ink: #1e7a36;
+  --ok-soft: #e3f7e8;
+  --warn: #ff9500;
+  --warn-ink: #8a5300;
+  --warn-soft: #fff1dc;
+  --bad: #ff3b30;
+  --bad-ink: #c4221a;
+  --bad-soft: #ffe8e6;
+
+  /* Bewegungsmuster: Fläche/Punkt, Tönung, Text */
+  --m-kn: #34c759;
+  --m-kn-soft: #e3f7e8;
+  --m-kn-ink: #207b37;
+  --m-hb: #5856d6;
+  --m-hb-soft: #e8e7f9;
+  --m-hb-ink: #5856d6;
+  --m-dh: #ff9500;
+  --m-dh-soft: #fff0db;
+  --m-dh-ink: #9e5c00;
+  --m-dv: #ff2d55;
+  --m-dv-soft: #ffe2e7;
+  --m-dv-ink: #c72342;
+  --m-zh: #007aff;
+  --m-zh-soft: #dbecff;
+  --m-zh-ink: #0064d1;
+  --m-zv: #af52de;
+  --m-zv-soft: #f4e7fa;
+  --m-zv-ink: #9345ba;
+  --m-tr: #a2845e;
+  --m-tr-soft: #f2eee8;
+  --m-tr-ink: #7e6749;
+  --m-ru: #30b0c7;
+  --m-ru-soft: #e2f4f7;
+  --m-ru-ink: #207483;
+
+  /* RPE-Skala 1-10 von grün nach rot (Flächen; Text darauf ist --on-rpe) */
+  --rpe-1: #34c759;
+  --rpe-2: #5dc95a;
+  --rpe-3: #86cb4f;
+  --rpe-4: #b0cc40;
+  --rpe-5: #d8c92f;
+  --rpe-6: #f5bd1f;
+  --rpe-7: #ff9f0a;
+  --rpe-8: #ff7a1a;
+  --rpe-9: #ff5530;
+  --rpe-10: #cf3517;
+  --on-rpe: #1c1c1e;
+  --on-rpe-hi: #ffffff; /* Text auf RPE 10 */
+
+  --card-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.06);
+  --hero-from: #0071e3;
+  --hero-to: #5448c8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --fill: #2c2c2e;
+    --fill-2: #3a3a3c;
+    --line: #38383a;
+    --overlay: rgb(28 28 30 / 0.72);
+
+    --ink: #f5f5f7;
+    --ink-2: #d1d1d6;
+    --ink-3: #98989f;
+
+    --accent: #0071e3;
+    --accent-ink: #4da3ff;
+    --accent-soft: #10263f;
+
+    --ok: #30d158;
+    --ok-ink: #5fdc7e;
+    --ok-soft: #12301b;
+    --warn: #ff9f0a;
+    --warn-ink: #ffc14d;
+    --warn-soft: #3a2a08;
+    --bad: #ff453a;
+    --bad-ink: #ff7a72;
+    --bad-soft: #3d1613;
+
+    --m-kn: #30d158;
+    --m-kn-soft: #20442b;
+    --m-kn-ink: #30d158;
+    --m-hb: #5e5ce6;
+    --m-hb-soft: #2b2a4a;
+    --m-hb-ink: #9897ef;
+    --m-dh: #ff9f0a;
+    --m-dh-soft: #4e391a;
+    --m-dh-ink: #ff9f0a;
+    --m-dv: #ff375f;
+    --m-dv-soft: #4e222c;
+    --m-dv-ink: #ff7792;
+    --m-zh: #0a84ff;
+    --m-zh-soft: #183350;
+    --m-zh-ink: #54a9ff;
+    --m-zv: #bf5af2;
+    --m-zv-soft: #402a4d;
+    --m-zv-ink: #d28cf6;
+    --m-tr: #ac8e68;
+    --m-tr-soft: #3c352e;
+    --m-tr-ink: #bea789;
+    --m-ru: #40c8e0;
+    --m-ru-soft: #244249;
+    --m-ru-ink: #40c8e0;
+
+    --card-shadow: none;
+    --hero-from: #0a5fd6;
+    --hero-to: #4240b8;
+  }
+}
+
+@theme inline {
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --color-brand: #0f766e;
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    system-ui, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fill: var(--fill);
+  --color-fill-2: var(--fill-2);
+  --color-line: var(--line);
+  --color-overlay: var(--overlay);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-brand: var(--accent);
+  --color-ok: var(--ok);
+  --color-ok-ink: var(--ok-ink);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-ink: var(--bad-ink);
+  --color-bad-soft: var(--bad-soft);
+
+  --color-m-kn: var(--m-kn);
+  --color-m-kn-soft: var(--m-kn-soft);
+  --color-m-kn-ink: var(--m-kn-ink);
+  --color-m-hb: var(--m-hb);
+  --color-m-hb-soft: var(--m-hb-soft);
+  --color-m-hb-ink: var(--m-hb-ink);
+  --color-m-dh: var(--m-dh);
+  --color-m-dh-soft: var(--m-dh-soft);
+  --color-m-dh-ink: var(--m-dh-ink);
+  --color-m-dv: var(--m-dv);
+  --color-m-dv-soft: var(--m-dv-soft);
+  --color-m-dv-ink: var(--m-dv-ink);
+  --color-m-zh: var(--m-zh);
+  --color-m-zh-soft: var(--m-zh-soft);
+  --color-m-zh-ink: var(--m-zh-ink);
+  --color-m-zv: var(--m-zv);
+  --color-m-zv-soft: var(--m-zv-soft);
+  --color-m-zv-ink: var(--m-zv-ink);
+  --color-m-tr: var(--m-tr);
+  --color-m-tr-soft: var(--m-tr-soft);
+  --color-m-tr-ink: var(--m-tr-ink);
+  --color-m-ru: var(--m-ru);
+  --color-m-ru-soft: var(--m-ru-soft);
+  --color-m-ru-ink: var(--m-ru-ink);
+
+  --color-rpe-1: var(--rpe-1);
+  --color-rpe-2: var(--rpe-2);
+  --color-rpe-3: var(--rpe-3);
+  --color-rpe-4: var(--rpe-4);
+  --color-rpe-5: var(--rpe-5);
+  --color-rpe-6: var(--rpe-6);
+  --color-rpe-7: var(--rpe-7);
+  --color-rpe-8: var(--rpe-8);
+  --color-rpe-9: var(--rpe-9);
+  --color-rpe-10: var(--rpe-10);
+  --color-on-rpe: var(--on-rpe);
+  --color-on-rpe-hi: var(--on-rpe-hi);
+
+  --color-hero-from: var(--hero-from);
+  --color-hero-to: var(--hero-to);
+
+  --shadow-card: var(--card-shadow);
+  --radius-card: 1.25rem;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  @apply bg-neutral-50 text-neutral-900 antialiased;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    @apply bg-neutral-950 text-neutral-100;
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+
+/* Kleine Druck-Animation für Knöpfe und tippbare Flächen */
+@utility press {
+  transition:
+    transform 150ms ease,
+    background-color 150ms ease,
+    opacity 150ms ease,
+    box-shadow 150ms ease;
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@utility fade-up {
+  animation: fade-up 260ms ease both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

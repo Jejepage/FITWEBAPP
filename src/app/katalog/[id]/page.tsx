@@ -36,11 +36,11 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <Link href="/katalog" className="mb-3 inline-block min-h-11 py-2 text-brand">
+      <Link href="/katalog" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
         ← {t.zurueckZurListe}
       </Link>
       <h1 className="text-2xl font-bold">{e.name}</h1>
-      <p className="mb-3 text-neutral-500">
+      <p className="mb-3 text-ink-3">
         {e.id} · {MUSTER_NAMEN[e.muster]}
       </p>
       <div className="mb-4 flex flex-wrap gap-1.5">
@@ -103,24 +103,24 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
 
       <section className={`${karte} mb-4`}>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-          <dt className="text-neutral-500">{t.equipment}</dt>
+          <dt className="text-ink-3">{t.equipment}</dt>
           <dd>{beschreibeBedingung(e.equipment)}</dd>
-          <dt className="text-neutral-500">{t.optionaleLast}</dt>
+          <dt className="text-ink-3">{t.optionaleLast}</dt>
           <dd>
             {e.optionaleLast.length > 0
               ? e.optionaleLast.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
               : t.keineOptionaleLast}
           </dd>
-          <dt className="text-neutral-500">{t.hauptmuskeln}</dt>
+          <dt className="text-ink-3">{t.hauptmuskeln}</dt>
           <dd>{e.hauptmuskeln.join(", ")}</dd>
-          <dt className="text-neutral-500">{t.belastung}</dt>
+          <dt className="text-ink-3">{t.belastung}</dt>
           <dd>{t.belastungsarten[e.belastungsart]}</dd>
-          <dt className="text-neutral-500">{t.standardBereich}</dt>
+          <dt className="text-ink-3">{t.standardBereich}</dt>
           <dd>
             {e.standardBereich}
             {e.einseitig ? " (pro Seite)" : ""}
           </dd>
-          <dt className="text-neutral-500">{t.steigerung}</dt>
+          <dt className="text-ink-3">{t.steigerung}</dt>
           <dd>{e.steigerungsart.map((s) => t.steigerungsarten[s]).join(" → ")}</dd>
         </dl>
       </section>

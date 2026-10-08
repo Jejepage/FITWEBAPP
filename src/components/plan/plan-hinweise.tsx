@@ -34,8 +34,8 @@ export function PlanHinweise({ hinweise }: { hinweise: readonly PlanHinweis[] })
             key={`${x.code}-${x.muster ?? ""}-${x.tatsaechlich ?? ""}-${i}`}
             className={
               WARNUNG.has(x.code)
-                ? "rounded-lg bg-amber-50 px-3 py-2 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-                : "px-3 py-1 text-neutral-600 dark:text-neutral-400"
+                ? "rounded-lg bg-warn-soft px-3 py-2 text-warn-ink"
+                : "px-3 py-1 text-ink-2"
             }
           >
             {hinweisText(x)}

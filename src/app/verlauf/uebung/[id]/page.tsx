@@ -52,7 +52,7 @@ export default async function UebungsVerlaufPage({
       href={`/verlauf/uebung/${daten.id}${m === "volumen" ? "?metrik=volumen" : ""}`}
       aria-current={metrik === m ? "true" : undefined}
       className={`flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 text-center text-base font-medium ${
-        metrik === m ? "bg-brand text-white" : "border border-neutral-300 dark:border-neutral-700"
+        metrik === m ? "bg-accent text-on-accent" : "border border-line"
       }`}
     >
       {text}
@@ -61,23 +61,23 @@ export default async function UebungsVerlaufPage({
 
   return (
     <>
-      <Link href="/verlauf" className="mb-3 inline-block min-h-11 py-2 text-brand">
+      <Link href="/verlauf" className="mb-3 inline-block min-h-11 py-2 text-accent-ink">
         ← {t.zurueck}
       </Link>
       <h1 className="text-2xl font-bold">{daten.name}</h1>
-      <p className="text-neutral-500">
+      <p className="text-ink-3">
         {daten.id} · {MUSTER_NAMEN[daten.muster]}
       </p>
       <Link
         href={`/katalog/${daten.id}`}
-        className="mb-3 inline-flex min-h-11 items-center text-brand"
+        className="mb-3 inline-flex min-h-11 items-center text-accent-ink"
       >
         {t.zurUebung}
       </Link>
       <VideoKnopf url={daten.videoUrl} className="mb-4 w-full sm:w-auto" />
 
       {verlauf.zeilen.length === 0 ? (
-        <p className={`${karte} text-neutral-600 dark:text-neutral-400`}>{t.keinVerlauf}</p>
+        <p className={`${karte} text-ink-2`}>{t.keinVerlauf}</p>
       ) : (
         <>
           <nav aria-label={t.metrik} className="mb-3 flex gap-2">
@@ -85,20 +85,20 @@ export default async function UebungsVerlaufPage({
             {umschalter("volumen", t.volumen)}
           </nav>
           <section className={`${karte} mb-4`}>
-            <p className="mb-2 text-sm text-neutral-600 dark:text-neutral-400">{hilfe}</p>
+            <p className="mb-2 text-sm text-ink-2">{hilfe}</p>
             <VerlaufDiagramm
               punkte={punkte}
               einheit={einheit}
               titel={t.diagrammTitel(daten.name, metrikName)}
             />
-            {hatAdHoc && <p className="mt-2 text-xs text-neutral-500">{t.adHocHinweis}</p>}
+            {hatAdHoc && <p className="mt-2 text-xs text-ink-3">{t.adHocHinweis}</p>}
           </section>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <caption className="sr-only">{t.diagrammTitel(daten.name, metrikName)}</caption>
               <thead>
-                <tr className="border-b border-neutral-200 text-neutral-500 dark:border-neutral-800">
+                <tr className="border-b border-line text-ink-3">
                   <th scope="col" className="py-2 pr-2 font-medium">
                     {t.datum}
                   </th>
@@ -112,18 +112,15 @@ export default async function UebungsVerlaufPage({
               </thead>
               <tbody>
                 {[...verlauf.zeilen].reverse().map((z) => (
-                  <tr
-                    key={z.workoutId}
-                    className="border-b border-neutral-100 dark:border-neutral-900"
-                  >
+                  <tr key={z.workoutId} className="border-b border-line">
                     <td className="py-2 pr-2">
                       <Link
                         href={`/verlauf/einheit/${z.workoutId}`}
-                        className="inline-flex min-h-11 items-center text-brand"
+                        className="inline-flex min-h-11 items-center text-accent-ink"
                       >
                         {datumKurz(z.datum)}
                       </Link>
-                      <span className="block text-xs text-neutral-500">
+                      <span className="block text-xs text-ink-3">
                         {t.woche(z.woche)}
                         {z.adHoc ? ` · ${t.adHoc}` : ""}
                       </span>
