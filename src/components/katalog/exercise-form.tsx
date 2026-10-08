@@ -139,10 +139,12 @@ export function ExerciseForm({
       </Feld>
       <Feld label={f.videoUrl} hilfe={f.videoUrlHilfe} fehler={fehler.videoUrl}>
         <input
-          type="url"
+          type="text"
           name="videoUrl"
           inputMode="url"
           autoComplete="off"
+          autoCapitalize="none"
+          spellCheck={false}
           placeholder="https://www.youtube.com/watch?v=…"
           defaultValue={w.videoUrl}
           className={eingabe}

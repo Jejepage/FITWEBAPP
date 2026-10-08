@@ -51,7 +51,8 @@ const FELD_FEHLER: Record<string, string> = {
   ausfuehrung: "3 bis 5 Schritte angeben, je Zeile einer.",
   fehler: "2 bis 4 typische Fehler angeben, je Zeile einer.",
   hinweise: "Bitte einen Hinweis angeben.",
-  videoUrl: "Bitte einen YouTube-Link angeben (youtube.com oder youtu.be) oder das Feld leeren.",
+  videoUrl:
+    "Bitte einen YouTube-Link zu einem einzelnen Video angeben (youtube.com oder youtu.be, keine Playlist oder Kanal) oder das Feld leeren.",
   pruefstatus: "Ungültiger Prüfstatus.",
 };
 

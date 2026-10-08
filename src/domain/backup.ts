@@ -21,6 +21,7 @@ import { slotKey, slotVorlageVonKey } from "./plan-types";
 import { equipmentArtSchema, exerciseSchema, musterSchema } from "./schemas";
 import { MAX_AUFWAERMEN_ZEICHEN } from "./settings-form";
 import { MUSTER, type Muster } from "./types";
+import { parseVideoEingabe } from "./youtube";
 
 /** Obergrenzen der Zeilenzahlen je Tabelle (Schutz vor absurd großen Dateien). */
 export const BACKUP_ZEILEN_LIMIT = {
@@ -156,7 +157,21 @@ export const satzZeileSchema = z
 
 /** Übung im Backup: wie im Katalog, aber `videoUrl` darf fehlen (ältere Backups). */
 const backupUebungSchema = exerciseSchema.extend({
-  videoUrl: exerciseSchema.shape.videoUrl.optional(),
+  // Beim Import wird jede gültige YouTube-Schreibweise in die Standardform gebracht (Backups von
+  // Hand bearbeitet oder aus älteren Versionen); Ungültiges (andere Hosts, javascript:) lehnt die
+  // Prüfung ab. Fehlt das Feld, bleibt es undefined (siehe BackupUebung).
+  videoUrl: z
+    .string()
+    .transform((wert, ctx) => {
+      const r = parseVideoEingabe(wert);
+      if (!r.ok) {
+        ctx.addIssue({ code: "custom", message: "ist kein gültiger YouTube-Link" });
+        return z.NEVER;
+      }
+      return r.url;
+    })
+    .nullable()
+    .optional(),
 });
 
 export const katalogDatenSchema = z.object({

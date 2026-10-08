@@ -237,8 +237,19 @@ describe("YouTube-Link im Backup", () => {
     expect(link(db, "KN-02")).toBeNull();
   });
 
-  it.each(["https://example.com/x", "javascript:alert(1)", "https://youtu.be/dQw4w9WgXcQ", ""])(
-    "lehnt den Wert %j ab (nur die Standardform ist erlaubt)",
+  it("andere gültige Schreibweisen werden beim Import in die Standardform gebracht", () => {
+    const db = neueSeedDb();
+    const datei = kopie(exportiere(db, "katalog", JETZT));
+    datei.daten.uebungen.find((u) => u.id === "KN-02")!.videoUrl =
+      "https://youtu.be/dQw4w9WgXcQ?t=1m";
+    datei.daten.uebungen.find((u) => u.id === "KN-03")!.videoUrl = "";
+    expect(importiereDatei(db, datei, "katalog").ok).toBe(true);
+    expect(link(db, "KN-02")).toBe(`${LINK}&t=60s`);
+    expect(link(db, "KN-03")).toBeNull();
+  });
+
+  it.each(["https://example.com/x", "javascript:alert(1)", "https://youtube.com@evil.example/x"])(
+    "lehnt den Wert %j ab (nur YouTube-Links sind erlaubt)",
     (wert) => {
       const db = neueSeedDb();
       const datei = kopie(exportiere(db, "katalog", JETZT));
