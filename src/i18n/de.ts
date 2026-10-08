@@ -332,10 +332,6 @@ export const de = {
       vorgaenger_unbekannt: "Der Vorgängerplan existiert nicht.",
     },
   },
-  offline: {
-    titel: "Keine Verbindung",
-    text: "Die App erreicht den Server gerade nicht. Eine laufende Einheit kannst du über den Zurück-Pfeil oder die Startseite wieder öffnen, sobald das Netz zurück ist. Bereits erfasste Sätze bleiben auf dem Gerät erhalten und werden dann gespeichert.",
-  },
   installieren: {
     titel: "App auf dem Handy installieren",
     iphone: "iPhone (Safari): Teilen-Symbol, dann „Zum Home-Bildschirm“.",

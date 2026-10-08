@@ -29,7 +29,7 @@ async function ablauf(browser, base) {
     "/manifest.webmanifest",
     "/sw.js",
     "/icon-192.png",
-    "/offline",
+    "/offline.html",
   ]) {
     assert.equal((await roh(frei)).status, 200, `${frei} bleibt frei`);
   }

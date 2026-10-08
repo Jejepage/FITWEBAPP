@@ -4,7 +4,8 @@
 //  - Seitenaufrufe: Netz zuerst; Trainingsseiten und die Startseite landen im Cache und kommen
 //    bei fehlendem Netz von dort, sonst die Offline-Seite
 //  - alles andere (API, Server Actions = POST, fremde Herkunft) wird nicht angefasst
-const VERSION = "fit-v1";
+// Bei Änderungen an sw.js oder offline.html die Version erhöhen (räumt alte Caches auf).
+const VERSION = "fit-v2";
 const STATISCH = `${VERSION}-static`;
 const SEITEN = `${VERSION}-seiten`;
 
@@ -12,7 +13,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(SEITEN)
-      .then((c) => c.add("/offline"))
+      .then((c) => c.add("/offline.html"))
       .catch(() => {})
       .then(() => self.skipWaiting()),
   );
@@ -29,20 +30,34 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-const cachebareSeite = (pfad) => pfad === "/" || pfad.startsWith("/training/");
+// Nur die Startseite und einzelne Trainingsseiten ("/training/12"); der Pfad wird vorher
+// normalisiert, damit "/training/../api/export" nicht durchrutscht.
+const cachebareSeite = (pfad) => {
+  try {
+    const sauber = new URL(pfad, self.location.origin).pathname;
+    return sauber === pfad && (sauber === "/" || /^\/training\/\d+$/.test(sauber));
+  } catch {
+    return false;
+  }
+};
 
 async function seiteLaden(request) {
   try {
     const antwort = await fetch(request);
     // Weitergeleitete Antworten (z. B. auf die Anmeldeseite) und Fehler nie als Seite merken.
     if (antwort.ok && !antwort.redirected && cachebareSeite(new URL(request.url).pathname)) {
-      const cache = await caches.open(SEITEN);
-      await cache.put(request, antwort.clone());
+      // Ein Cache-Fehler (z. B. Speicherlimit) darf die gelungene Antwort nicht verdrängen.
+      try {
+        const cache = await caches.open(SEITEN);
+        await cache.put(request, antwort.clone());
+      } catch {
+        // Seite wird dann nur nicht für den Notfall gemerkt
+      }
     }
     return antwort;
   } catch {
     const cache = await caches.open(SEITEN);
-    return (await cache.match(request)) || (await cache.match("/offline")) || Response.error();
+    return (await cache.match(request)) || (await cache.match("/offline.html")) || Response.error();
   }
 }
 

@@ -80,6 +80,7 @@ try {
     assert.equal(r.status, 200, icon.src);
     assert.match(r.headers.get("content-type") ?? "", /image\/png/, icon.src);
   }
+  assert.equal((await fetch(`${BASE}/favicon.ico`)).status, 200, "favicon.ico");
   const apple = await fetch(`${BASE}/apple-touch-icon.png`);
   assert.equal(apple.status, 200);
   schritt(`Manifest gültig, ${manifest.icons.length} Symbole und Apple-Symbol abrufbar`);
@@ -90,6 +91,11 @@ try {
   assert.match(sw.headers.get("cache-control") ?? "", /no-cache/);
   assert.equal(sw.headers.get("service-worker-allowed"), "/");
   schritt("sw.js wird mit den richtigen Headern ausgeliefert");
+
+  const offline = await fetch(`${BASE}/offline.html`);
+  assert.equal(offline.status, 200);
+  assert.match(await offline.text(), /Keine Verbindung/);
+  schritt("offline.html wird ausgeliefert");
 
   const statisch = html.match(/\/_next\/static\/[^"']+\.(?:css|js)/)?.[0];
   assert.ok(statisch, "statische Datei im HTML");

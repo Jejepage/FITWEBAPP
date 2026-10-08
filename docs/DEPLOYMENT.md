@@ -154,6 +154,8 @@ Sie stehen in der Datei `.env` (Vorlage: `.env.example`). Nach jeder Änderung `
 
 **Zu viele Fehlversuche:** Nach fünf falschen Passwörtern innerhalb von fünf Minuten sperrt die Anmeldung eine Minute lang (für alle Geräte gemeinsam; ein Neustart des Containers hebt die Sperre auf).
 
+**Hinweise zur Sperre und zu Sitzungen:** Wer die Anmeldeseite erreicht, kann die Anmeldung durch absichtlich falsche Passwörter immer wieder für eine Minute sperren (bestehende Sitzungen bleiben gültig). Im Heimnetz/VPN ist das vertretbar. Sitzungen lassen sich serverseitig nicht einzeln widerrufen: Ein Passwortwechsel macht alle ungültig. Mit HTTPS speichert der Service Worker besuchte Trainingsseiten auf dem Handy als Notfallfallback; der Knopf „Abmelden“ unter Einstellungen leert diesen Speicher.
+
 **Passwort und HTTP:** Solange die App über HTTP aufgerufen wird, wird das Login-Cookie ohne `Secure`-Flag gesetzt (sonst würde der Browser es nicht speichern). Im Heimnetz oder VPN ist das akzeptabel, das Passwort wird aber unverschlüsselt übertragen. Mit HTTPS ([Anhang A](#12-anhang-a-https-optional-später)) wird das Cookie automatisch als `Secure` gesetzt (die App erkennt das am Header `X-Forwarded-Proto: https`, den Caddy setzt).
 
 ## 7. Zugriff vom Handy und per VPN
@@ -283,16 +285,18 @@ docker compose run --rm --no-deps \
   -e DATEI=DATEINAME.db \
   --entrypoint sh app -c '
     set -e
-    cp /data/fit.db /data/fit.db.vor-restore 2>/dev/null || true
+    # Alten Stand komplett beiseitelegen (inkl. noch nicht eingecheckter Schreibvorgänge im WAL)
+    for f in fit.db fit.db-wal fit.db-shm; do
+      [ -f "/data/$f" ] && mv "/data/$f" "/data/$f.vor-restore" || true
+    done
     cp "/backups/$DATEI" /data/fit.db
-    rm -f /data/fit.db-wal /data/fit.db-shm
   '
 
 docker compose up -d
 docker compose ps
 ```
 
-Erklärung: `DATEINAME.db` durch den echten Namen ersetzen (liegt die Sicherung in einem anderen Ordner als `./backups`, passe den Pfad bei `-v` an). Die alte Datenbank bleibt vorsichtshalber als `/data/fit.db.vor-restore` im Volume liegen. Wichtig ist, **vorher den Container zu stoppen** und die Dateien `fit.db-wal`/`fit.db-shm` zu entfernen: Sie gehören zur alten Datenbank und würden sonst mit der zurückgespielten Datei vermischt.
+Erklärung: `DATEINAME.db` durch den echten Namen ersetzen (liegt die Sicherung in einem anderen Ordner als `./backups`, passe den Pfad bei `-v` an). Die alte Datenbank bleibt vorsichtshalber als `/data/fit.db.vor-restore` (zusammen mit `…-wal.vor-restore` und `…-shm.vor-restore`) im Volume liegen. Wichtig ist, **vorher den Container zu stoppen** und die Dateien `fit.db-wal`/`fit.db-shm` beiseitezulegen: Sie gehören zur alten Datenbank und würden sonst mit der zurückgespielten Datei vermischt.
 
 Nach dem Start prüfen, ob die Daten stimmen. Danach kannst du die Datei `fit.db.vor-restore` bei Bedarf mit einem weiteren Hilfscontainer löschen (`rm /data/fit.db.vor-restore`).
 

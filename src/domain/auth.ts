@@ -8,7 +8,7 @@ export const SESSION_TAGE = 30;
 /** Pfade, die auch ohne Anmeldung erreichbar sind (Browser holen sie ohne Cookie). */
 const FREIE_PFADE: ReadonlySet<string> = new Set([
   "/login",
-  "/offline",
+  "/offline.html",
   "/api/health",
   "/manifest.webmanifest",
   "/sw.js",

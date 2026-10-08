@@ -4,6 +4,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, entscheideZugriff } from "@/domain/auth";
 import { istAngemeldet, passwortAusUmgebung } from "@/server/auth";
 
+/** Erstes Element einer kommagetrennten Header-Liste, getrimmt; null wenn leer. */
+function ersterWert(wert: string | null): string | null {
+  const erster = wert?.split(",")[0]?.trim();
+  return erster ? erster : null;
+}
+
 export function proxy(req: NextRequest): NextResponse {
   const passwort = passwortAusUmgebung();
   const z = entscheideZugriff({
@@ -23,9 +29,15 @@ export function proxy(req: NextRequest): NextResponse {
   }
   // Absolute Adresse aus dem Host-Header, damit die Weiterleitung unter der Adresse landet, unter
   // der der Browser die App aufgerufen hat (im Container wäre req.url z. B. http://0.0.0.0:3000).
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  const proto = req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "");
-  const ziel = host ? `${proto}://${host}${z.ziel}` : new URL(z.ziel, req.url).toString();
+  // Werte von Proxys können Listen enthalten ("a, b"): das erste Element zählt, alles wird geprüft.
+  const host = ersterWert(req.headers.get("x-forwarded-host") ?? req.headers.get("host"));
+  const proto = ersterWert(req.headers.get("x-forwarded-proto"));
+  const hostOk =
+    host !== null && /^[A-Za-z0-9.\-]+(:\d{1,5})?$|^\[[0-9A-Fa-f:.]+\](:\d{1,5})?$/.test(host);
+  const ziel =
+    hostOk && (proto === "http" || proto === "https" || proto === null)
+      ? `${proto ?? req.nextUrl.protocol.replace(":", "")}://${host}${z.ziel}`
+      : new URL(z.ziel, req.url).toString();
   const antwort = NextResponse.redirect(ziel, 307);
   antwort.headers.set("Cache-Control", "no-store");
   return antwort;

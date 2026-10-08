@@ -86,7 +86,7 @@ async function ablauf(browser, lanBase, dbPfad) {
   await page.getByText("1 von 18 Sätzen").first().waitFor();
   await page.waitForFunction(
     async () => {
-      const c = await caches.open("fit-v1-seiten");
+      const c = await caches.open("fit-v2-seiten");
       const t = await (await c.match(location.pathname))?.text();
       return Boolean(t && t.includes("1 von 18 Sätzen"));
     },
@@ -94,14 +94,14 @@ async function ablauf(browser, lanBase, dbPfad) {
     { timeout: 15000 },
   );
   const gecacht = await page.evaluate(async () => {
-    const c = await caches.open("fit-v1-seiten");
+    const c = await caches.open("fit-v2-seiten");
     return (await c.keys()).map((r) => new URL(r.url).pathname);
   });
-  assert.ok(gecacht.includes("/offline"));
+  assert.ok(gecacht.includes("/offline.html"));
   assert.ok(gecacht.some((p) => p.startsWith("/training/")));
   assert.ok(!gecacht.some((p) => p.startsWith("/api/")), "keine API-Antworten im Cache");
   schritt(
-    "Trainingsseite und /offline liegen im Cache, der Stand wird nach jedem Satz aufgefrischt",
+    "Trainingsseite und /offline.html liegen im Cache, der Stand wird nach jedem Satz aufgefrischt",
   );
 
   // --- 4. Netzausfall: Seite lädt aus dem Cache, Satz bleibt lokal und wird später gespeichert -------
@@ -131,7 +131,7 @@ async function ablauf(browser, lanBase, dbPfad) {
 
   // --- 6. Statische Dateien kommen aus dem Cache; Caches lassen sich leeren ------------------------
   const statisch = await page.evaluate(async () => {
-    const c = await caches.open("fit-v1-static");
+    const c = await caches.open("fit-v2-static");
     return (await c.keys()).length;
   });
   assert.ok(statisch > 0, "statische Dateien gecacht");

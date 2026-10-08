@@ -19,9 +19,16 @@ function stempel(d) {
 async function main() {
   fs.mkdirSync(ziel, { recursive: true });
   const datei = path.join(ziel, `fit-${stempel(new Date())}.db`);
+  // Erst in eine temporäre Datei schreiben: Ein Abbruch (z. B. Platte voll) hinterlässt so keine
+  // halbe Sicherung unter dem endgültigen Namen.
+  const temp = `${datei}.tmp`;
   const db = new Database(quelle, { fileMustExist: true });
   try {
-    await db.backup(datei);
+    await db.backup(temp);
+    fs.renameSync(temp, datei);
+  } catch (e) {
+    fs.rmSync(temp, { force: true });
+    throw e;
   } finally {
     db.close();
   }

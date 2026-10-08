@@ -55,7 +55,7 @@ describe("istFreierPfad", () => {
     "/icon.svg",
     "/icon-192.png",
     "/apple-touch-icon.png",
-    "/offline",
+    "/offline.html",
     "/_next/static/chunks/abc.js",
   ])("%s ist frei", (p) => expect(istFreierPfad(p)).toBe(true));
 

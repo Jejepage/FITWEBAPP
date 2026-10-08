@@ -1,7 +1,7 @@
 // Erzeugt die PNG-Symbole der App (Manifest, iPhone-Home-Bildschirm) aus dem Hantel-Symbol von
 // src/app/icon.svg. Aufruf: node scripts/make-icons.mjs  (nutzt das vorinstallierte Chromium,
 // Pfad per CHROMIUM_PATH änderbar). Die erzeugten Dateien liegen in public/ und sind eingecheckt.
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
 
@@ -50,3 +50,19 @@ try {
 } finally {
   await browser.close();
 }
+
+// favicon.ico: ICO-Container mit dem 192-px-PNG (moderne Browser lesen PNG-in-ICO). Manche
+// Browser fragen /favicon.ico unabhängig vom <link rel="icon"> an; so antwortet die App mit 200.
+const png = readFileSync(join(ordner, "icon-192.png"));
+const kopf = Buffer.alloc(22);
+kopf.writeUInt16LE(0, 0); // reserviert
+kopf.writeUInt16LE(1, 2); // Typ: Symbol
+kopf.writeUInt16LE(1, 4); // ein Bild
+kopf.writeUInt8(192, 6); // Breite
+kopf.writeUInt8(192, 7); // Höhe
+kopf.writeUInt16LE(1, 10); // Farbebenen
+kopf.writeUInt16LE(32, 12); // Bit pro Pixel
+kopf.writeUInt32LE(png.length, 14); // Größe der Bilddaten
+kopf.writeUInt32LE(22, 18); // Offset der Bilddaten
+writeFileSync(join(ordner, "favicon.ico"), Buffer.concat([kopf, png]));
+console.log("public/favicon.ico");

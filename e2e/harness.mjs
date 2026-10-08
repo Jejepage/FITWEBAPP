@@ -20,7 +20,10 @@ export async function hinweisBestaetigen(page, base = BASE) {
 export function sammleFehler(page) {
   const fehler = [];
   page.on("pageerror", (e) => fehler.push(e.message));
-  page.on("console", (m) => m.type() === "error" && fehler.push(m.text()));
+  page.on(
+    "console",
+    (m) => m.type() === "error" && fehler.push(`${m.text()} (${m.location().url})`),
+  );
   page.on("response", (r) => r.status() >= 400 && fehler.push(`HTTP ${r.status()} ${r.url()}`));
   return fehler;
 }
