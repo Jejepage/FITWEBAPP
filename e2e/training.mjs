@@ -203,6 +203,20 @@ async function ablauf(browser, BASE, dbPfad) {
   // --- 9. Abschließen mit Notiz ----------------------------------------------------------
   await page.getByLabel(/Notiz zur Einheit/).fill("Knie fühlte sich gut an.");
   await page.getByRole("button", { name: "Einheit abschließen" }).click();
+  // Nach dem Abschluss: Zusammenfassung mit Protokoll und "Nächstes Mal"-Vorschlägen
+  await page.getByText("Einheit gespeichert. Gut gemacht!").waitFor();
+  await page.getByRole("heading", { name: "Nächstes Mal", level: 2 }).waitFor();
+  await page
+    .getByText(/Vorschlag für die nächste Einheit mit diesen Übungen \(Woche 2\)/)
+    .waitFor();
+  assert.equal(
+    await page.getByRole("heading", { name: "Protokoll", level: 2 }).count(),
+    1,
+    "Protokoll der Einheit",
+  );
+  await keinHorizontalScroll("Zusammenfassung");
+  await shot("7b-zusammenfassung");
+  await page.getByRole("link", { name: "Zur Startseite" }).click();
   await page.getByText("Einheit B · Woche 1 von 6").waitFor();
   const d = db();
   const w1 = d.prepare("select * from workout where id = 1").get();
@@ -243,6 +257,8 @@ async function ablauf(browser, BASE, dbPfad) {
   await page.getByRole("button", { name: "Einheit vorzeitig abschließen" }).click();
   await page.getByRole("heading", { name: "Geschafft", level: 1 }).waitFor();
   await page.getByRole("button", { name: "Einheit abschließen" }).click();
+  await page.getByText("Einheit gespeichert. Gut gemacht!").waitFor();
+  await page.getByRole("link", { name: "Zur Startseite" }).click();
   await page.getByText("Einheit A · Woche 2 von 6").waitFor();
   await page.getByText("3 × 10–12 Wdh · RPE 7").waitFor();
   schritt(

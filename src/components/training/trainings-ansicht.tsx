@@ -13,6 +13,7 @@ import { formatSatz } from "@/domain/satz-format";
 import { vorbelegung, type FormularWerte } from "@/domain/satz-vorbelegung";
 import type { Block } from "@/domain/types";
 import { de } from "@/i18n/de";
+import { vorschlagGrundText } from "@/i18n/vorschlag-text";
 import { liesJson, loesche, schreibeJson } from "@/lib/speicher";
 import { neueUuid } from "@/lib/uuid";
 import { FehlerBanner } from "@/components/form-felder";
@@ -59,12 +60,8 @@ function datumKurz(iso: string): string {
 }
 
 function VorschlagHinweis({ info }: { info: UebungInfo }) {
-  const g = info.vorschlag.grund;
-  if (g === "wiederholen") return null;
-  const text =
-    g === "naechste_stufe" && info.schwererName
-      ? t.vorschlag.naechste_stufe_name(info.schwererName)
-      : (t.vorschlag[g as Exclude<typeof g, "naechste_stufe">] ?? t.vorschlag.naechste_stufe);
+  const text = vorschlagGrundText(info.vorschlag.grund, info.schwererName);
+  if (!text) return null;
   return <p className="mt-1 text-sm font-medium text-brand">{text}</p>;
 }
 
@@ -285,7 +282,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
     const r = await beendeTrainingAktion(daten.workoutId, notiz);
     if (r.ok) {
       setBeendet(true);
-      router.push("/");
+      router.push(`/verlauf/einheit/${daten.workoutId}?neu=1`);
       router.refresh();
     } else setMeldung(t.fehler[r.code]);
   };

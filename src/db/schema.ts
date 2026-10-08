@@ -94,7 +94,9 @@ export const plan = sqliteTable(
   },
   (t) => [
     // Ein aktiver Plan zur Zeit.
-    uniqueIndex("plan_ein_aktiver_idx").on(t.status).where(sql`${t.status} = 'aktiv'`),
+    uniqueIndex("plan_ein_aktiver_idx")
+      .on(t.status)
+      .where(sql`${t.status} = 'aktiv'`),
   ],
 );
 
@@ -165,5 +167,8 @@ export const setLog = sqliteTable(
     erledigt: bool("erledigt").notNull().default(false),
     erstelltAm: text("erstellt_am").notNull().default(now),
   },
-  (t) => [index("set_log_workout_idx").on(t.workoutId), index("set_log_exercise_idx").on(t.exerciseId)],
+  (t) => [
+    index("set_log_workout_idx").on(t.workoutId),
+    index("set_log_exercise_idx").on(t.exerciseId),
+  ],
 );

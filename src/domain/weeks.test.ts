@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { RUNDEN_ZUSATZBLOCK } from "./training-types";
 import { testKatalog } from "./test-katalog";
 import type { Block, Exercise } from "./types";
-import { einheitNachFortschritt, rundenFuerBlock, wochenVorgabe, zielBereich } from "./weeks";
+import {
+  einheitNachFortschritt,
+  naechsteEinheitMit,
+  rundenFuerBlock,
+  wochenVorgabe,
+  zielBereich,
+} from "./weeks";
 
 const katalog = testKatalog();
 function uebung(id: string): Exercise {
@@ -188,5 +194,27 @@ describe("einheitNachFortschritt", () => {
     expect(einheitNachFortschritt(-Infinity, 3)).toEqual(einheitNachFortschritt(0, 3));
     expect(einheitNachFortschritt(2.9, 3)).toEqual(einheitNachFortschritt(2, 3));
     expect(start2).toEqual({ einheit: "A", woche: 1, positionInWoche: 1, blockFertig: false });
+  });
+});
+
+describe("naechsteEinheitMit", () => {
+  it("2×/Woche: nach A kommt A in der übernächsten Einheit", () => {
+    expect(naechsteEinheitMit("A", 1, 2)).toMatchObject({ einheit: "A", woche: 2 });
+    expect(naechsteEinheitMit("B", 1, 2)).toMatchObject({ einheit: "B", woche: 1 });
+  });
+
+  it("liefert die fällige Einheit selbst, wenn sie passt", () => {
+    expect(naechsteEinheitMit("A", 0, 2)).toMatchObject({ einheit: "A", woche: 1 });
+  });
+
+  it("3×/Woche: Woche 1 A-B-A, Woche 2 B-A-B", () => {
+    // Nach A (n=1): nächste A ist die dritte Einheit der Woche 1
+    expect(naechsteEinheitMit("A", 1, 3)).toMatchObject({ einheit: "A", woche: 1 });
+    // Nach dem zweiten A der Woche 1 (n=3) beginnt Woche 2 mit B; das nächste A ist an Position 2
+    expect(naechsteEinheitMit("A", 3, 3)).toMatchObject({ einheit: "A", woche: 2 });
+  });
+
+  it("am Blockende liegt die Woche über 6", () => {
+    expect(naechsteEinheitMit("A", 11, 2).woche).toBeGreaterThan(6);
   });
 });

@@ -50,7 +50,7 @@ export interface AblaufEingabe {
   woche: number;
 }
 
-const BLOCK_REIHENFOLGE: readonly Block[] = ["1", "2", "Z"];
+export const BLOCK_REIHENFOLGE: readonly Block[] = ["1", "2", "Z"];
 
 export const schrittKey = (slotId: number, runde: number): string => `${slotId}:${runde}`;
 

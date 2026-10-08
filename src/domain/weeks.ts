@@ -64,3 +64,22 @@ export function einheitNachFortschritt(abgeschlossen: number, proWoche: 2 | 3): 
   const einheit: Einheit = istA ? "A" : "B";
   return { einheit, woche, positionInWoche, blockFertig: n >= WOCHEN_PRO_BLOCK * proWoche };
 }
+
+/**
+ * Nächste Einheit mit der Bezeichnung `einheit` (A/B), ab der Zahl bereits abgeschlossener
+ * Einheiten gerechnet. Für Vorschläge nach einer Einheit: Übungen kehren erst in der nächsten
+ * Einheit derselben Art (A oder B) wieder, also meist übernächste Einheit.
+ */
+export function naechsteEinheitMit(
+  einheit: Einheit,
+  abgeschlossen: number,
+  proWoche: 2 | 3,
+): FortschrittEinheit {
+  const start = Number.isFinite(abgeschlossen) ? Math.max(0, Math.floor(abgeschlossen)) : 0;
+  // Spätestens nach einer Woche kommt jede Einheitenart wieder vor.
+  for (let k = start; k < start + 2 * proWoche; k++) {
+    const f = einheitNachFortschritt(k, proWoche);
+    if (f.einheit === einheit) return f;
+  }
+  return einheitNachFortschritt(start, proWoche);
+}

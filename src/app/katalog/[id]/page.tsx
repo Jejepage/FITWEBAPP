@@ -8,6 +8,7 @@ import { beschreibeBedingung } from "@/domain/equipment";
 import { EQUIPMENT_NAMEN, MUSTER_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
 import { getExercise, getLadder } from "@/server/exercises";
+import { ladeUebungsVerlauf } from "@/server/verlauf";
 import { aktivUmschalten, pruefstatusSetzen } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,7 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
   if (!e) notFound();
   const kette = getLadder(db, id);
   const geprueft = e.pruefstatus === "geprueft";
+  const hatVerlauf = (ladeUebungsVerlauf(db, id)?.verlauf.zeilen.length ?? 0) > 0;
 
   return (
     <>
@@ -55,6 +57,11 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
             {geprueft ? t.markierenZuPruefen : t.markierenGeprueft}
           </button>
         </form>
+        {hatVerlauf && (
+          <Link href={`/verlauf/uebung/${e.id}`} className={knopfSekundaer}>
+            {de.verlauf.verlaufAnsehen}
+          </Link>
+        )}
         <form action={aktivUmschalten.bind(null, e.id, !e.aktiv)}>
           <button type="submit" className={knopfSekundaer}>
             {e.aktiv ? t.deaktivieren : t.aktivieren}

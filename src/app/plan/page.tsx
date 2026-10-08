@@ -6,6 +6,8 @@ import { de } from "@/i18n/de";
 import { alleUebungen } from "@/server/exercises";
 import { getActivePlan, getPlanSlots } from "@/server/plans";
 import { getProfile } from "@/server/profiles";
+import { StufenCheckFormular } from "@/components/plan/stufen-check-formular";
+import { istBlockFertig, ladeStufenCheck } from "@/server/stufen-check";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +65,10 @@ export default function PlanPage() {
           </Link>
         </p>
       </section>
+
+      {istBlockFertig(db, plan) && (
+        <StufenCheckFormular planId={plan.id} ergebnisse={ladeStufenCheck(db, plan)} />
+      )}
 
       <PlanAnsicht slots={slots} uebungen={uebungen} zusatzblockAktiv={plan.zusatzblock} />
     </>
