@@ -21,7 +21,8 @@ function fehlerAntwort(...fehler: string[]): Response {
 /** Nur Anfragen von der eigenen Seite: ein fremder Browser-Tab darf keinen Import auslösen. */
 function istGleicheHerkunft(req: Request): boolean {
   const origin = req.headers.get("origin");
-  const host = req.headers.get("host");
+  // Hinter einem Reverse-Proxy (später z. B. Caddy für HTTPS) kann der Host-Header umgeschrieben sein.
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
   if (req.headers.get("sec-fetch-site") === "cross-site") return false;
   if (!origin) return true;
   try {
@@ -29,6 +30,31 @@ function istGleicheHerkunft(req: Request): boolean {
   } catch {
     return false;
   }
+}
+
+/** Liest den Body bis `max` Bytes; `null`, wenn er größer ist. */
+async function leseBegrenzt(req: Request, max: number): Promise<Uint8Array<ArrayBuffer> | null> {
+  if (!req.body) return new Uint8Array();
+  const teile: Uint8Array[] = [];
+  let summe = 0;
+  const reader = req.body.getReader();
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    summe += value.byteLength;
+    if (summe > max) {
+      await reader.cancel();
+      return null;
+    }
+    teile.push(value);
+  }
+  const alles = new Uint8Array(summe);
+  let pos = 0;
+  for (const t of teile) {
+    alles.set(t, pos);
+    pos += t.byteLength;
+  }
+  return alles;
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -39,9 +65,15 @@ export async function POST(req: Request): Promise<Response> {
     return fehlerAntwort("Die Datei ist zu groß (höchstens 20 MB).");
   }
 
+  // Den Body gedeckelt lesen: Anfragen ohne (oder mit falscher) Content-Length dürfen den
+  // Speicher nicht füllen.
+  const body = await leseBegrenzt(req, BACKUP_MAX_BYTES + 4096);
+  if (body === null) return fehlerAntwort("Die Datei ist zu groß (höchstens 20 MB).");
   let form: FormData;
   try {
-    form = await req.formData();
+    form = await new Response(body, {
+      headers: { "content-type": req.headers.get("content-type") ?? "" },
+    }).formData();
   } catch {
     return fehlerAntwort("Die Anfrage konnte nicht gelesen werden.");
   }

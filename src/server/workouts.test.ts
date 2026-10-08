@@ -225,6 +225,15 @@ describe("startWorkout mit anderem Profil (Ad-hoc)", () => {
     expect(getLaufendesWorkout(db)).toBeNull();
   });
 
+  it("Muster nur im Zusatzblock: ohne Zusatzblock geht der Start, mit Zusatzblock nicht", () => {
+    db.update(exercise).set({ aktiv: false }).where(eq(exercise.muster, "TR")).run();
+    const unterwegs = profilId("unterwegs");
+    const mit = startWorkout(db, { heute: "2026-10-08", profilId: unterwegs, zusatzblock: true });
+    expect(mit).toMatchObject({ ok: false, code: "profil_unmoeglich", fehlendeMuster: ["TR"] });
+    const ohne = startWorkout(db, { heute: "2026-10-08", profilId: unterwegs, zusatzblock: false });
+    expect(ohne.ok).toBe(true);
+  });
+
   it("läuft schon eine Einheit, wird sie zurückgegeben (Profil wird ignoriert)", () => {
     const erste = start();
     const r = startWorkout(db, { heute: "2026-10-09", profilId: profilId("unterwegs") });

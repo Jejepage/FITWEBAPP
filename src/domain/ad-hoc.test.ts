@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { ersetzungenFuerProfil, type AdHocSlot } from "./ad-hoc";
+import { ersetzungenFuerEinheit, ersetzungenFuerProfil, type AdHocSlot } from "./ad-hoc";
 import { erfuellt } from "./equipment";
 import { testKatalog, testProfile } from "./test-katalog";
-import { MUSTER, type EquipmentBedingung, type Exercise, type Muster, type Stufe } from "./types";
+import {
+  MUSTER,
+  type EquipmentBedingung,
+  type Exercise,
+  type Block,
+  type Muster,
+  type Stufe,
+} from "./types";
 
 const katalog = testKatalog();
 const profil = (key: string) => testProfile.find((p) => p.seedKey === key)!.equipment;
@@ -24,8 +31,14 @@ const u = (
   aktiv: o.aktiv ?? true,
 });
 
-const slot = (slotId: number, muster: Muster, exerciseId: string): AdHocSlot => ({
+const slot = (
+  slotId: number,
+  muster: Muster,
+  exerciseId: string,
+  block: Block = "1",
+): AdHocSlot => ({
   slotId,
+  block,
   muster,
   exerciseId,
 });
@@ -162,5 +175,30 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
       ersetzungen: {},
       fehlendeMuster: [],
     });
+  });
+});
+
+describe("ersetzungenFuerEinheit", () => {
+  const eingabe = {
+    slots: [slot(1, "KN", "KN-90", "1"), slot(2, "TR", "TR-90", "Z")],
+    uebungen: [
+      u("KN-90", "KN", 3, { equipment: [["maschinen"]] }),
+      u("KN-91", "KN", 2),
+      u("TR-90", "TR", 2, { equipment: [["maschinen"]] }),
+    ],
+    equipment: [] as const,
+  };
+
+  it("lässt den Zusatzblock weg, wenn er nicht aktiv ist (auch für fehlende Muster)", () => {
+    expect(ersetzungenFuerEinheit({ ...eingabe, zusatzblock: false })).toEqual({
+      ersetzungen: { "1": "KN-91" },
+      fehlendeMuster: [],
+    });
+  });
+
+  it("nimmt den Zusatzblock mit, wenn er aktiv ist", () => {
+    expect(ersetzungenFuerEinheit({ ...eingabe, zusatzblock: true }).fehlendeMuster).toEqual([
+      "TR",
+    ]);
   });
 });

@@ -1,7 +1,7 @@
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { equipmentProfile, exercise, plan, planSlot, setLog, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
-import { ersetzungenFuerProfil } from "@/domain/ad-hoc";
+import { ersetzungenFuerEinheit } from "@/domain/ad-hoc";
 import { erfuellt } from "@/domain/equipment";
 import { satzEingabeSchema } from "@/domain/satz-eingabe";
 import type { SatzWerte } from "@/domain/training-types";
@@ -80,10 +80,16 @@ export function startWorkout(
         .from(planSlot)
         .where(and(eq(planSlot.planId, p.id), eq(planSlot.einheit, naechste.einheit)))
         .all();
-      const r = ersetzungenFuerProfil({
-        slots: slots.map((s) => ({ slotId: s.id, muster: s.muster, exerciseId: s.exerciseId })),
+      const r = ersetzungenFuerEinheit({
+        slots: slots.map((s) => ({
+          slotId: s.id,
+          block: s.block,
+          muster: s.muster,
+          exerciseId: s.exerciseId,
+        })),
         uebungen: tx.select().from(exercise).all().map(zuExercise),
         equipment: profil.equipment,
+        zusatzblock: opts.zusatzblock ?? p.zusatzblock,
       });
       if (r.fehlendeMuster.length > 0) {
         return { ok: false, code: "profil_unmoeglich", fehlendeMuster: r.fehlendeMuster };

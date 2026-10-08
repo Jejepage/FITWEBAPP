@@ -1,7 +1,7 @@
 // Vorschau für den Ad-hoc-Start (Spec F6): welche Übungen würden mit einem anderen Profil
 // anstelle der Planübungen der fälligen Einheit trainiert?
 import type { Db } from "@/db/types";
-import { ersetzungenFuerProfil } from "@/domain/ad-hoc";
+import { ersetzungenFuerEinheit } from "@/domain/ad-hoc";
 import type { Block, Einheit, Muster } from "@/domain/types";
 import { einheitNachFortschritt } from "@/domain/weeks";
 import { alleUebungen } from "./exercises";
@@ -56,10 +56,16 @@ export function ladeAdHocVorschau(db: Db, profilId: number, zusatzblock: boolean
   const istPlanProfil = profil.id === plan.profilId;
   const r = istPlanProfil
     ? { ersetzungen: {} as Record<string, string>, fehlendeMuster: [] as Muster[] }
-    : ersetzungenFuerProfil({
-        slots: slots.map((s) => ({ slotId: s.id, muster: s.muster, exerciseId: s.exerciseId })),
+    : ersetzungenFuerEinheit({
+        slots: slots.map((s) => ({
+          slotId: s.id,
+          block: s.block,
+          muster: s.muster,
+          exerciseId: s.exerciseId,
+        })),
         uebungen: katalog,
         equipment: profil.equipment,
+        zusatzblock,
       });
 
   return {

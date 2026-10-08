@@ -1,11 +1,12 @@
 // Ad-hoc-Profilwechsel (Spec F6): Welche Übungen ersetzen die Planübungen einer Einheit, wenn mit
 // einem anderen Equipment-Profil trainiert wird? Rein, ohne DB und UI.
 import { erfuellt } from "./equipment";
-import type { EquipmentArt, Exercise, Muster } from "./types";
+import type { Block, EquipmentArt, Exercise, Muster } from "./types";
 
 export interface AdHocSlot {
   /** ID des Plan-Slots (plan_slot.id) */
   slotId: number;
+  block: Block;
   muster: Muster;
   /** Im Plan vorgesehene Übung */
   exerciseId: string;
@@ -58,4 +59,16 @@ export function ersetzungenFuerProfil(e: AdHocEingabe): AdHocErgebnis {
     else fehlend.add(slot.muster);
   }
   return { ersetzungen, fehlendeMuster: [...fehlend] };
+}
+
+/**
+ * Ersetzungen für eine Einheit: wie `ersetzungenFuerProfil`, aber nur für die Slots, die in dieser
+ * Einheit gebraucht werden (der Zusatzblock Z nur, wenn er aktiv ist). Start und Vorschau nutzen
+ * dieselbe Funktion, damit beide immer dasselbe zeigen.
+ */
+export function ersetzungenFuerEinheit(e: AdHocEingabe & { zusatzblock: boolean }): AdHocErgebnis {
+  return ersetzungenFuerProfil({
+    ...e,
+    slots: e.slots.filter((s) => s.block !== "Z" || e.zusatzblock),
+  });
 }

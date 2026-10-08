@@ -78,6 +78,14 @@ export function exportiere(db: Db, art: BackupArt, jetzt: Date = new Date()): Ba
  * darauf verweisen.
  */
 export function importiereKatalog(db: Db, daten: KatalogDaten): ImportErgebnis {
+  try {
+    return katalogTransaktion(db, daten);
+  } catch (e) {
+    return { ok: false, fehler: [`Der Import ist fehlgeschlagen: ${(e as Error).message}`] };
+  }
+}
+
+function katalogTransaktion(db: Db, daten: KatalogDaten): ImportErgebnis {
   return db.transaction((tx): ImportErgebnis => {
     const vorhanden = new Map(
       tx
