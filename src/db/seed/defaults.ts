@@ -1,10 +1,4 @@
-import {
-  EQUIPMENT_AUSWAHL,
-  MUSTER,
-  type EquipmentArt,
-  type Gewichte,
-  type Muster,
-} from "@/domain/types";
+import { EQUIPMENT_AUSWAHL, MUSTER, type EquipmentArt, type Gewichte, type Muster } from "@/domain/types";
 
 export interface StandardProfil {
   seedKey: string;

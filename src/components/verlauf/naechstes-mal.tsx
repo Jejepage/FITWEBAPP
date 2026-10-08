@@ -37,7 +37,9 @@ export function NaechstesMalAnsicht({ daten }: { daten: NaechstesMal }) {
               <Link href={`/verlauf/uebung/${e.exerciseId}`} className="font-medium text-brand">
                 {e.name}
               </Link>
-              <p className="text-sm text-neutral-500">Ziel: {e.zielText}</p>
+              <p className="text-sm text-neutral-500">
+                {t.zielLabel}: {e.zielText}
+              </p>
               <p className="mt-1 text-lg font-semibold">
                 {formatSatz({
                   gewicht: e.vorschlag.gewicht,

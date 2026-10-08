@@ -35,10 +35,10 @@ export default async function PlanNeuPage({
 }) {
   const sp = await searchParams;
   const profile = listProfiles(db);
-  const standard = ladePlanStandard(db);
+  const roh = parsePlanRohwerte(quelleAusSearchParams(sp));
+  const standard = ladePlanStandard(db, undefined, roh.vorgaengerId);
   if (!standard) return <FehlerBanner>{t.fehler.profil_unbekannt}</FehlerBanner>;
 
-  const roh = parsePlanRohwerte(quelleAusSearchParams(sp));
   const { werte: aufgeloest, fehler: feldFehler } = loesePlanWerteAuf(roh, standard);
   // Unbekanntes Profil in der URL: Standardprofil nehmen.
   const profil =

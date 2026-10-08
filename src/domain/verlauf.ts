@@ -25,7 +25,8 @@ export interface VerlaufZeile {
   bester: SatzWerte | null;
   /** Wert des besten Satzes für das Diagramm (geschätzte 1RM, Wdh., s oder m) */
   besterWert: number | null;
-  volumen: number;
+  /** Null, wenn die Einheit bei einer Gewichtsübung keinen Satz mit Gewicht hat */
+  volumen: number | null;
 }
 
 export interface UebungsVerlauf {
@@ -105,7 +106,10 @@ export function uebungsVerlauf(
       adHoc: e.adHoc,
       bester: b?.satz ?? null,
       besterWert: b?.wert ?? null,
-      volumen: volumen(e.saetze, art, mitGewicht),
+      volumen:
+        mitGewicht && !e.saetze.some((s) => (s.gewicht ?? 0) > 0 && s.wdh !== null)
+          ? null
+          : volumen(e.saetze, art, mitGewicht),
     };
   });
   return {

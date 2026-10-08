@@ -51,7 +51,7 @@ interface Payload {
 
 const wartendSchluessel = (workoutId: number) => `fit-wartend-${workoutId}`;
 
-function datumKurz(iso: string): string {
+function datumTagMonat(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "2-digit",
@@ -560,7 +560,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
           <span className="font-medium">{t.letztesMal}:</span>{" "}
           {info.letzte
-            ? `${datumKurz(info.letzte.datum)} · ${info.letzte.saetze.map(formatSatz).join(" | ")}`
+            ? `${datumTagMonat(info.letzte.datum)} · ${info.letzte.saetze.map(formatSatz).join(" | ")}`
             : t.keinLetztesMal}
         </p>
       </section>

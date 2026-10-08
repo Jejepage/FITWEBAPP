@@ -34,6 +34,13 @@ describe("ladeNaechstesMal", () => {
     }
   });
 
+  it("rechnet mit dem Stand nach der Einheit, nicht mit dem heutigen Fortschritt", () => {
+    const { workoutIds } = legeBlockAn(db, { einheiten: 12 });
+    const r = ladeNaechstesMal(db, workoutIds[0]!);
+    expect(r.art).toBe("ok");
+    if (r.art === "ok") expect(r.eintraege.every((e) => e.woche === 2)).toBe(true);
+  });
+
   it("keine Vorschläge bei Ad-hoc-Einheiten", () => {
     const { workoutIds } = legeBlockAn(db, { einheiten: 2, adHoc: (n) => n === 0 });
     expect(ladeNaechstesMal(db, workoutIds[0]!)).toEqual({ art: "keine", grund: "ad_hoc" });
@@ -44,9 +51,11 @@ describe("ladeNaechstesMal", () => {
     expect(ladeNaechstesMal(db, workoutIds[11]!)).toEqual({ art: "keine", grund: "entlastung" });
   });
 
-  it("keine Vorschläge, wenn die nächste Einheit nicht mehr zum Block gehört", () => {
+  it("Woche 5: die nächste Einheit derselben Art liegt noch im Block (Woche 6)", () => {
     const { workoutIds } = legeBlockAn(db, { einheiten: 12 });
-    expect(ladeNaechstesMal(db, workoutIds[8]!)).toEqual({ art: "keine", grund: "block_ende" });
+    const r = ladeNaechstesMal(db, workoutIds[8]!);
+    expect(r.art).toBe("ok");
+    if (r.art === "ok") expect(r.eintraege.every((e) => e.woche === 6)).toBe(true);
   });
 
   it("unbekannt oder nicht abgeschlossen: keine", () => {

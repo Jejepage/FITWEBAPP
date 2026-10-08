@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { de } from "@/i18n/de";
 
 export interface DiagrammPunkt {
   /** ISO-Datum yyyy-mm-dd */
@@ -9,14 +10,7 @@ export interface DiagrammPunkt {
   adHoc: boolean;
 }
 
-const TEXT = {
-  keineDaten: "Noch keine Daten.",
-  adHoc: "Ad-hoc",
-  geplant: "Geplant",
-  beschreibung: (n: number, von: string, bis: string, min: string, max: string, einheit: string) =>
-    `${n} ${n === 1 ? "Datenpunkt" : "Datenpunkte"}, ${von}${n > 1 ? ` bis ${bis}` : ""}. ` +
-    `Niedrigster Wert ${min} ${einheit}, höchster Wert ${max} ${einheit}.`,
-} as const;
+const TEXT = de.verlauf.diagramm;
 
 // viewBox nahe der Handybreite, damit die Schrift bei 390 px effektiv ≥ 11 px bleibt.
 const B = 360;

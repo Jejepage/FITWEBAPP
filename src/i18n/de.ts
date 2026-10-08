@@ -46,8 +46,6 @@ export const de = {
       ad_hoc: "Ad-hoc-Einheiten zählen nicht für die Steigerung. Es gibt keine Vorschläge.",
       entlastung:
         "Woche 6 ist Entlastung und Test: keine Steigerung. Der Stufen-Check steht im Plan.",
-      block_ende:
-        "Der Block ist zu Ende. Im Plan siehst du den Stufen-Check und kannst den nächsten Block erstellen.",
       nicht_abgeschlossen: "Für diese Einheit gibt es keine Vorschläge.",
     },
     uebungTitel: "Übungsverlauf",
@@ -68,6 +66,22 @@ export const de = {
       "Wdh.": "Summe aller Wiederholungen",
       s: "Summe aller Sekunden",
       m: "Summe aller Meter",
+    },
+    zielLabel: "Ziel",
+    diagramm: {
+      keineDaten: "Noch keine Daten.",
+      adHoc: "Ad-hoc",
+      geplant: "Geplant",
+      beschreibung: (
+        n: number,
+        von: string,
+        bis: string,
+        min: string,
+        max: string,
+        einheit: string,
+      ) =>
+        `${n} ${n === 1 ? "Datenpunkt" : "Datenpunkte"}, ${von}${n > 1 ? ` bis ${bis}` : ""}. ` +
+        `Niedrigster Wert ${min} ${einheit}, höchster Wert ${max} ${einheit}.`,
     },
     datum: "Datum",
     besterSatz: "Bester Satz",

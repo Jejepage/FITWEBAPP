@@ -1,5 +1,7 @@
 // "Nächstes Mal" (Spec F5): Vorschlag je Übung direkt nach einer Einheit, aus den Sätzen dieser
 // Einheit. Wird berechnet, nicht gespeichert (wie die Vorbelegung im Training).
+import { and, count, eq, lte } from "drizzle-orm";
+import { workout } from "@/db/schema";
 import type { Db } from "@/db/types";
 import { vorschlagFuerUebung } from "@/domain/progression";
 import { zielText } from "@/domain/satz-format";
@@ -9,7 +11,7 @@ import { alleUebungen } from "./exercises";
 import { getPlan } from "./plans";
 import { getProfile } from "./profiles";
 import { ladeEinheit } from "./verlauf";
-import { getWorkout, zaehleAbgeschlosseneEinheiten } from "./workouts";
+import { getWorkout } from "./workouts";
 
 export interface NaechstesMalEintrag {
   exerciseId: string;
@@ -24,7 +26,24 @@ export interface NaechstesMalEintrag {
 
 export type NaechstesMal =
   | { art: "ok"; eintraege: NaechstesMalEintrag[] }
-  | { art: "keine"; grund: "nicht_abgeschlossen" | "ad_hoc" | "entlastung" | "block_ende" };
+  | { art: "keine"; grund: "nicht_abgeschlossen" | "ad_hoc" | "entlastung" };
+
+/** Abgeschlossene Einheiten des Plans bis einschließlich `workoutId` (Stand nach dieser Einheit). */
+function zaehleBis(db: Db, planId: number, workoutId: number): number {
+  return (
+    db
+      .select({ n: count() })
+      .from(workout)
+      .where(
+        and(
+          eq(workout.planId, planId),
+          eq(workout.status, "abgeschlossen"),
+          lte(workout.id, workoutId),
+        ),
+      )
+      .get()?.n ?? 0
+  );
+}
 
 export function ladeNaechstesMal(db: Db, workoutId: number): NaechstesMal {
   const w = getWorkout(db, workoutId);
@@ -37,12 +56,8 @@ export function ladeNaechstesMal(db: Db, workoutId: number): NaechstesMal {
   const profil = getProfile(db, w.profilId);
   if (!plan || !profil) return { art: "keine", grund: "nicht_abgeschlossen" };
   const proWoche = plan.einheitenProWoche === 3 ? 3 : 2;
-  const naechste = naechsteEinheitMit(
-    w.einheit,
-    zaehleAbgeschlosseneEinheiten(db, plan.id),
-    proWoche,
-  );
-  if (naechste.woche > WOCHEN_PRO_BLOCK) return { art: "keine", grund: "block_ende" };
+  // Stand nach dieser Einheit: Anzahl abgeschlossener Einheiten bis einschließlich dieser.
+  const naechste = naechsteEinheitMit(w.einheit, zaehleBis(db, plan.id, w.id), proWoche);
 
   const katalog = new Map(alleUebungen(db).map((u) => [u.id, u]));
   const eintraege: NaechstesMalEintrag[] = [];

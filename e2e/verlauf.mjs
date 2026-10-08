@@ -194,9 +194,11 @@ async function ablauf(browser, dbPfad) {
   await keinHorizontalScroll("Einheit");
   await shot("3-einheit");
   await page.goBack();
-  await eintraege.last().click(); // Woche 1: der Block ist komplett → keine weiteren Vorschläge
-  await page.getByText(/Der Block ist zu Ende/).waitFor();
-  schritt("Einheit im Detail: Protokoll, Hinweis zu Woche 6 bzw. Blockende");
+  await eintraege.last().click(); // Woche 1: Vorschläge gelten für Woche 2, auch Wochen später
+  await page
+    .getByText(/Vorschlag für die nächste Einheit mit diesen Übungen \(Woche 2\)/)
+    .waitFor();
+  schritt("Einheit im Detail: Protokoll, Hinweis zu Woche 6, Vorschläge für die Folgewoche");
 
   // --- 7. Übungsverlauf mit Diagramm ---------------------------------------------------------
   await page.goto(`${BASE}/verlauf`);

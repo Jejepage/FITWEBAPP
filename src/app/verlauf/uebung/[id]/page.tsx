@@ -128,7 +128,7 @@ export default async function UebungsVerlaufPage({
                     </td>
                     <td className="py-2 pr-2">{besterSatzText(z)}</td>
                     <td className="py-2 text-right tabular-nums">
-                      {z.volumen.toLocaleString("de-DE")}
+                      {z.volumen === null ? "–" : z.volumen.toLocaleString("de-DE")}
                     </td>
                   </tr>
                 ))}

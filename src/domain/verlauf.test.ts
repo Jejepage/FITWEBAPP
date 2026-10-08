@@ -107,7 +107,7 @@ describe("uebungsVerlauf", () => {
     );
     expect(v.mitGewicht).toBe(true);
     expect(v.volumenEinheit).toBe("kg");
-    expect(v.zeilen.map((z) => z.volumen)).toEqual([0, 100]);
+    expect(v.zeilen.map((z) => z.volumen)).toEqual([null, 100]);
     expect(v.zeilen[0]?.besterWert).toBeNull();
   });
 

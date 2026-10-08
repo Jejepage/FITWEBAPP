@@ -1,7 +1,7 @@
 // Stufen-Check am Blockende (Spec 2.5, F5): holt die Einheiten aus Woche 5 und 6 des Plans und
 // lässt die reine Logik in domain/stufen-check.ts die Empfehlung je Muster berechnen.
 import { and, eq, inArray } from "drizzle-orm";
-import { setLog, workout } from "@/db/schema";
+import { planSlot, setLog, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
 import { stufenCheck } from "@/domain/stufen-check";
 import {
@@ -26,6 +26,7 @@ export function ladeStufenCheck(db: Db, plan: Pick<Plan, "id" | "stufen">): Stuf
     .select({ satz: setLog, w: workout })
     .from(setLog)
     .innerJoin(workout, eq(setLog.workoutId, workout.id))
+    .innerJoin(planSlot, eq(setLog.planSlotId, planSlot.id))
     .where(
       and(
         eq(workout.planId, plan.id),
@@ -33,6 +34,9 @@ export function ladeStufenCheck(db: Db, plan: Pick<Plan, "id" | "stufen">): Stuf
         eq(workout.adHoc, false),
         inArray(workout.woche, [...STUFEN_CHECK_WOCHEN]),
         eq(setLog.erledigt, true),
+        // Nur die geplante Übung des Slots: Ersatzübungen können eine andere Stufe haben und
+        // würden den Vergleich mit der Planstufe verfälschen.
+        eq(setLog.exerciseId, planSlot.exerciseId),
       ),
     )
     .orderBy(workout.id, setLog.runde)
@@ -58,8 +62,19 @@ export function ladeStufenCheck(db: Db, plan: Pick<Plan, "id" | "stufen">): Stuf
     e.saetze.push(zuSatzWerte(satz));
     einheiten.set(key, e);
   }
+  // Je Einheit zählt ein Muster einmal: bei einem Übungswechsel mitten im Slot gilt die Übung
+  // mit den meisten Sätzen, sonst würde dieselbe Sitzung doppelt gewertet.
+  const jeMuster = new Map<
+    string,
+    { meta: Omit<StufenCheckEinheit, "saetze">; saetze: SatzWerte[] }
+  >();
+  for (const [key, e] of einheiten) {
+    const k = `${key.split(":")[0]}:${e.meta.muster}`;
+    const bisher = jeMuster.get(k);
+    if (!bisher || e.saetze.length > bisher.saetze.length) jeMuster.set(k, e);
+  }
   return stufenCheck({
     stufen: plan.stufen,
-    einheiten: [...einheiten.values()].map((e) => ({ ...e.meta, saetze: e.saetze })),
+    einheiten: [...jeMuster.values()].map((e) => ({ ...e.meta, saetze: e.saetze })),
   });
 }
