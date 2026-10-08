@@ -47,6 +47,15 @@ export async function withApp(fn, { lan = false, env: zusatzEnv = {} } = {}) {
   const host = ip ?? "127.0.0.1";
   const base = `http://${host}:${PORT}`;
   mkdirSync(SHOTS, { recursive: true });
+  // Ein eben beendeter Server der vorigen Suite kann den Port noch kurz belegen: erst warten.
+  for (let i = 0; i < 40; i++) {
+    try {
+      await fetch(`http://127.0.0.1:${PORT}/api/health`);
+      await new Promise((r) => setTimeout(r, 250));
+    } catch {
+      break;
+    }
+  }
   const dbDir = mkdtempSync(join(tmpdir(), "fit-e2e-"));
   const server = spawn(
     "npx",
