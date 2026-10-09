@@ -77,6 +77,7 @@ export interface VorschlagEingabe {
     | "steigerungsart"
     | "equipment"
     | "schwererId"
+    | "ersatz"
   >;
   /** Woche der Einheit, für die der Vorschlag gilt (1 bis 6); in Woche 6 wird nicht gesteigert */
   woche: number;

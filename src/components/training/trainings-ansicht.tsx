@@ -354,11 +354,6 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
       <div className="min-w-0">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-semibold">
           {t.kopf(daten.einheit, daten.woche)}
-          {daten.adHoc && (
-            <span className="rounded-full bg-warn-soft px-2.5 py-0.5 text-xs font-semibold text-warn-ink">
-              {de.adhoc.kopfBadge(daten.profilName)}
-            </span>
-          )}
         </p>
         <p className="mt-0.5 text-sm text-ink-3">
           {t.fortschritt(erledigteKeys.size, schritte.length)}
@@ -759,6 +754,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
                           <span className="block text-sm font-normal text-ink-3">
                             Stufe {k.stufe}
                             {k.einseitig ? " · einseitig" : ""}
+                            {k.ersatz ? ` · ${t.ersatzMarke}` : ""}
                           </span>
                         </span>
                         <IconTausch className="size-5 shrink-0 text-ink-3" />

@@ -36,6 +36,7 @@ describe("parseExerciseForm", () => {
       formular({
         ...basis,
         einseitig: "on",
+        ersatz: "on",
         equipment: ["kurzhanteln", "bank"],
         leichterId: "DH-01",
         schwererId: "",
@@ -43,6 +44,7 @@ describe("parseExerciseForm", () => {
     );
     expect(w.ausfuehrung).toEqual(["Schritt eins", "Schritt zwei", "Schritt drei"]);
     expect(w.einseitig).toBe(true);
+    expect(w.ersatz).toBe(true);
     expect(w.equipment).toEqual(["kurzhanteln", "bank"]);
     expect(w.leichterId).toBe("DH-01");
     expect(w.schwererId).toBeNull();
@@ -61,6 +63,7 @@ describe("parseExerciseForm", () => {
     const w = parseExerciseForm(formular({ name: "x" }));
     expect(w.einseitig).toBe(false);
     expect(w.aktiv).toBe(false);
+    expect(w.ersatz).toBe(false);
   });
 });
 
@@ -168,9 +171,11 @@ describe("Vorlagen", () => {
       bild: null,
       videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       aktiv: true,
+      ersatz: true,
       pruefstatus: "geprueft",
     };
     const w = exerciseZuFormWerte(e);
+    expect(w.ersatz).toBe(true);
     expect(w.schwererId).toBe("DH-98");
     expect(w.videoUrl).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     expect(validiereExercise(w, { id: e.id, muster: e.muster, bild: e.bild }).ok).toBe(true);

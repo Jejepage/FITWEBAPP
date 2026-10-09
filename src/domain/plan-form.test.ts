@@ -11,7 +11,8 @@ import {
 import { MUSTER, type Muster } from "./types";
 
 const standard: PlanStandardwerte = {
-  profilId: 1,
+  equipment: ["kurzhanteln", "bank"],
+  gewichte: { kurzhanteln: [8, 10, 12] },
   stufen: Object.fromEntries(MUSTER.map((m) => [m, 2])) as Record<Muster, number>,
   einheitenProWoche: 2,
   zusatzblock: false,
@@ -42,7 +43,8 @@ describe("parsePlanRohwerte", () => {
   it("liest alle Felder", () => {
     const r = roh({
       gesendet: "1",
-      profil: "3",
+      equipment: "maschinen,bank",
+      gewichte_kurzhanteln: "2–20/2",
       stufe_KN: "4",
       stufe_RU: "1",
       einheiten: "3",
@@ -55,7 +57,8 @@ describe("parsePlanRohwerte", () => {
     });
     expect(r).toMatchObject({
       gesendet: true,
-      profilId: 3,
+      equipment: ["maschinen", "bank"],
+      gewichteText: { kurzhanteln: "2–20/2" },
       stufen: { KN: 4, RU: 1 },
       einheitenProWoche: 3,
       zusatzblock: true,
@@ -69,7 +72,7 @@ describe("parsePlanRohwerte", () => {
 
   it("ignoriert Ungültiges", () => {
     const r = roh({
-      profil: "abc",
+      equipment: "rudergeraet,keins",
       stufe_KN: "9",
       stufe_HB: "x",
       einheiten: "4",
@@ -86,18 +89,31 @@ describe("parsePlanRohwerte", () => {
       seed: 0,
       gesendet: false,
     });
-    expect(r.profilId).toBeUndefined();
+    expect(r.equipment).toEqual([]);
     expect(r.einheitenProWoche).toBeUndefined();
     expect(r.vorgaengerId).toBeUndefined();
   });
 
-  it("liest auch FormData", () => {
+  it("liest auch FormData, Häkchen mit gleichem Namen als Liste", () => {
     const fd = new FormData();
-    fd.append("profil", "2");
+    fd.append("equipment", "stange");
+    fd.append("equipment", "kurzhanteln");
+    fd.append("gewichte_kettlebell", " 12, 16 ");
     fd.append("slot_B-2-3", "ZH-05");
     const r = parsePlanRohwerte(quelleAusFormData(fd));
-    expect(r.profilId).toBe(2);
+    expect(r.equipment).toEqual(["kurzhanteln", "stange"]);
+    expect(r.gewichteText).toEqual({ kettlebell: "12, 16" });
     expect(r.auswahl).toEqual({ "B-2-3": "ZH-05" });
+  });
+
+  it("liest mehrfache URL-Parameter als Liste", () => {
+    const r = parsePlanRohwerte(quelleAusSearchParams({ equipment: ["bank", "stange"] }));
+    expect(r.equipment).toEqual(["bank", "stange"]);
+  });
+
+  it("Equipment: nie gesendet = undefined (Standard), gesendet ohne Haken = leer", () => {
+    expect(roh({}).equipment).toBeUndefined();
+    expect(roh({ gesendet: "1" }).equipment).toEqual([]);
   });
 });
 
@@ -105,7 +121,9 @@ describe("loesePlanWerteAuf", () => {
   it("nimmt ohne Angaben die Standardwerte", () => {
     const { werte, fehler } = auf({});
     expect(werte).toMatchObject({
-      profilId: 1,
+      equipment: ["kurzhanteln", "bank"],
+      gewichte: { kurzhanteln: [8, 10, 12] },
+      gewichteText: { kurzhanteln: "8, 10, 12", kettlebell: "" },
       einheitenProWoche: 2,
       zusatzblock: false,
       startDatum: "2026-10-07",
@@ -126,6 +144,47 @@ describe("loesePlanWerteAuf", () => {
     ).toBe(true);
   });
 
+  describe("Equipment und Hantelgewichte", () => {
+    it("übernimmt Angaben aus dem Formular", () => {
+      const { werte, fehler } = auf({
+        gesendet: "1",
+        equipment: "kettlebell",
+        gewichte_kettlebell: "12, 16",
+        gewichte_kurzhanteln: "5",
+      });
+      expect(werte.equipment).toEqual(["kettlebell"]);
+      // Gewichte zählen nur für angekreuzte Arten
+      expect(werte.gewichte).toEqual({ kettlebell: [12, 16] });
+      expect(fehler).toEqual({});
+    });
+
+    it("abgeschicktes Formular ohne Haken: kein Equipment, keine Gewichte", () => {
+      const { werte } = auf({ gesendet: "1" });
+      expect(werte.equipment).toEqual([]);
+      expect(werte.gewichte).toEqual({});
+    });
+
+    it("ungültige Gewichte: Fehler am Feld, der Text bleibt zum Korrigieren erhalten", () => {
+      const { werte, fehler } = auf({
+        gesendet: "1",
+        equipment: "kurzhanteln",
+        gewichte_kurzhanteln: "12,16",
+      });
+      expect(fehler.gewichte_kurzhanteln).toBeDefined();
+      expect(werte.gewichteText.kurzhanteln).toBe("12,16");
+      expect(werte.gewichte).toEqual({});
+    });
+
+    it("ungültige Gewichte einer nicht angekreuzten Art stören nicht", () => {
+      const { fehler } = auf({
+        gesendet: "1",
+        equipment: "bank",
+        gewichte_kurzhanteln: "abc",
+      });
+      expect(fehler).toEqual({});
+    });
+  });
+
   it("ungültiges Startdatum: Fehler und Ersatz durch das heutige Datum", () => {
     const { werte, fehler } = auf({ start: "2026-02-30" });
     expect(werte.startDatum).toBe("2026-10-07");
@@ -144,7 +203,7 @@ describe("loesePlanWerteAuf", () => {
   });
 
   describe("manuelle Wahl und Basis", () => {
-    const sp = { "slot_A-1-1": "KN-04", profil: "1", seed: "2" };
+    const sp = { "slot_A-1-1": "KN-04", gesendet: "1", equipment: "bank", seed: "2" };
     const basisVon = (extra: Record<string, string> = {}) =>
       planBasis(auf({ ...sp, ...extra, aktion: "aktualisieren" }).werte);
 
@@ -160,7 +219,7 @@ describe("loesePlanWerteAuf", () => {
     });
 
     it.each([
-      ["Profil", { profil: "2" }],
+      ["Equipment", { equipment: "bank,stange" }],
       ["Stufe", { stufe_KN: "4" }],
       ["Seed", { seed: "3" }],
       ["Vorgänger", { vorgaenger: "5" }],
@@ -172,15 +231,15 @@ describe("loesePlanWerteAuf", () => {
     it("meldet veraltete Vorschau, wenn bestimmende Eingaben geändert wurden", () => {
       const basis = basisVon();
       expect(auf({ ...sp, basis }).vorschauVeraltet).toBe(false);
-      expect(auf({ ...sp, basis, profil: "2" }).vorschauVeraltet).toBe(true);
-      expect(auf({ ...sp, profil: "2" }).vorschauVeraltet).toBe(false); // ohne Basis nichts zu vergleichen
+      expect(auf({ ...sp, basis, equipment: "bank,stange" }).vorschauVeraltet).toBe(true);
+      expect(auf({ ...sp, equipment: "bank,stange" }).vorschauVeraltet).toBe(false); // ohne Basis nichts zu vergleichen
     });
 
     it("planBasis unterscheidet alle bestimmenden Eingaben", () => {
       const w = auf({}).werte;
       const basen = new Set([
         planBasis(w),
-        planBasis({ ...w, profilId: 2 }),
+        planBasis({ ...w, equipment: ["stange"] }),
         planBasis({ ...w, seed: 1 }),
         planBasis({ ...w, vorgaengerId: 3 }),
         planBasis({ ...w, stufen: { ...w.stufen, KN: 5 } }),

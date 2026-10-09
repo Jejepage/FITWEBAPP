@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { beschreibeBedingung, erfuellt, zaehleMachbar } from "./equipment";
+import { beschreibeBedingung, erfuellt, istErsatzStandard, zaehleMachbar } from "./equipment";
 import type { EquipmentBedingung } from "./types";
 
 describe("erfuellt", () => {
@@ -50,5 +50,22 @@ describe("zaehleMachbar", () => {
     expect(z.HB).toBe(0);
     expect(z.DH).toBe(0);
     expect(zaehleMachbar(liste, ["kurzhanteln", "maschinen"])).toMatchObject({ KN: 2, HB: 1 });
+  });
+});
+
+describe("istErsatzStandard", () => {
+  it("reines Körpergewicht ist Ersatz", () => {
+    expect(istErsatzStandard({ equipment: [] })).toBe(true);
+  });
+
+  it("nur Band ist Ersatz; Band zusammen mit einem Gerät nicht", () => {
+    expect(istErsatzStandard({ equipment: ["band"] })).toBe(true);
+    expect(istErsatzStandard({ equipment: ["maschinen", "band"] })).toBe(false);
+  });
+
+  it("Geräte machen eine Übung zur Planübung, auch Hanteln und die Stange", () => {
+    expect(istErsatzStandard({ equipment: ["kurzhanteln", "bank"] })).toBe(false);
+    expect(istErsatzStandard({ equipment: ["kurzhanteln"] })).toBe(false);
+    expect(istErsatzStandard({ equipment: ["stange"] })).toBe(false);
   });
 });

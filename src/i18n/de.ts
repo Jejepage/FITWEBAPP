@@ -23,7 +23,6 @@ export const de = {
     keineEinheitenHilfe: "Sobald du eine Einheit abschließt, erscheint sie hier.",
     einheitZeile: (einheit: string, woche: number) => `Einheit ${einheit} · Woche ${woche}`,
     saetze: (n: number) => (n === 1 ? "1 Satz" : `${n} Sätze`),
-    adHoc: "Ad-hoc",
     mitZusatzblock: "mit Zusatzblock",
     alleAnzeigen: (n: number) => `Alle ${n} Einheiten anzeigen`,
     uebungen: "Verlauf pro Übung",
@@ -33,7 +32,6 @@ export const de = {
     zurueck: "Zum Verlauf",
     zurStart: "Zur Startseite",
     gespeichert: "Einheit gespeichert. Gut gemacht!",
-    profil: "Profil",
     notiz: "Notiz",
     ersetzt: "ersetzt",
     abgebrochen: "abgebrochen",
@@ -43,7 +41,6 @@ export const de = {
     naechstesMalHilfe: (woche: number) =>
       `Vorschlag für die nächste Einheit mit diesen Übungen (Woche ${woche}).`,
     keineVorschlaege: {
-      ad_hoc: "Ad-hoc-Einheiten zählen nicht für die Steigerung. Es gibt keine Vorschläge.",
       entlastung:
         "Woche 6 ist Entlastung und Test: keine Steigerung. Der Stufen-Check steht im Plan.",
       nicht_abgeschlossen: "Für diese Einheit gibt es keine Vorschläge.",
@@ -70,8 +67,6 @@ export const de = {
     zielLabel: "Ziel",
     diagramm: {
       keineDaten: "Noch keine Daten.",
-      adHoc: "Ad-hoc",
-      geplant: "Geplant",
       beschreibung: (
         n: number,
         von: string,
@@ -86,7 +81,6 @@ export const de = {
     datum: "Datum",
     besterSatz: "Bester Satz",
     keinVerlauf: "Für diese Übung gibt es noch keine abgeschlossene Einheit.",
-    adHocHinweis: "Ad-hoc-Einheiten sind im Diagramm als offene Punkte dargestellt.",
   },
   stufencheck: {
     titel: "Stufen-Check",
@@ -121,7 +115,7 @@ export const de = {
     zuruecksetzen: "Zurücksetzen",
     muster: "Muster",
     alle: "Alle",
-    profil: "Equipment-Profil",
+    machbar: "Machbar mit meinem Equipment",
     stufe: "Stufe",
     einseitig: "Einseitig",
     ja: "Ja",
@@ -140,6 +134,8 @@ export const de = {
     zurueckZurListe: "Zurück zum Katalog",
     stufeBadge: (s: number) => `Stufe ${s}`,
     einseitigBadge: "einseitig",
+    ersatzBadge: "Ersatz",
+    ersatzFilter: "Ersatzübung",
     zuPruefen: "zu prüfen",
     geprueft: "geprüft",
     inaktiv: "inaktiv",
@@ -177,6 +173,7 @@ export const de = {
         stufe: "Stufe",
         equipment: "Equipment",
         einseitig: "Einseitig",
+        ersatz: "Ersatz",
         belastung: "Belastung",
         bereich: "Zielbereich",
         muskeln: "Hauptmuskeln",
@@ -192,8 +189,8 @@ export const de = {
       suche: "Name oder ID suchen",
       suchePlatzhalter: "Suchen …",
       muskelSuche: "Muskel suchen",
-      alleProfile: "Alle Profile",
-      mitProfil: (name: string) => `Machbar: ${name}`,
+      alleUebungen: "Alle Übungen",
+      nurMachbar: "Nur machbare",
       alleGeraete: "Jedes Gerät",
       benoetigt: (name: string) => `Braucht ${name}`,
       alleStufen: "Alle",
@@ -230,6 +227,9 @@ export const de = {
       muster: "Bewegungsmuster",
       stufe: "Stufe (1–5)",
       einseitig: "Einbeinig/einarmig (einseitig)",
+      ersatz: "Ersatzübung",
+      ersatzHilfe:
+        "Ersatzübungen (Körpergewicht, Band) wählt der Plan-Generator nur, wenn es für das Muster mit dem Equipment sonst nichts gibt. Zum Tauschen im Plan und im Training sind sie immer wählbar.",
       belastungsart: "Belastungsart",
       standardBereich: "Standardbereich",
       standardBereichHilfe:
@@ -285,40 +285,35 @@ export const de = {
     aufwaermen: "Aufwärmprogramm (Text)",
     aufwaermenHilfe: "Wird vor jeder Einheit angezeigt.",
     speichern: "Speichern",
-    profile: "Equipment-Profile",
-    profileHilfe: "Ein Profil beschreibt, was du am jeweiligen Ort zur Verfügung hast.",
-    neuesProfil: "Neues Profil",
-    standard: "Standard",
-    keinEquipment: "Kein Gerät (nur Körpergewicht)",
-    gewichteKurz: (art: string, liste: string) => `${art}: ${liste} kg`,
-    machbarVonGesamt: (n: number, gesamt: number) => `${n} von ${gesamt} Übungen machbar`,
+    equipmentHinweis:
+      "Das Equipment (Geräte und Hantelgewichte) legst du für jeden Plan fest und änderst es dort, zum Beispiel wenn du ein neues Gerät bekommst.",
+    zumPlan: "Zum Plan",
     bestaetigtAm: (datum: string) => `Bestätigt am ${datum}.`,
     hinweisTitel: "Hinweis",
   },
-  profil: {
-    neuTitel: "Neues Profil",
-    bearbeitenTitel: (name: string) => `Profil „${name}“`,
-    zurueck: "Zurück zu den Einstellungen",
-    name: "Name",
+  equipment: {
+    titel: "Equipment ändern",
+    zurueck: "Zurück zum Plan",
     equipment: "Verfügbares Equipment",
     equipmentHilfe:
-      "Alltagsgegenstände wie Stuhl, Tisch, Rucksack und Wand gelten immer als verfügbar. Ohne Auswahl sind nur Übungen ohne Gerät möglich.",
+      "Alltagsgegenstände wie Stuhl, Tisch, Rucksack und Wand gelten immer als verfügbar. Ersatzübungen (Körpergewicht, Band) gehen auch ohne Auswahl.",
     gewichte: (art: string) => `Gewichte ${art} (kg)`,
     gewichteHilfe:
       "Verfügbare Gewichte, z. B. „12, 16“ oder als Bereich „2–20/2“ (2 bis 20 kg in 2-kg-Schritten). Dezimalkomma ist erlaubt: „2,5“. Nur nötig, wenn das Equipment angekreuzt ist.",
-    istStandard: "Als Standardprofil verwenden",
-    istStandardFest:
-      "Dies ist das Standardprofil. Um ein anderes festzulegen, öffne dieses und setze dort den Haken.",
     speichern: "Speichern",
     abbrechen: "Abbrechen",
+    wirkung:
+      "Die Übungen im Plan bleiben, wie sie sind. Neues Equipment erscheint in den Tauschlisten. Übungen, für die Equipment fehlt, werden beim Start einer Einheit automatisch durch passende ersetzt. Die Hantelgewichte gelten sofort für die Gewichtsvorschläge.",
+    gespeichert: "Equipment gespeichert.",
     machbarTitel: "Damit machbar",
-    machbarHilfe:
-      "Aktive Übungen je Bewegungsmuster mit dem gespeicherten Equipment dieses Profils.",
+    machbarHilfe: "Aktive Übungen je Bewegungsmuster mit dem gespeicherten Equipment dieses Plans.",
     machbarWarnung: (muster: string) =>
-      `Für ${muster} gibt es mit diesem Profil keine Übung. Ein Plan kann dort keinen Platz füllen.`,
-    loeschenTitel: "Profil löschen",
-    loeschen: "Profil löschen",
-    loeschenFrage: "Dieses Profil wirklich löschen?",
+      `Für ${muster} gibt es mit diesem Equipment keine Übung. Eine Einheit kann dort nicht starten.`,
+    formularFehler: "Bitte die markierten Felder prüfen.",
+    fehler: {
+      plan_unbekannt: "Der Plan existiert nicht mehr.",
+      equipment_ungueltig: "Das Equipment ist ungültig.",
+    },
   },
   plan: {
     titel: "Plan",
@@ -330,7 +325,14 @@ export const de = {
     neuErstellen: "Neuen Plan erstellen",
     zurueck: "Zurück zum Plan",
     aktiverPlan: "Aktiver Plan",
-    profil: "Profil",
+    equipment: "Equipment",
+    equipmentAendern: "Ändern",
+    keinEquipment: "Kein Gerät (nur Ersatzübungen)",
+    gewichteKurz: (art: string, liste: string) => `${art}: ${liste} kg`,
+    equipmentFehlt: (n: number) =>
+      n === 1
+        ? "Für 1 Übung des Plans fehlt Equipment. Sie wird beim Start einer Einheit ersetzt."
+        : `Für ${n} Übungen des Plans fehlt Equipment. Sie werden beim Start einer Einheit ersetzt.`,
     start: "Start",
     einheitenProWoche: (n: number) => `${n} Einheiten pro Woche`,
     wochenfolge: (n: number) =>
@@ -346,7 +348,12 @@ export const de = {
     zumTraining: "Zum Training",
     form: {
       eingaben: "Eingaben",
-      profil: "Equipment-Profil",
+      equipment: "Verfügbares Equipment",
+      equipmentHilfe:
+        "Wähle, was du zur Verfügung hast. Ersatzübungen (Körpergewicht, Band) kommen nur dazu, wenn es für ein Muster sonst nichts gibt.",
+      gewichte: (art: string) => `Gewichte ${art} (kg)`,
+      gewichteHilfe:
+        "Verfügbare Gewichte, z. B. „12, 16“ oder „2–20/2“ (2 bis 20 kg in 2-kg-Schritten). Nur nötig, wenn das Equipment angekreuzt ist.",
       stufen: "Wunschstufe pro Muster",
       einheiten: "Einheiten pro Woche",
       zusatzblock: "Zusatzblock (Tragen und Rumpf) einplanen",
@@ -362,14 +369,15 @@ export const de = {
       folgeblock: "Folgeblock: Übungen aus dem vorigen Block werden nach Möglichkeit vermieden.",
       stufeKurz: (s: number) => `Stufe ${s}`,
       einseitigKurz: "einseitig",
+      ersatzKurz: "Ersatz",
     },
     fehlendeMuster: (liste: string) =>
-      `Mit diesem Profil gibt es keine Übung für: ${liste}. Ein Plan kann so nicht erstellt werden.`,
-    fehlendeMusterHilfe: "Wähle ein anderes Profil oder ergänze das Equipment bzw. den Katalog.",
+      `Mit diesem Equipment gibt es keine Übung für: ${liste}. Ein Plan kann so nicht erstellt werden.`,
+    fehlendeMusterHilfe: "Ergänze das Equipment oder den Katalog.",
     hinweise: {
       titel: "Hinweise zur Auswahl",
       wenig_auswahl: (muster: string) =>
-        `${muster}: Mit diesem Profil gibt es nur eine Übung, sie steht in A und B.`,
+        `${muster}: Mit diesem Equipment gibt es nur eine Übung, sie steht in A und B.`,
       gleiche_uebung_ab: (muster: string) =>
         `${muster}: In A und B steht dieselbe Übung, obwohl es Alternativen gibt.`,
       einseitig_fehlt:
@@ -378,7 +386,8 @@ export const de = {
         `${muster}: Stufe ${tatsaechlich} statt der Wunschstufe ${gewuenscht}.`,
     },
     fehler: {
-      profil_unbekannt: "Das Profil gibt es nicht mehr. Bitte ein anderes wählen.",
+      equipment_ungueltig: "Das Equipment ist ungültig. Bitte die Auswahl prüfen.",
+      gewichte_ungueltig: "Bitte die Hantelgewichte prüfen.",
       datum_ungueltig: "Bitte ein gültiges Startdatum angeben.",
       einheiten_ungueltig: "Bitte 2 oder 3 Einheiten pro Woche wählen.",
       stufen_ungueltig: "Die Wunschstufen müssen zwischen 1 und 5 liegen.",
@@ -387,7 +396,7 @@ export const de = {
       slots_unvollstaendig:
         "Die Übungsauswahl ist unvollständig. Bitte die Vorschau aktualisieren.",
       uebung_ungueltig:
-        "Eine gewählte Übung ist nicht mehr verfügbar oder passt nicht zum Profil. Bitte die Vorschau aktualisieren.",
+        "Eine gewählte Übung ist nicht mehr verfügbar oder passt nicht zum Equipment. Bitte die Vorschau aktualisieren.",
       vorgaenger_unbekannt: "Der Vorgängerplan existiert nicht.",
     },
   },
@@ -417,7 +426,7 @@ export const de = {
       "Sichere deine Daten als JSON-Datei und stelle sie bei Bedarf wieder her. Die Datei ist nicht verschlüsselt: Bewahre sie sicher auf.",
     export: "Export",
     exportAlles: "Alle Daten exportieren",
-    exportAllesHilfe: "Katalog, Profile, Einstellungen, Pläne, Einheiten und alle Sätze.",
+    exportAllesHilfe: "Katalog, Einstellungen, Pläne (mit Equipment), Einheiten und alle Sätze.",
     exportKatalog: "Nur den Katalog exportieren",
     exportKatalogHilfe: "Alle Übungen mit deinen Änderungen.",
     import: "Import",
@@ -427,46 +436,17 @@ export const de = {
       "Übungen gleicher ID werden aktualisiert, neue werden angelegt. Es wird nichts gelöscht, Pläne und Protokolle bleiben unberührt.",
     importAlles: "Alle Daten importieren",
     importAllesHilfe:
-      "Achtung: Alle aktuellen Daten (Katalog, Profile, Einstellungen, Pläne, Einheiten, Sätze) werden durch den Inhalt der Datei ersetzt. Exportiere vorher den aktuellen Stand.",
+      "Achtung: Alle aktuellen Daten (Katalog, Einstellungen, Pläne, Einheiten, Sätze) werden durch den Inhalt der Datei ersetzt. Exportiere vorher den aktuellen Stand.",
     bestaetigung: "Ich habe verstanden, dass alle aktuellen Daten ersetzt werden.",
     ergebnisOk: "Import erfolgreich.",
     bilanz: {
       uebungen: "Übungen",
       neu: "davon neu",
-      profile: "Profile",
       plaene: "Pläne",
       einheiten: "Einheiten",
       saetze: "Sätze",
     },
     ergebnisFehler: "Der Import wurde nicht durchgeführt. Es wurde nichts geändert.",
-  },
-  adhoc: {
-    titel: "Mit anderem Profil trainieren",
-    hilfe:
-      "Du trainierst heute mit anderem Equipment, zum Beispiel unterwegs. Übungen, die dort nicht gehen, werden nur für diese Einheit durch ähnliche ersetzt. Der Plan bleibt unverändert.",
-    zaehlt:
-      "Die Einheit zählt für den Wochenfortschritt, aber nicht für die Steigerung der Planübungen.",
-    profil: "Profil für diese Einheit",
-    vorschauAktualisieren: "Vorschau aktualisieren",
-    vorschau: "Vorschau",
-    planUebung: "Plan",
-    heute: "Heute",
-    bleibt: "bleibt",
-    ersetztDurch: "ersetzt durch",
-    planProfilHinweis:
-      "Das ist das Profil deines Plans: Es ist eine normale Einheit, nichts wird ersetzt.",
-    starten: "Training starten",
-    zurueck: "Zurück zum Start",
-    link: "Mit anderem Profil trainieren",
-    zusatzblock: "Zusatzblock (Tragen und Rumpf)",
-    kopfBadge: (profil: string) => `Ad-hoc · ${profil}`,
-    fehler: {
-      kein_plan: "Es gibt keinen aktiven Plan.",
-      block_fertig: "Der Block ist abgeschlossen.",
-      profil_unbekannt: "Dieses Profil gibt es nicht.",
-      profil_unmoeglich: (muster: string) =>
-        `Mit diesem Profil gibt es für ${muster} keine passende Übung. Wähle ein anderes Profil.`,
-    },
   },
   start: {
     titel: "Start",
@@ -496,6 +476,8 @@ export const de = {
     fehler: {
       kein_plan: "Es gibt keinen aktiven Plan.",
       block_fertig: "Der Block ist bereits abgeschlossen.",
+      equipment_unmoeglich: (muster: string) =>
+        `Mit dem Equipment des Plans gibt es für ${muster} keine passende Übung. Ändere das Equipment im Plan.`,
     },
   },
   training: {
@@ -528,7 +510,8 @@ export const de = {
     verringern: "Verringern",
     ersetzen: "Übung ersetzen",
     ersetzenHilfe:
-      "Gilt für die restlichen Runden dieser Übung in dieser Einheit. Der Plan bleibt unverändert.",
+      "Gilt für die restlichen Runden dieser Übung in dieser Einheit. Der Plan bleibt unverändert. Ersatzübungen (Körpergewicht, Band) stehen am Ende der Liste, zum Beispiel für unterwegs.",
+    ersatzMarke: "Ersatz",
     ersetzenKeine: "Keine Alternativen mit deinem Equipment.",
     zurueckZurGeplanten: (name: string) => `Zurück zu ${name}`,
     ersetztBadge: "ersetzt",

@@ -25,6 +25,15 @@ export function beschreibeBedingung(bedingung: EquipmentBedingung): string {
 }
 
 /**
+ * Vorbelegung des Ersatz-Kennzeichens für Seed und Migration: reines Körpergewicht (kein Gerät)
+ * oder eine Übung, die nur mit dem Band geht. Übungen mit einem anderen Gerät (auch Hanteln,
+ * z. B. Split Squat mit Kurzhanteln) bleiben Planübungen.
+ */
+export function istErsatzStandard(u: Pick<Exercise, "equipment">): boolean {
+  return u.equipment.every((art) => art === "band");
+}
+
+/**
  * Gleiche Übung oder eine Variante davon (anderes Gerät, mit/ohne Gewicht). Varianten stehen als
  * eigene Übungen im Katalog und teilen sich das Video (Spec 3.3); Übungen ohne Video sind nur
  * mit sich selbst gleich.

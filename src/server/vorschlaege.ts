@@ -9,7 +9,6 @@ import { WOCHEN_PRO_BLOCK, type Vorschlag } from "@/domain/training-types";
 import { naechsteEinheitMit, zielBereich } from "@/domain/weeks";
 import { alleUebungen } from "./exercises";
 import { getPlan } from "./plans";
-import { getProfile } from "./profiles";
 import { ladeEinheit } from "./verlauf";
 import { getWorkout } from "./workouts";
 
@@ -26,7 +25,7 @@ export interface NaechstesMalEintrag {
 
 export type NaechstesMal =
   | { art: "ok"; eintraege: NaechstesMalEintrag[] }
-  | { art: "keine"; grund: "nicht_abgeschlossen" | "ad_hoc" | "entlastung" };
+  | { art: "keine"; grund: "nicht_abgeschlossen" | "entlastung" };
 
 /** Abgeschlossene Einheiten des Plans bis einschließlich `workoutId` (Stand nach dieser Einheit). */
 function zaehleBis(db: Db, planId: number, workoutId: number): number {
@@ -48,13 +47,11 @@ function zaehleBis(db: Db, planId: number, workoutId: number): number {
 export function ladeNaechstesMal(db: Db, workoutId: number): NaechstesMal {
   const w = getWorkout(db, workoutId);
   if (!w || w.status !== "abgeschlossen") return { art: "keine", grund: "nicht_abgeschlossen" };
-  // Ad-hoc-Einheiten zählen nicht für die Steigerung (Spec F6), Woche 6 ist Entlastung (Spec 2.5).
-  if (w.adHoc) return { art: "keine", grund: "ad_hoc" };
+  // Woche 6 ist Entlastung (Spec 2.5).
   if (w.woche >= WOCHEN_PRO_BLOCK) return { art: "keine", grund: "entlastung" };
 
   const plan = getPlan(db, w.planId);
-  const profil = getProfile(db, w.profilId);
-  if (!plan || !profil) return { art: "keine", grund: "nicht_abgeschlossen" };
+  if (!plan) return { art: "keine", grund: "nicht_abgeschlossen" };
   const proWoche = plan.einheitenProWoche === 3 ? 3 : 2;
   // Stand nach dieser Einheit: Anzahl abgeschlossener Einheiten bis einschließlich dieser.
   const naechste = naechsteEinheitMit(w.einheit, zaehleBis(db, plan.id, w.id), proWoche);
@@ -71,7 +68,7 @@ export function ladeNaechstesMal(db: Db, workoutId: number): NaechstesMal {
       uebung: u,
       woche: naechste.woche,
       letzteSaetze: saetze,
-      gewichte: profil.gewichte,
+      gewichte: plan.gewichte,
     });
     eintraege.push({
       exerciseId: id,

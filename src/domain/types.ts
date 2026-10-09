@@ -27,7 +27,7 @@ export const EQUIPMENT_ARTEN = [
 ] as const;
 export type EquipmentArt = (typeof EQUIPMENT_ARTEN)[number];
 
-/** Arten, die ein Nutzer im Profil ankreuzen kann ("keins" ist kein Gerät). */
+/** Arten, die ein Nutzer beim Equipment eines Plans ankreuzen kann ("keins" ist kein Gerät). */
 export const EQUIPMENT_AUSWAHL = EQUIPMENT_ARTEN.filter(
   (e): e is Exclude<EquipmentArt, "keins"> => e !== "keins",
 );
@@ -73,15 +73,23 @@ export interface Exercise {
   videoUrl: string | null;
   aktiv: boolean;
   pruefstatus: Pruefstatus;
+  /**
+   * Ersatzübung (Körpergewicht, Band o. Ä.): Der Plan-Generator wählt sie nur, wenn es für das
+   * Muster mit dem Equipment des Plans keine andere Übung gibt. Beim Tauschen bleibt sie wählbar.
+   */
+  ersatz: boolean;
 }
 
-/** Was in den Seed-Dateien steht; bild/aktiv/pruefstatus setzt der Seed-Runner. */
-export type ExerciseSeed = Omit<Exercise, "bild" | "aktiv" | "pruefstatus">;
+/** Was in den Seed-Dateien steht; `ersatz` leitet data/index.ts ab, der Rest kommt vom Seed-Runner. */
+export type ExerciseSeedRoh = Omit<Exercise, "bild" | "aktiv" | "pruefstatus" | "ersatz">;
+
+/** Eine Seed-Übung samt Ersatz-Kennzeichen (der Seed-Runner ergänzt bild/aktiv/pruefstatus). */
+export type ExerciseSeed = ExerciseSeedRoh & { ersatz: boolean };
 
 export type Einheit = "A" | "B";
 export type Block = "1" | "2" | "Z";
 
-/** Verfügbare Hantelgewichte in kg je Equipment-Art (nur zuhause relevant). */
+/** Verfügbare Hantelgewichte in kg je Equipment-Art (Kurzhanteln, Kettlebell). */
 export type Gewichte = Partial<Record<EquipmentArt, number[]>>;
 
 export const EQUIPMENT_NAMEN: Record<EquipmentArt, string> = {

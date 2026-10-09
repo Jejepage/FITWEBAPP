@@ -57,10 +57,7 @@ export default async function EinheitPage({
         breite="weit"
         untertitel={
           <span className="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-            <span>
-              {t.einheitZeile(e.einheit, e.woche)} · {e.profilName}
-            </span>
-            {e.adHoc && <Badge farbe="hinweis">{t.adHoc}</Badge>}
+            <span>{t.einheitZeile(e.einheit, e.woche)}</span>
             {e.zusatzblock && <Badge>{t.mitZusatzblock}</Badge>}
             {e.status === "abgebrochen" && <Badge farbe="grau">{t.abgebrochen}</Badge>}
           </span>

@@ -17,7 +17,7 @@ export function neueDb(): Db {
   return db;
 }
 
-/** Wie neueDb(), plus Seed (60 Übungen, 3 Profile, Einstellungen). Nur für Tests. */
+/** Wie neueDb(), plus Seed (60 Übungen, Einstellungen). Nur für Tests. */
 export function neueSeedDb(): Db {
   const db = neueDb();
   seed(db);

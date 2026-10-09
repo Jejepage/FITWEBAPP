@@ -82,17 +82,15 @@ Pausen: 30–45 s beim Wechsel innerhalb der Kombi, 60–90 s nach jeder Runde (
 
 Alltagsgegenstände (Stuhl, Tisch, Rucksack, Wand) gelten als immer verfügbar.
 
-### 3.2 Profile
+### 3.2 Equipment im Plan
 
-Der Nutzer kreuzt Equipment an und speichert es als Profil. Voreinstellungen:
+Es gibt keine Profile mehr (ob zuhause oder im Studio, ist egal). Beim Anlegen eines Plans kreuzt der Nutzer an, welches Equipment zur Verfügung steht; es wird **im Plan** gespeichert und lässt sich später ändern (z. B. nach dem Kauf eines Geräts). Beim ersten Plan ist vorausgewählt: kurzhanteln, kettlebell, bank, stange; danach das Equipment des zuletzt angelegten Plans (beim Folgeblock das des Vorgängers).
 
-| Profil | Equipment |
-|---|---|
-| Studio | alles |
-| Zuhause | kurzhanteln, kettlebell, bank, stange |
-| Unterwegs | stange (Annahme: etwas zum Hochziehen ist immer vorhanden) |
+Zusätzlich im Plan: verfügbare Hantelgewichte (z. B. Kurzhanteln 2–20 kg in 2-kg-Schritten, Kettlebell 12 und 16 kg) für sinnvolle Gewichtsvorschläge; sie lassen sich ebenfalls jederzeit ändern.
 
-Zusätzlich speicherbar: verfügbare Hantelgewichte zuhause (z. B. Kurzhanteln 2–20 kg in 2-kg-Schritten, Kettlebell 12 und 16 kg) für sinnvolle Gewichtsvorschläge.
+**Equipment ändern:** Die Übungen des Plans bleiben. Neues Equipment erscheint in den Tauschlisten. Planübungen, für die Equipment fehlt, werden beim Start einer Einheit automatisch durch passende ersetzt (nur für diese Einheit).
+
+**Ersatzübungen:** Übungen mit reinem Körpergewicht (auch Alltagsgegenstände) und reine Band-Übungen sind im Katalog als *Ersatz* gekennzeichnet (änderbar). Der Generator wählt sie nur, wenn es für ein Muster mit dem Equipment keine andere Übung gibt, und füllt damit höchstens fehlende Plätze auf. In den Tauschlisten stehen sie immer zur Wahl, auch wenn ihr Equipment (z. B. ein Band) im Plan nicht angekreuzt ist.
 
 ### 3.3 Equipment-Bedingung einer Übung
 
@@ -124,6 +122,7 @@ Beispiel Goblet Squat mit Kurzhantel: `["kurzhanteln"]`. Beispiel Kurzhantel-Ban
 | bild | string? | Phase 2, in Phase 1 leer |
 | video_url | string? | YouTube-Link (Änderungswunsch nach Phase 1): wird immer in die Standardform `https://www.youtube.com/watch?v=<ID>[&t=<n>s]` gebracht; nur YouTube-Adressen erlaubt; in der App nur als Link „Video ansehen“ |
 | aktiv | bool | Übung ausblenden statt löschen |
+| ersatz | bool | Ersatzübung (Körpergewicht, Band), siehe 3.2. Im Seed vorbelegt: kein Gerät oder nur Band (Klimmzüge an der Stange bleiben Planübungen); im Katalog änderbar |
 
 ### 4.2 Startkatalog (Seed)
 
@@ -255,29 +254,30 @@ Stufenleitern (leichter/schwerer) verknüpfen vorrangig Übungen **mit gleichem 
 - Mit und ohne Gewicht getrennt: KN-05/KN-10 Split Squat, KN-11/KN-06 Ausfallschritt rückwärts (KN-06 ist jetzt die Variante mit Kurzhanteln, Leiter KN-04 → KN-06), KN-07/KN-12 Bulgarian Split Squat (Leiter KN-10 → KN-12), HB-10/HB-13 Einbeiniger Hip Thrust, HB-09/HB-14 Einbeiniges rumänisches Kreuzheben (Leiter HB-13 → HB-14). Die Varianten ohne Gewicht steigern ohne „Gewicht“.
 - ZV-07 braucht nur die Stange; die Last kommt in den Rucksack (Alltagsgegenstand).
 - Varianten derselben Übung teilen sich den YouTube-Link.
+- Die Varianten ohne Gewicht (Körpergewicht) sind Ersatzübungen, die Varianten mit Kurzhantel, Kettlebell oder Langhantel Planübungen; so wird mit Geräten trainiert (Doppelprogression über das Gewicht) und die Körpergewichts-Variante füllt nur auf oder dient unterwegs zum Tauschen.
 - Jede Seed-Übung bringt einen YouTube-Link mit (`video_url`). Da der Seed nur fehlende Zeilen anlegt, kommen Änderungen an vorhandenen Übungen über den Katalogimport (F8) in eine bestehende Datenbank (`npm run katalog:seed-export`).
 
 ## 5. Funktionen
 
 ### F1 Katalog
-- Liste mit Filter nach Muster, Equipment-Profil, Stufe, einseitig
+- Liste mit Filter nach Muster, „machbar mit dem Equipment des aktiven Plans“, Stufe, einseitig, Ersatzübung
 - Detailansicht mit allen Feldern und Stufenleiter (leichter/schwerer anklickbar)
 - Übungen anlegen, bearbeiten, deaktivieren
 - Optionaler YouTube-Link je Übung (editierbar); Anzeige als Knopf „Video ansehen“ im Katalog und im Training, ohne eingebetteten Player
 
 ### F2 Equipment und Einstellungen
-- Profile anlegen/bearbeiten (Häkchen pro Equipment, vorhandene Gewichte)
+- Equipment und Hantelgewichte gehören zum Plan (siehe 3.2), Änderung auf der Plan-Seite
 - Startstufe pro Muster (Standard: 2)
 - Standard: Einheiten pro Woche (2/3), Zusatzblock ja/nein
 
 ### F3 Plan-Generator
-Eingabe: Profil, Stufen pro Muster, Einheiten/Woche, Zusatzblock, Startdatum.
+Eingabe: Equipment und Hantelgewichte, Stufen pro Muster, Einheiten/Woche, Zusatzblock, Startdatum.
 
 Auswahllogik pro Slot:
-1. Kandidaten = aktive Übungen des Musters, deren Equipment das Profil erfüllt
-2. Bevorzugt Stufe = Nutzerstufe, sonst nächstniedrigere, sonst nächsthöhere
+1. Kandidaten = aktive Übungen des Musters, deren Equipment das Plan-Equipment erfüllt
+2. Planübungen vor Ersatzübungen; darin bevorzugt Stufe = Nutzerstufe, sonst nächstniedrigere, sonst nächsthöhere
 3. A und B erhalten verschiedene Übungen, falls möglich; B möglichst auch keine Variante der A-Übung (z. B. nicht Goblet Squat mit Kurzhantel in A und mit Kettlebell in B)
-4. Regel „mindestens eine einseitige KN/HB-Übung pro Woche" einhalten
+4. Regel „mindestens eine einseitige KN/HB-Übung pro Woche" einhalten (bevorzugt mit einer einseitigen Planübung)
 5. Bei Folgeblöcken: bevorzugt Übungen, die im letzten Block nicht verwendet wurden; eine Variante einer verwendeten Übung zählt als verwendet
 
 Varianten erkennt die App am gemeinsamen Video-Link (siehe 3.3).
@@ -289,7 +289,7 @@ Ergebnis: Vorschau beider Einheiten. Jeder Slot lässt sich manuell tauschen (Au
 - Ablauf rundenweise: aktuelle Übung groß, Vorgabe (Gewicht/Wdh/Zeit), Werte vom letzten Mal
 - Pro Satz erfassen: Gewicht, Wdh oder Sekunden/Meter, Anstrengung in vier Textstufen, erledigt; vorausgefüllt mit Vorschlag
 - Kein Pausentimer (Änderung nach Abschnitt 6): nach „erledigt" erscheint direkt der nächste Satz
-- Übung in der Einheit ersetzen (z. B. Gerät belegt) durch Kandidaten desselben Musters
+- Übung in der Einheit ersetzen (z. B. Gerät belegt oder unterwegs) durch Kandidaten desselben Musters: Planübungen zuerst, danach alle Ersatzübungen (gekennzeichnet)
 - Einheit unterbrechen und fortsetzen; Abschluss mit optionaler Notiz
 - Bildschirm bleibt während des Trainings an (Wake Lock, wenn verfügbar)
 
@@ -297,10 +297,10 @@ Ergebnis: Vorschau beider Einheiten. Jeder Slot lässt sich manuell tauschen (Au
 - Nach jeder Einheit Gewichts-/Wdh-Vorschlag pro Übung nach Regeln aus 2.5
 - Ende Woche 6: Stufen-Check pro Muster und Button „Nächsten Block erstellen"
 
-### F6 Ad-hoc-Profilwechsel
-- Vor dem Start einer Einheit anderes Profil wählen (z. B. „Unterwegs")
-- Slots werden für diese Einheit durch Übungen gleichen Musters und ähnlicher Stufe ersetzt; der Plan selbst bleibt unverändert
-- Diese Einheiten zählen für den Wochenfortschritt, aber nicht für die Steigerung der Planübungen
+### F6 Unterwegs trainieren
+- Es gibt keinen Profilwechsel mehr: Unterwegs wird der normale Plan benutzt und einzelne Übungen werden im Training gegen Ersatzübungen getauscht (siehe F4); der Plan selbst bleibt unverändert
+- Solche Einheiten zählen für den Wochenfortschritt; die Sätze gehören zu den tatsächlich trainierten Übungen, die geplanten Übungen steigern sich daher nicht durch Ersatzübungen
+- Bei Ersatzübungen schlägt die App kein Tempo und keine nächste Stufe vor, Wiederholungen und ggf. Gewicht steigen weiter
 
 ### F7 Verlauf
 - Kalender/Liste absolvierter Einheiten
@@ -314,11 +314,10 @@ Ergebnis: Vorschau beider Einheiten. Jeder Slot lässt sich manuell tauschen (Au
 ## 6. Datenmodell (Vorschlag)
 
 - `exercise` – Felder aus 4.1 (Listen als JSON)
-- `equipment_profile` – id, name, equipment[], gewichte (JSON), ist_standard
 - `settings` – stufen pro Muster, einheiten_pro_woche, zusatzblock
-- `plan` – id, profil_id, start_datum, einheiten_pro_woche, zusatzblock, status (aktiv/abgeschlossen), vorgaenger_id
+- `plan` – id, equipment[], gewichte (JSON), start_datum, einheiten_pro_woche, zusatzblock, status (aktiv/abgeschlossen), vorgaenger_id
 - `plan_slot` – plan_id, einheit (A/B), block (1/2/Z), position, muster, exercise_id
-- `workout` – id, plan_id, datum, einheit, woche, profil_id, ad_hoc (bool), status, notiz
+- `workout` – id, plan_id, datum, einheit, woche, status, ersetzungen (JSON), notiz
 - `set_log` – workout_id, plan_slot_id?, exercise_id, runde, gewicht, wdh, sekunden, meter, rpe, erledigt
 - `suggestion` – exercise_id, plan_id, gewicht, wdh_ziel, erstellt_am (oder bei Bedarf berechnen)
 
@@ -339,13 +338,13 @@ Ergebnis: Vorschau beider Einheiten. Jeder Slot lässt sich manuell tauschen (Au
 Jeder Abschnitt endet mit lauffähiger App und manueller Prüfung.
 
 1. **Projekt-Setup** – Next.js, Tailwind, Drizzle/SQLite, Docker Compose, Grundlayout mit Navigation. *Fertig, wenn:* Container startet, leere App im Browser und am Handy erreichbar.
-2. **Datenmodell und Seed** – Tabellen, Seed des Katalogs aus 4.2 inkl. erzeugter Ausführungstexte und Stufenleitern, Standardprofile. *Fertig, wenn:* Seed läuft idempotent, Daten in der DB prüfbar.
+2. **Datenmodell und Seed** – Tabellen, Seed des Katalogs aus 4.2 inkl. erzeugter Ausführungstexte und Stufenleitern. *Fertig, wenn:* Seed läuft idempotent, Daten in der DB prüfbar.
 3. **Katalog (F1)** – Liste, Filter, Detail, Bearbeiten. *Fertig, wenn:* alle Übungen filterbar und editierbar.
-4. **Equipment und Einstellungen (F2)** – *Fertig, wenn:* Profil „Unterwegs" filtert den Katalog korrekt.
-5. **Plan-Generator (F3)** – inkl. Unit-Tests. *Fertig, wenn:* für alle drei Standardprofile gültige A/B-Pläne entstehen, Regeln aus 2.4 eingehalten, Slots tauschbar.
+4. **Equipment und Einstellungen (F2)** – *Fertig, wenn:* der Machbar-Filter den Katalog nach dem Plan-Equipment filtert.
+5. **Plan-Generator (F3)** – inkl. Unit-Tests. *Fertig, wenn:* für typische Equipment-Auswahlen (alles, zuhause, nur Stange) gültige A/B-Pläne entstehen, Regeln aus 2.4 eingehalten, Slots tauschbar.
 6. **Training durchführen (F4)** – *Fertig, wenn:* eine komplette Einheit am Handy durchlaufen und gespeichert werden kann.
 7. **Steigerung und Verlauf (F5, F7)** – inkl. Unit-Tests. *Fertig, wenn:* Vorschläge nach Regeln erscheinen, Verlauf pro Übung sichtbar.
-8. **Ad-hoc-Wechsel und Datensicherung (F6, F8)**
+8. **Unterwegs-Tausch und Datensicherung (F6, F8)**
 9. **PWA und Deployment** – Manifest, Icons, Offline-Fallback für die laufende Einheit, Deployment-Anleitung für Proxmox. *Fertig, wenn:* App auf dem iPhone installierbar und im Studio nutzbar.
 
 ## 9. Phase 2 (Ausblick)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ersetzungenFuerEinheit, ersetzungenFuerProfil, type AdHocSlot } from "./ad-hoc";
+import { ersetzungenFuerEinheit, ersetzungenFuerEquipment, type ErsetzSlot } from "./ersetzungen";
 import { erfuellt } from "./equipment";
 import { testKatalog, testProfile } from "./test-katalog";
 import {
@@ -12,7 +12,7 @@ import {
 } from "./types";
 
 const katalog = testKatalog();
-const profil = (key: string) => testProfile.find((p) => p.seedKey === key)!.equipment;
+const equipmentVon = (key: string) => testProfile.find((p) => p.seedKey === key)!.equipment;
 const basis = katalog[0] as Exercise;
 
 /** Minimale künstliche Übung für gezielte Fälle. */
@@ -24,6 +24,7 @@ const u = (
     einseitig?: boolean;
     equipment?: EquipmentBedingung;
     aktiv?: boolean;
+    ersatz?: boolean;
     videoUrl?: string;
   } = {},
 ): Exercise => ({
@@ -34,6 +35,7 @@ const u = (
   einseitig: o.einseitig ?? false,
   equipment: o.equipment ?? [],
   aktiv: o.aktiv ?? true,
+  ersatz: o.ersatz ?? false,
   videoUrl: o.videoUrl ?? null,
 });
 
@@ -42,30 +44,30 @@ const slot = (
   muster: Muster,
   exerciseId: string,
   block: Block = "1",
-): AdHocSlot => ({
+): ErsetzSlot => ({
   slotId,
   block,
   muster,
   exerciseId,
 });
 
-describe("ersetzungenFuerProfil mit dem Seed-Katalog", () => {
+describe("ersetzungenFuerEquipment mit dem Seed-Katalog", () => {
   const ersteJeMuster = MUSTER.map((m, i) =>
     slot(i + 1, m, katalog.filter((x) => x.muster === m).sort((a, b) => b.stufe - a.stufe)[0]!.id),
   );
 
-  it("Studio: nichts muss ersetzt werden", () => {
-    const r = ersetzungenFuerProfil({
+  it("Studio-Equipment: nichts muss ersetzt werden", () => {
+    const r = ersetzungenFuerEquipment({
       slots: ersteJeMuster,
       uebungen: katalog,
-      equipment: profil("studio"),
+      equipment: equipmentVon("studio"),
     });
     expect(r).toEqual({ ersetzungen: {}, fehlendeMuster: [] });
   });
 
-  it("Unterwegs: jede Ersetzung ist aktiv, gleiches Muster und vom Profil erfüllt", () => {
-    const equipment = profil("unterwegs");
-    const r = ersetzungenFuerProfil({ slots: ersteJeMuster, uebungen: katalog, equipment });
+  it("Unterwegs: jede Ersetzung ist aktiv, gleiches Muster und vom Equipment erfüllt", () => {
+    const equipment = equipmentVon("unterwegs");
+    const r = ersetzungenFuerEquipment({ slots: ersteJeMuster, uebungen: katalog, equipment });
     expect(r.fehlendeMuster).toEqual([]);
     for (const [slotId, id] of Object.entries(r.ersetzungen)) {
       const s = ersteJeMuster.find((x) => String(x.slotId) === slotId)!;
@@ -83,20 +85,20 @@ describe("ersetzungenFuerProfil mit dem Seed-Katalog", () => {
   });
 
   it("Unterwegs: Kabelrudern wird zum Türrahmen-Rudern (gleiche Stufe 1)", () => {
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "ZH", "ZH-01")],
       uebungen: katalog,
-      equipment: profil("unterwegs"),
+      equipment: equipmentVon("unterwegs"),
     });
     expect(r.ersetzungen["1"]).toBe("ZH-08");
   });
 });
 
-describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
+describe("ersetzungenFuerEquipment: Auswahl des Ersatzes", () => {
   const maschine: EquipmentBedingung = ["maschinen"];
 
   it("kleinster Stufenabstand zur Planübung", () => {
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "KN", "KN-90")],
       uebungen: [
         u("KN-90", "KN", 4, { equipment: maschine }),
@@ -108,9 +110,22 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
     expect(r.ersetzungen["1"]).toBe("KN-92");
   });
 
+  it("eine Planübung schlägt eine Ersatzübung, auch wenn die Ersatzübung näher an der Stufe liegt", () => {
+    const r = ersetzungenFuerEquipment({
+      slots: [slot(1, "KN", "KN-90")],
+      uebungen: [
+        u("KN-90", "KN", 3, { equipment: maschine }),
+        u("KN-91", "KN", 3, { ersatz: true }),
+        u("KN-92", "KN", 1),
+      ],
+      equipment: [],
+    });
+    expect(r.ersetzungen["1"]).toBe("KN-92");
+  });
+
   it("eine Variante der Planübung (gleiches Video) geht vor, auch bei größerem Stufenabstand", () => {
     const video = "https://www.youtube.com/watch?v=FQiMMHcWLLM";
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "KN", "KN-90")],
       uebungen: [
         u("KN-90", "KN", 2, { equipment: ["kurzhanteln"], videoUrl: video }),
@@ -122,8 +137,33 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
     expect(r.ersetzungen["1"]).toBe("KN-92");
   });
 
+  it("gibt es nur Ersatzübungen, wird die ähnlichste Ersatzübung gewählt", () => {
+    const r = ersetzungenFuerEquipment({
+      slots: [slot(1, "KN", "KN-90")],
+      uebungen: [
+        u("KN-90", "KN", 3, { equipment: maschine }),
+        u("KN-91", "KN", 2, { ersatz: true }),
+        u("KN-92", "KN", 3, { ersatz: true }),
+      ],
+      equipment: [],
+    });
+    expect(r.ersetzungen["1"]).toBe("KN-92");
+  });
+
+  it("eine Ersatzübung, die das Equipment nicht erfüllt, ersetzt nichts", () => {
+    const r = ersetzungenFuerEquipment({
+      slots: [slot(1, "ZH", "ZH-90")],
+      uebungen: [
+        u("ZH-90", "ZH", 2, { equipment: maschine }),
+        u("ZH-91", "ZH", 1, { equipment: ["band"], ersatz: true }),
+      ],
+      equipment: [],
+    });
+    expect(r).toEqual({ ersetzungen: {}, fehlendeMuster: ["ZH"] });
+  });
+
   it("bei gleichem Abstand gewinnt die niedrigere Stufe", () => {
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "KN", "KN-90")],
       uebungen: [
         u("KN-90", "KN", 3, { equipment: maschine }),
@@ -136,7 +176,7 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
   });
 
   it("bei gleicher Stufe gewinnt die gleiche Einseitigkeit, danach die ID", () => {
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "HB", "HB-90")],
       uebungen: [
         u("HB-90", "HB", 3, { equipment: maschine, einseitig: true }),
@@ -150,7 +190,7 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
   });
 
   it("inaktive Kandidaten werden ignoriert, eine inaktive Planübung wird ersetzt", () => {
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "DH", "DH-90")],
       uebungen: [
         u("DH-90", "DH", 2, { aktiv: false }),
@@ -162,8 +202,8 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
     expect(r.ersetzungen["1"]).toBe("DH-92");
   });
 
-  it("Planübung bleibt, wenn sie zum Profil passt", () => {
-    const r = ersetzungenFuerProfil({
+  it("Planübung bleibt, wenn sie zum Equipment passt", () => {
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "DH", "DH-90")],
       uebungen: [u("DH-90", "DH", 3), u("DH-91", "DH", 3)],
       equipment: [],
@@ -172,7 +212,7 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
   });
 
   it("fehlendes Muster wird gemeldet, auch bei mehreren Slots nur einmal", () => {
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "ZV", "ZV-90"), slot(2, "ZV", "ZV-90"), slot(3, "TR", "TR-90")],
       uebungen: [u("ZV-90", "ZV", 3, { equipment: maschine }), u("TR-90", "TR", 2)],
       equipment: [],
@@ -182,7 +222,7 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
   });
 
   it("unbekannte Planübung: Ersatz nach Stufe 2", () => {
-    const r = ersetzungenFuerProfil({
+    const r = ersetzungenFuerEquipment({
       slots: [slot(1, "TR", "TR-99")],
       uebungen: [u("TR-90", "TR", 1), u("TR-91", "TR", 3)],
       equipment: [],
@@ -191,7 +231,7 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
   });
 
   it("keine Slots: leeres Ergebnis", () => {
-    expect(ersetzungenFuerProfil({ slots: [], uebungen: katalog, equipment: [] })).toEqual({
+    expect(ersetzungenFuerEquipment({ slots: [], uebungen: katalog, equipment: [] })).toEqual({
       ersetzungen: {},
       fehlendeMuster: [],
     });

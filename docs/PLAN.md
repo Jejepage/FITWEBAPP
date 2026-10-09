@@ -54,7 +54,7 @@ src/components/     UI (mobile-first), Client Components nur wo nötig (Training
 src/server/         Queries/Repositories (Drizzle), Actions-Hilfen, Auth
 src/domain/         REINE TS-Logik, keine DB/React-Importe, voll unit-getestet
   types.ts            Muster, Equipment, Exercise, Slot … (Vertrag für alle Module)
-  equipment.ts        erfuellt(bedingung, profil): alle Geräte vorhanden
+  equipment.ts        erfuellt(bedingung, equipment): alle Geräte vorhanden, Ersatz-Vorbelegung
   generator.ts        Plan-Generator (F3), Kandidatenlisten, Tausch-Kandidaten
   weeks.ts            Wochenvorgaben 2.5, Rundenzahl, Pausenzeiten
   progression.ts      Doppelprogression, nächste Hantelstufe, Tempo/Stufe, Stufen-Check
@@ -96,9 +96,9 @@ Nach jedem Abschnitt prüft ein **unabhängiger Reviewer-Agent** mit frischem Ko
 
 ## Wichtige Prüffälle (Tests)
 
-- **Generator:** Alle drei Standardprofile liefern gültige A/B-Pläne mit Regeln aus 2.4. Zum Beispiel ist „Unterwegs" für ZH nur mit ZH-07 möglich, dann sind gleiche Übungen in A und B erlaubt („falls möglich"). Pro Woche mindestens eine einseitige KN/HB-Übung. Folgeblock bevorzugt bisher nicht genutzte Übungen. Stufenwahl: Nutzerstufe, sonst nächstniedrigere, sonst nächsthöhere.
+- **Generator:** Typische Equipment-Auswahlen (alles, zuhause, nur Stange) liefern gültige A/B-Pläne mit Regeln aus 2.4. Planübungen gehen vor Ersatzübungen (Körpergewicht, Band), die nur auffüllen. Mit nur der Stange gibt es für ZH nur Ersatzübungen (ZH-08, ZH-07). B nimmt möglichst keine Variante der A-Übung. Pro Woche mindestens eine einseitige KN/HB-Übung. Folgeblock bevorzugt bisher nicht genutzte Übungen. Stufenwahl: Nutzerstufe, sonst nächstniedrigere, sonst nächsthöhere.
 - **Equipment:** `["kurzhanteln"]`, `["kurzhanteln","bank"]` (beides nötig), `[]`.
-- **Progression:** Obergrenze in allen Sätzen bei RPE ≤ 8 führt zu Gewichtserhöhung. Hantelstufen aus den Profilgewichten. Danach Wdh, Tempo, Stufe. Zeit- und Streckenübungen. Woche 6 zählt nicht zur Steigerung.
+- **Progression:** Obergrenze in allen Sätzen bei RPE ≤ 8 führt zu Gewichtserhöhung. Hantelstufen aus den Hantelgewichten des Plans. Danach Wdh, Tempo, Stufe (Ersatzübungen ohne Tempo und Stufe). Zeit- und Streckenübungen. Woche 6 zählt nicht zur Steigerung.
 - **Seed-Validierung:** Leiter ohne Zyklen und mit gleichem Muster, Stufen strikt aufsteigend, alle IDs vorhanden, Equipment nur aus der erlaubten Liste, Seed zweimal ausführen ändert nichts.
 
 ## Verifikation

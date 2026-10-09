@@ -37,8 +37,13 @@ describe("ladeStufenCheck", () => {
     expect(ergebnis(erg, "HB")).toMatchObject({ empfehlung: "senken", neu: 1 });
   });
 
-  it("Ad-hoc-Einheiten zählen nicht", () => {
-    const { planId } = legeBlockAn(db, { einheiten: 12, satz, adHoc: (n) => n >= 8 });
+  it("Sätze einer anderen Übung als der geplanten (Ersatz) zählen nicht", () => {
+    const { planId } = legeBlockAn(db, { einheiten: 12, satz });
+    const katalog = alleUebungen(db);
+    for (const slot of getPlanSlotsMitId(db, planId)) {
+      const ersatz = katalog.find((u) => u.muster === slot.muster && u.id !== slot.exerciseId)!;
+      db.update(setLog).set({ exerciseId: ersatz.id }).where(eq(setLog.planSlotId, slot.id)).run();
+    }
     const erg = ladeStufenCheck(db, getPlan(db, planId)!);
     expect(ergebnis(erg, "KN")).toMatchObject({
       empfehlung: "halten",

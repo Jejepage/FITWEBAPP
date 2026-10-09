@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -11,7 +11,7 @@ import {
   type EquipmentBedingung,
 } from "@/domain/types";
 import { PROJEKT_ROOT, neueDb } from "../test-utils";
-import { equipmentProfile, exercise, settings } from "../schema";
+import { exercise, settings } from "../schema";
 import { uebungenSeed } from "./data";
 import { seed } from "./run";
 
@@ -109,6 +109,27 @@ describe("Seed-Daten", () => {
   });
 });
 
+describe("Ersatzübungen im Seed", () => {
+  it("kennzeichnet reines Körpergewicht und Band-Übungen, Übungen mit Gerät bleiben Planübungen", () => {
+    const ersatz = uebungenSeed.filter((u) => u.ersatz).map((u) => u.id);
+    expect(ersatz).toEqual([
+      "KN-01", "KN-03", "KN-05", "KN-07", "KN-11",
+      "HB-01", "HB-03", "HB-09", "HB-10",
+      "DH-02", "DH-04", "DH-07",
+      "DV-02", "DV-03", "DV-07", "DV-08",
+      "ZH-02", "ZH-07", "ZH-08",
+      "TR-01", "TR-03", "TR-07",
+      "RU-01", "RU-02", "RU-03", "RU-04", "RU-06", "RU-09",
+    ]);
+  });
+
+  it("jedes Muster hat mindestens eine Planübung", () => {
+    for (const m of MUSTER) {
+      expect(uebungenSeed.some((u) => u.muster === m && !u.ersatz), m).toBe(true);
+    }
+  });
+});
+
 describe("Stufenleitern", () => {
   it("sind gegenseitig konsistent, im selben Muster und strikt aufsteigend", () => {
     for (const u of uebungenSeed) {
@@ -203,16 +224,9 @@ describe("Seed-Runner", () => {
     db = neueDb();
   });
 
-  it("legt Katalog, drei Standardprofile und eine Settings-Zeile an", () => {
+  it("legt Katalog und eine Settings-Zeile an", () => {
     seed(db);
     expect(db.select().from(exercise).all()).toHaveLength(76);
-    const profile = db.select().from(equipmentProfile).all();
-    expect(profile.map((p) => p.seedKey).sort()).toEqual(["studio", "unterwegs", "zuhause"]);
-    expect(profile.find((p) => p.seedKey === "unterwegs")!.equipment).toEqual(["stange"]);
-    const zuhause = profile.find((p) => p.seedKey === "zuhause")!;
-    expect(zuhause.equipment.sort()).toEqual(["bank", "kettlebell", "kurzhanteln", "stange"]);
-    expect(zuhause.gewichte.kurzhanteln).toEqual([2, 4, 6, 8, 10, 12, 14, 16, 18, 20]);
-    expect(zuhause.gewichte.kettlebell).toEqual([12, 16]);
     const s = db.select().from(settings).all();
     expect(s).toHaveLength(1);
     expect(s[0]!.einheitenProWoche).toBe(2);
@@ -222,29 +236,28 @@ describe("Seed-Runner", () => {
   it("ist idempotent und überschreibt keine Nutzeränderungen", () => {
     seed(db);
     db.update(exercise)
-      .set({ name: "Meine Kniebeuge", aktiv: false, pruefstatus: "geprueft" })
-      .where(eq(exercise.id, "KN-03"))
+      .set({ name: "Meine Kniebeuge", aktiv: false, pruefstatus: "geprueft", ersatz: true })
+      .where(eq(exercise.id, "KN-04"))
       .run();
     db.update(settings).set({ einheitenProWoche: 3 }).where(eq(settings.id, 1)).run();
     seed(db);
     expect(db.select().from(exercise).all()).toHaveLength(76);
-    expect(db.select().from(equipmentProfile).all()).toHaveLength(3);
-    const kn03 = db.select().from(exercise).where(eq(exercise.id, "KN-03")).get()!;
-    expect(kn03).toMatchObject({ name: "Meine Kniebeuge", aktiv: false, pruefstatus: "geprueft" });
+    const kn04 = db.select().from(exercise).where(eq(exercise.id, "KN-04")).get()!;
+    expect(kn04).toMatchObject({
+      name: "Meine Kniebeuge",
+      aktiv: false,
+      pruefstatus: "geprueft",
+      ersatz: true,
+    });
     expect(db.select().from(settings).get()!.einheitenProWoche).toBe(3);
   });
 
-  it("legt Standardprofile nur beim ersten Lauf an (gelöschte kehren nicht zurück, nur ein Standardprofil)", () => {
+  it("legt keine Equipment-Profile mehr an (das Equipment gehört zum Plan)", () => {
     seed(db);
-    db.delete(equipmentProfile).where(eq(equipmentProfile.seedKey, "studio")).run();
-    db.update(equipmentProfile)
-      .set({ istStandard: true })
-      .where(eq(equipmentProfile.seedKey, "zuhause"))
-      .run();
-    seed(db);
-    const profile = db.select().from(equipmentProfile).all();
-    expect(profile.map((p) => p.seedKey).sort()).toEqual(["unterwegs", "zuhause"]);
-    expect(profile.filter((p) => p.istStandard)).toHaveLength(1);
+    const tabellen = db
+      .all<{ name: string }>(sql`select name from sqlite_master where type = 'table'`)
+      .map((t) => t.name);
+    expect(tabellen).not.toContain("equipment_profile");
   });
 
   it("speichert Seed-Übungen als 'zu prüfen' und aktiv; Listen bleiben als Listen lesbar", () => {

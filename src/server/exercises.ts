@@ -37,8 +37,10 @@ export interface KatalogFilter {
   muster?: Muster;
   stufe?: number;
   einseitig?: boolean;
+  /** true = nur Ersatzübungen, false = nur Planübungen. */
+  ersatz?: boolean;
   /** Nur Übungen, die mit diesem Equipment machbar sind. */
-  profilEquipment?: readonly EquipmentArt[];
+  machbarMit?: readonly EquipmentArt[];
   /** Inaktive Übungen mit anzeigen (Standard: nein). */
   inaktive?: boolean;
   /** Nur inaktive Übungen. */
@@ -84,8 +86,8 @@ export function listExercises(
       (!filter.muster || e.muster === filter.muster) &&
       (filter.stufe === undefined || e.stufe === filter.stufe) &&
       (filter.einseitig === undefined || e.einseitig === filter.einseitig) &&
-      (!filter.profilEquipment ||
-        erfuellt(e.equipment, filter.profilEquipment)) &&
+      (filter.ersatz === undefined || e.ersatz === filter.ersatz) &&
+      (!filter.machbarMit || erfuellt(e.equipment, filter.machbarMit)) &&
       (!filter.nurZuPruefen || e.pruefstatus === "zu_pruefen") &&
       (!filter.pruefstatus || e.pruefstatus === filter.pruefstatus) &&
       (!q || klein(e.name).includes(q) || klein(e.id).includes(q)) &&

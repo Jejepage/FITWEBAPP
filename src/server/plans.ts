@@ -1,15 +1,18 @@
 import { asc, eq } from "drizzle-orm";
-import { equipmentProfile, exercise, plan, planSlot, workout } from "@/db/schema";
+import { exercise, plan, planSlot, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
 import { erfuellt } from "@/domain/equipment";
 import { istGueltigesDatum } from "@/domain/plan-form";
 import { SLOT_VORLAGE, slotKey, type SlotZuordnung } from "@/domain/plan-types";
-import { MUSTER, type Muster } from "@/domain/types";
+import { EQUIPMENT_AUSWAHL, MUSTER, type EquipmentArt, type Gewichte, type Muster } from "@/domain/types";
 
 export type Plan = typeof plan.$inferSelect;
 
 export interface PlanEingabe {
-  profilId: number;
+  /** Verfügbares Equipment dieses Plans */
+  equipment: readonly EquipmentArt[];
+  /** Verfügbare Hantelgewichte in kg */
+  gewichte: Gewichte;
   startDatum: string;
   einheitenProWoche: number;
   zusatzblock: boolean;
@@ -19,7 +22,7 @@ export interface PlanEingabe {
 }
 
 export type PlanFehlerCode =
-  | "profil_unbekannt"
+  | "equipment_ungueltig"
   | "datum_ungueltig"
   | "einheiten_ungueltig"
   | "stufen_ungueltig"
@@ -29,18 +32,21 @@ export type PlanFehlerCode =
 
 export type PlanErgebnis = { ok: true; id: number } | { ok: false; code: PlanFehlerCode };
 
+/** Gültige Auswahl ohne Doppelte in fester Reihenfolge; null bei Unbekanntem (z. B. "keins"). */
+function bereinige(equipment: readonly string[]): EquipmentArt[] | null {
+  const gueltig = new Set<string>(EQUIPMENT_AUSWAHL);
+  if (!equipment.every((a) => gueltig.has(a))) return null;
+  return EQUIPMENT_AUSWAHL.filter((a) => equipment.includes(a));
+}
+
 /**
  * Speichert einen Plan mit seinen 16 Slots und macht ihn zum aktiven Plan. Ein bisher aktiver
  * Plan wird abgeschlossen (Einheiten und Protokolle bleiben erhalten). Alles in einer Transaktion.
  */
 export function createPlan(db: Db, e: PlanEingabe): PlanErgebnis {
   return db.transaction((tx): PlanErgebnis => {
-    const profil = tx
-      .select()
-      .from(equipmentProfile)
-      .where(eq(equipmentProfile.id, e.profilId))
-      .get();
-    if (!profil) return { ok: false, code: "profil_unbekannt" };
+    const equipment = bereinige(e.equipment);
+    if (!equipment) return { ok: false, code: "equipment_ungueltig" };
     if (!istGueltigesDatum(e.startDatum)) return { ok: false, code: "datum_ungueltig" };
     if (e.einheitenProWoche !== 2 && e.einheitenProWoche !== 3) {
       return { ok: false, code: "einheiten_ungueltig" };
@@ -76,7 +82,7 @@ export function createPlan(db: Db, e: PlanEingabe): PlanErgebnis {
         !u ||
         !u.aktiv ||
         u.muster !== vorlage.muster ||
-        !erfuellt(u.equipment, profil.equipment)
+        !erfuellt(u.equipment, equipment)
       ) {
         return { ok: false, code: "uebung_ungueltig" };
       }
@@ -92,7 +98,8 @@ export function createPlan(db: Db, e: PlanEingabe): PlanErgebnis {
     const neu = tx
       .insert(plan)
       .values({
-        profilId: e.profilId,
+        equipment,
+        gewichte: e.gewichte,
         startDatum: e.startDatum,
         einheitenProWoche: e.einheitenProWoche,
         zusatzblock: e.zusatzblock,
@@ -116,6 +123,26 @@ export function createPlan(db: Db, e: PlanEingabe): PlanErgebnis {
       .run();
     return { ok: true, id: neu.id };
   });
+}
+
+export type EquipmentErgebnis = { ok: true } | { ok: false; code: "plan_unbekannt" | "equipment_ungueltig" };
+
+/**
+ * Ändert Equipment und Hantelgewichte eines bestehenden Plans (z. B. nach dem Kauf eines Geräts).
+ * Die Übungen des Plans bleiben, wie sie sind. Was das neue Equipment nicht mehr erfüllt, wird beim
+ * Start der nächsten Einheit durch passende Übungen ersetzt; neue Möglichkeiten erscheinen in den
+ * Tauschlisten. Eine laufende Einheit sieht die Änderung in ihren Tauschlisten und Gewichten.
+ */
+export function setzePlanEquipment(
+  db: Db,
+  planId: number,
+  equipment: readonly EquipmentArt[],
+  gewichte: Gewichte,
+): EquipmentErgebnis {
+  const arten = bereinige(equipment);
+  if (!arten) return { ok: false, code: "equipment_ungueltig" };
+  const r = db.update(plan).set({ equipment: arten, gewichte }).where(eq(plan.id, planId)).run();
+  return r.changes > 0 ? { ok: true } : { ok: false, code: "plan_unbekannt" };
 }
 
 export function getPlan(db: Db, id: number): Plan | null {

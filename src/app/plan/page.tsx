@@ -2,12 +2,14 @@ import Link from "next/link";
 import { IconPlan, IconPlus } from "@/components/icons";
 import { PageShell } from "@/components/page-shell";
 import { PlanAnsicht } from "@/components/plan/plan-ansicht";
-import { karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
+import { bannerInfo, karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
+import { erfuellt } from "@/domain/equipment";
+import { formatGewichte } from "@/domain/gewichte";
+import { EQUIPMENT_NAMEN } from "@/domain/types";
 import { db } from "@/db/client";
 import { de } from "@/i18n/de";
 import { alleUebungen } from "@/server/exercises";
 import { getActivePlan, getPlanSlots } from "@/server/plans";
-import { getProfile } from "@/server/profiles";
 import { StufenCheckFormular } from "@/components/plan/stufen-check-formular";
 import { istBlockFertig, ladeStufenCheck } from "@/server/stufen-check";
 
@@ -55,7 +57,13 @@ export default function PlanPage() {
 
   const slots = getPlanSlots(db, plan.id);
   const uebungen = new Map(alleUebungen(db).map((u) => [u.id, u]));
-  const profil = getProfile(db, plan.profilId);
+  const fehlt = slots.filter((s) => {
+    const u = uebungen.get(s.exerciseId);
+    return !u || !u.aktiv || !erfuellt(u.equipment, plan.equipment);
+  }).length;
+  const gewichte = (["kurzhanteln", "kettlebell"] as const)
+    .filter((art) => plan.equipment.includes(art) && (plan.gewichte[art]?.length ?? 0) > 0)
+    .map((art) => t.gewichteKurz(EQUIPMENT_NAMEN[art], formatGewichte(plan.gewichte[art]!)));
 
   return (
     <PageShell
@@ -70,7 +78,22 @@ export default function PlanPage() {
     >
       <section className={`${karte} mb-6`} aria-label={t.aktiverPlan}>
         <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Kachel name={t.profil}>{profil?.name ?? "–"}</Kachel>
+          <Kachel name={t.equipment}>
+            <span className="block text-[15px] font-medium leading-snug">
+              {plan.equipment.length > 0
+                ? plan.equipment.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
+                : t.keinEquipment}
+            </span>
+            {gewichte.length > 0 && (
+              <span className="block text-sm font-normal text-ink-2">{gewichte.join(" · ")}</span>
+            )}
+            <Link
+              href="/plan/equipment"
+              className="mt-1 inline-flex min-h-11 items-center text-[15px] font-medium text-accent-ink hover:underline"
+            >
+              {t.equipmentAendern}
+            </Link>
+          </Kachel>
           <Kachel name={t.start}>{datumAnzeige(plan.startDatum)}</Kachel>
           <Kachel name={t.einheitenProWoche(plan.einheitenProWoche)}>
             {t.wochenfolge(plan.einheitenProWoche)}
@@ -85,6 +108,11 @@ export default function PlanPage() {
             </span>
           </Kachel>
         </dl>
+        {fehlt > 0 && (
+          <p role="status" className={`${bannerInfo} mt-4 text-[15px]`}>
+            {t.equipmentFehlt(fehlt)}
+          </p>
+        )}
         <p className="mt-4">
           <Link href="/" className={knopfSekundaer}>
             {t.zumTraining}

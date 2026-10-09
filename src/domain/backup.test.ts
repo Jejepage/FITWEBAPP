@@ -59,30 +59,12 @@ const satz = (nr: number, extra: Partial<SatzZeile> = {}): SatzZeile => ({
 type AllesBackup = Extract<BackupDatei, { art: "alles" }>;
 
 /**
- * Kleines, vollständig gültiges Gesamt-Backup: zwei Profile, zwei Pläne (der aktive mit dem
- * abgeschlossenen als Vorgänger), je eine abgeschlossene und eine laufende Einheit.
+ * Kleines, vollständig gültiges Gesamt-Backup: zwei Pläne mit je eigenem Equipment (der aktive mit
+ * dem abgeschlossenen als Vorgänger), je eine abgeschlossene und eine laufende Einheit.
  */
 function gueltigeDatei(): AllesBackup {
   const daten: AllesDaten = {
     uebungen: katalog.map((u) => ({ ...u })),
-    profile: [
-      {
-        id: 1,
-        seedKey: "studio",
-        name: "Studio",
-        equipment: ["maschinen", "langhantel", "bank"],
-        gewichte: {},
-        istStandard: true,
-      },
-      {
-        id: 2,
-        seedKey: null,
-        name: "Zuhause",
-        equipment: ["kurzhanteln", "band"],
-        gewichte: { kurzhanteln: [4, 8, 12.5] },
-        istStandard: false,
-      },
-    ],
     einstellungen: {
       stufen: stufen(2),
       einheitenProWoche: 2,
@@ -93,7 +75,8 @@ function gueltigeDatei(): AllesBackup {
     plaene: [
       {
         id: 1,
-        profilId: 1,
+        equipment: ["maschinen", "langhantel", "bank"],
+        gewichte: {},
         startDatum: "2026-09-14",
         einheitenProWoche: 2,
         zusatzblock: true,
@@ -104,7 +87,8 @@ function gueltigeDatei(): AllesBackup {
       },
       {
         id: 2,
-        profilId: 2,
+        equipment: ["kurzhanteln", "band"],
+        gewichte: { kurzhanteln: [4, 8, 12.5] },
         startDatum: "2026-08-03",
         einheitenProWoche: 3,
         zusatzblock: false,
@@ -122,8 +106,6 @@ function gueltigeDatei(): AllesBackup {
         datum: "2026-09-10",
         einheit: "A",
         woche: 6,
-        profilId: 2,
-        adHoc: false,
         zusatzblock: false,
         status: "abgeschlossen",
         ersetzungen: { "101": zweite("KN").id },
@@ -137,8 +119,6 @@ function gueltigeDatei(): AllesBackup {
         datum: "2026-09-14",
         einheit: "A",
         woche: 1,
-        profilId: 1,
-        adHoc: false,
         zusatzblock: true,
         status: "laufend",
         ersetzungen: {},
@@ -217,9 +197,8 @@ describe("parseBackup: gültige Dateien", () => {
     expect(parseBackup(roh).ok).toBe(true);
   });
 
-  it("akzeptiert eine leere Datenbank ohne Profile", () => {
+  it("akzeptiert eine leere Datenbank ohne Pläne", () => {
     const roh = gueltigeDatei();
-    roh.daten.profile = [];
     roh.daten.plaene = [];
     roh.daten.planSlots = [];
     roh.daten.einheiten = [];
@@ -239,14 +218,14 @@ describe("parseBackup: gültige Dateien", () => {
     (roh as Record<string, unknown>).zukunft = true;
     (roh.daten as unknown as Record<string, unknown>).neueTabelle = [1];
     (roh.daten.saetze[0] as unknown as Record<string, unknown>).kommentar = "neu";
-    (roh.daten.profile[0] as unknown as Record<string, unknown>).farbe = "rot";
+    (roh.daten.plaene[0] as unknown as Record<string, unknown>).farbe = "rot";
     const ergebnis = parseBackup(roh);
     expect(ergebnis.ok).toBe(true);
     if (!ergebnis.ok || ergebnis.datei.art !== "alles") return;
     expect(ergebnis.datei).not.toHaveProperty("zukunft");
     expect(ergebnis.datei.daten).not.toHaveProperty("neueTabelle");
     expect(ergebnis.datei.daten.saetze[0]).not.toHaveProperty("kommentar");
-    expect(ergebnis.datei.daten.profile[0]).not.toHaveProperty("farbe");
+    expect(ergebnis.datei.daten.plaene[0]).not.toHaveProperty("farbe");
   });
 
   it("verändert die Eingabe nicht", () => {
@@ -259,7 +238,7 @@ describe("parseBackup: gültige Dateien", () => {
   it("stimmt mit backupDateiSchema überein", () => {
     expect(backupDateiSchema.safeParse(gueltigeDatei()).success).toBe(true);
     expect(backupDateiSchema.safeParse(katalogDatei()).success).toBe(true);
-    expect(backupDateiSchema.safeParse({ ...katalogDatei(), version: 1 }).success).toBe(false);
+    expect(backupDateiSchema.safeParse({ ...katalogDatei(), version: 2 }).success).toBe(false);
   });
 });
 
@@ -271,7 +250,11 @@ describe("parseBackup: Kopf", () => {
 
   it("lehnt eine andere Version mit klarer Meldung ab", () => {
     expect(fehlerVon({ ...gueltigeDatei(), version: 4 })).toEqual([
-      "Backup-Version 4 wird nicht unterstützt (diese App liest die Versionen 1 bis 3).",
+      "Backup-Version 4 wird nicht unterstützt (diese App liest Version 3).",
+    ]);
+    // Version 2 und älter stammen aus der Zeit mit Equipment-Profilen
+    expect(fehlerVon({ ...gueltigeDatei(), version: 2 })).toEqual([
+      "Backup-Version 2 wird nicht unterstützt (diese App liest Version 3). Sicherungen aus der Zeit mit Equipment-Profilen lassen sich nicht mehr einlesen.",
     ]);
     expect(fehlerVon({ ...gueltigeDatei(), version: "3" })[0]).toContain(
       "Backup-Version 3 wird nicht unterstützt",
@@ -301,57 +284,6 @@ describe("parseBackup: Kopf", () => {
     expect(fehlerVon(gueltigeDatei(), "katalog")).toEqual([
       "Die Datei enthält ein Gesamt-Backup, erwartet wurde ein Katalog-Backup.",
     ]);
-  });
-
-  it("hebt Version 1 an: Profile mit Maschinen bekommen den Kabelzug, Kabelübungen wechseln", () => {
-    const roh = gueltigeDatei();
-    // Übungen im alten Format (Gruppenlisten), daher ohne die heutigen Typen.
-    const uebungen: Record<string, unknown>[] = roh.daten.uebungen.map((u) =>
-      u.id === "ZH-01"
-        ? { ...u, equipment: [["maschinen"]] }
-        : u.id === "RU-05"
-          ? { ...u, equipment: [["maschinen", "band"]] }
-          : u.id === "ZV-01"
-            ? { ...u, equipment: [["maschinen"], ["bank"]] } // vom Nutzer geändert: bleibt
-            : u,
-    );
-    const alt = { ...roh, version: 1, daten: { ...roh.daten, uebungen } };
-    const vorher = JSON.parse(JSON.stringify(alt)) as unknown;
-    const ergebnis = parseBackup(alt);
-    expect(alt).toEqual(vorher);
-    if (!ergebnis.ok) throw new Error(ergebnis.fehler.join("\n"));
-    expect(ergebnis.datei.version).toBe(BACKUP_VERSION);
-    if (ergebnis.datei.art !== "alles") throw new Error("kein Gesamt-Backup");
-    const d = ergebnis.datei.daten;
-    expect(d.profile.map((p) => p.equipment)).toEqual([
-      ["maschinen", "kabelzug", "langhantel", "bank"],
-      roh.daten.profile[1]!.equipment,
-    ]);
-    const bedingung = (id: string) => d.uebungen.find((u) => u.id === id)!.equipment;
-    // Danach wie Version 2 flach gemacht: aus jeder Gruppe das erste Gerät.
-    expect(bedingung("ZH-01")).toEqual(["kabelzug"]);
-    expect(bedingung("RU-05")).toEqual(["kabelzug"]);
-    expect(bedingung("ZV-01")).toEqual(["maschinen", "bank"]);
-    expect(bedingung("KN-02")).toEqual(["maschinen"]);
-  });
-
-  it("hebt Version 2 an: Gruppen werden flach, die optionale Last entfällt", () => {
-    const roh = gueltigeDatei();
-    const uebungen: Record<string, unknown>[] = roh.daten.uebungen.map((u, i) =>
-      i === 0
-        ? { ...u, equipment: [["bank"], ["kurzhanteln", "kettlebell"]], optionaleLast: ["kurzhanteln"] }
-        : { ...u, equipment: u.equipment.map((a) => [a]), optionaleLast: [] },
-    );
-    const alt = { ...roh, version: 2, daten: { ...roh.daten, uebungen } };
-    const ergebnis = parseBackup(alt);
-    if (!ergebnis.ok) throw new Error(ergebnis.fehler.join("\n"));
-    expect(ergebnis.datei.version).toBe(BACKUP_VERSION);
-    const neu = ergebnis.datei.daten.uebungen;
-    expect(neu[0]!.equipment).toEqual(["bank", "kurzhanteln"]);
-    expect(neu.map((u) => u.equipment).slice(1)).toEqual(
-      roh.daten.uebungen.map((u) => u.equipment).slice(1),
-    );
-    expect(neu.every((u) => !("optionaleLast" in u))).toBe(true);
   });
 
   it("verlangt einen ISO-Zeitstempel in erstelltAm", () => {
@@ -428,11 +360,11 @@ describe("parseBackup: beliebige Eingaben", () => {
   it("meldet Müll in den Tabellen, statt zu werfen", () => {
     const roh = gueltigeDatei() as unknown as { daten: Record<string, unknown> };
     roh.daten.uebungen = "keine Liste";
-    roh.daten.profile = [null, 3, "x", []];
+    roh.daten.plaene = [null, 3, "x", []];
     roh.daten.einstellungen = [];
     const f = fehlerVon(roh);
     expect(f).toContain("Übungen: muss eine Liste sein");
-    expect(f).toContain("Profil Nr. 1: muss ein Objekt sein");
+    expect(f).toContain("Plan Nr. 1: muss ein Objekt sein");
     expect(f).toContain("Einstellungen muss ein Objekt sein");
   });
 });
@@ -592,37 +524,35 @@ describe("parseBackup: Schema der Zeilen", () => {
     roh.daten.saetze[0]!.id = "kurz";
     roh.daten.saetze[1]!.id = "leer zeichen!";
     roh.daten.plaene[0]!.id = 0;
-    roh.daten.profile[0]!.id = 1.5;
+    roh.daten.einheiten[1]!.id = 1.5;
     const f = fehlerVon(roh);
     expect(f).toContain(
       "Satz kurz: Feld id ist keine gültige Satz-ID (8 bis 64 Zeichen: Buchstaben, Ziffern, Bindestrich)",
     );
     expect(f).toContain("Plan 0: Feld id muss mindestens 1 sein");
-    expect(f).toContain("Profil 1.5: Feld id muss eine ganze Zahl sein");
+    expect(f).toContain("Einheit 1.5: Feld id muss eine ganze Zahl sein");
     expect(f).toHaveLength(4);
   });
 
-  it("lehnt zu lange Notizen, leere Profilnamen und unpassende Gewichte ab", () => {
+  it("lehnt zu lange Notizen und unpassende Gewichte ab", () => {
     const roh = gueltigeDatei();
     roh.daten.einheiten[0]!.notiz = "x".repeat(BACKUP_MAX_NOTIZ_ZEICHEN + 1);
-    roh.daten.profile[0]!.name = "   ";
-    roh.daten.profile[1]!.gewichte = { kurzhanteln: [0, 501], kettlebell: Array(101).fill(8) };
+    roh.daten.plaene[1]!.gewichte = { kurzhanteln: [0, 501], kettlebell: Array(101).fill(8) };
     const f = fehlerVon(roh);
     expect(f).toContain("Einheit 1: Feld notiz darf höchstens 2000 Zeichen lang sein");
-    expect(f).toContain("Profil 1: Feld name darf nicht leer sein");
-    expect(f).toContain("Profil 2: Feld gewichte.kurzhanteln (Eintrag 1) muss größer als 0 sein");
-    expect(f).toContain("Profil 2: Feld gewichte.kurzhanteln (Eintrag 2) darf höchstens 500 sein");
-    expect(f).toContain("Profil 2: Feld gewichte.kettlebell darf höchstens 100 Einträge haben");
+    expect(f).toContain("Plan 2: Feld gewichte.kurzhanteln (Eintrag 1) muss größer als 0 sein");
+    expect(f).toContain("Plan 2: Feld gewichte.kurzhanteln (Eintrag 2) darf höchstens 500 sein");
+    expect(f).toContain("Plan 2: Feld gewichte.kettlebell darf höchstens 100 Einträge haben");
   });
 
   it("lehnt unbekannte Equipment-Arten ab", () => {
     const roh = gueltigeDatei();
-    (roh.daten.profile[0] as unknown as { equipment: string[] }).equipment = ["rudergeraet"];
-    (roh.daten.profile[1]!.gewichte as Record<string, number[]>).hantelscheiben = [5];
+    (roh.daten.plaene[0] as unknown as { equipment: string[] }).equipment = ["rudergeraet"];
+    (roh.daten.plaene[1]!.gewichte as Record<string, number[]>).hantelscheiben = [5];
     const f = fehlerVon(roh);
     expect(f).toHaveLength(2);
-    expect(f[0]).toContain("Profil 1: Feld equipment (Eintrag 1) muss einer der Werte");
-    expect(f[1]).toBe("Profil 2: Feld gewichte enthält unbekannte Schlüssel: hantelscheiben");
+    expect(f[0]).toContain("Plan 1: Feld equipment (Eintrag 1) muss einer der Werte");
+    expect(f[1]).toBe("Plan 2: Feld gewichte enthält unbekannte Schlüssel: hantelscheiben");
   });
 
   it("lehnt ungültige Schlüssel und Werte in ersetzungen ab", () => {
@@ -654,7 +584,7 @@ describe("parseBackup: Schema der Zeilen", () => {
 
   it("prüft die Integrität erst nach erfolgreicher Schemaprüfung", () => {
     const roh = gueltigeDatei();
-    roh.daten.plaene[0]!.profilId = 99; // Integritätsfehler
+    roh.daten.plaene[0]!.vorgaengerId = 99; // Integritätsfehler
     roh.daten.saetze[0]!.wdh = -1; // Schemafehler
     expect(fehlerVon(roh)).toEqual(["Satz satz-000001: Feld wdh muss mindestens 0 sein"]);
   });
@@ -681,32 +611,14 @@ describe("parseBackup: Grenzgrößen", () => {
     roh.daten.plaene[0]!.stufen = stufen(5);
     roh.daten.plaene[0]!.einheitenProWoche = 3;
     roh.daten.einstellungen.stufen = stufen(1);
-    roh.daten.profile[1]!.gewichte = {
+    roh.daten.plaene[1]!.gewichte = {
       kurzhanteln: Array.from({ length: 100 }, (_, i) => (i + 1) * 5),
     };
     expect(parseBackup(roh).ok).toBe(true);
   });
 
-  it("akzeptiert genau 50 Profile", () => {
-    const roh = gueltigeDatei();
-    roh.daten.profile = Array.from({ length: BACKUP_ZEILEN_LIMIT.profile }, (_, i) => ({
-      id: i + 1,
-      seedKey: null,
-      name: `Profil ${i + 1}`,
-      equipment: [],
-      gewichte: {},
-      istStandard: i === 0,
-    }));
-    roh.daten.plaene = [];
-    roh.daten.planSlots = [];
-    roh.daten.einheiten = [];
-    roh.daten.saetze = [];
-    expect(parseBackup(roh).ok).toBe(true);
-  });
-
   it.each([
     ["uebungen", "Übungen", 500],
-    ["profile", "Profile", 50],
     ["plaene", "Pläne", 200],
     ["planSlots", "Plan-Slots", 3200],
     ["einheiten", "Einheiten", 5000],
@@ -726,7 +638,6 @@ describe("parseBackup: Grenzgrößen", () => {
   it("hält die Obergrenzen der Spezifikation ein", () => {
     expect(BACKUP_ZEILEN_LIMIT).toEqual({
       uebungen: 500,
-      profile: 50,
       plaene: 200,
       slotsJePlan: 16,
       planSlots: 3200,
@@ -846,12 +757,6 @@ describe("parseBackup: Integrität im Katalog", () => {
 });
 
 describe("parseBackup: fehlende Verweise im Gesamt-Backup", () => {
-  it("Plan: Profil fehlt", () => {
-    const roh = gueltigeDatei();
-    roh.daten.plaene[0]!.profilId = 9;
-    expect(fehlerVon(roh)).toEqual(["Plan 1: Profil 9 existiert nicht."]);
-  });
-
   it("Plan: Vorgänger fehlt oder ist der Plan selbst", () => {
     const roh = gueltigeDatei();
     roh.daten.plaene[0]!.vorgaengerId = 7;
@@ -871,16 +776,12 @@ describe("parseBackup: fehlende Verweise im Gesamt-Backup", () => {
     expect(f).toContain("Plan-Slot 2: Übung DH-99 existiert nicht.");
   });
 
-  it("Einheit: Plan oder Profil fehlt", () => {
+  it("Einheit: Plan fehlt", () => {
     const roh = gueltigeDatei();
     roh.daten.einheiten[0]!.planId = 8;
-    roh.daten.einheiten[1]!.profilId = 6;
     roh.daten.einheiten[0]!.ersetzungen = {};
     roh.daten.saetze[2]!.planSlotId = null;
-    expect(fehlerVon(roh)).toEqual([
-      "Einheit 1: Plan 8 existiert nicht.",
-      "Einheit 2: Profil 6 existiert nicht.",
-    ]);
+    expect(fehlerVon(roh)).toEqual(["Einheit 1: Plan 8 existiert nicht."]);
   });
 
   it("Satz: Einheit, Plan-Slot oder Übung fehlt", () => {
@@ -926,21 +827,6 @@ describe("parseBackup: Eindeutigkeit", () => {
     expect(f).toContain("Satz satz-000004: Die ID kommt mehrfach vor.");
   });
 
-  it("meldet eine doppelte Profil-ID und einen doppelten seedKey", () => {
-    const roh = gueltigeDatei();
-    roh.daten.profile[1]!.id = 1;
-    roh.daten.profile[1]!.seedKey = "studio";
-    const f = fehlerVon(roh);
-    expect(f).toContain("Profil 1: Die ID kommt mehrfach vor.");
-    expect(f).toContain("Profil 1: seedKey „studio“ kommt mehrfach vor.");
-  });
-
-  it("erlaubt mehrere Profile ohne seedKey", () => {
-    const roh = gueltigeDatei();
-    roh.daten.profile.push({ ...roh.daten.profile[1]!, id: 3 });
-    expect(parseBackup(roh).ok).toBe(true);
-  });
-
   it("meldet zwei aktive Pläne", () => {
     const roh = gueltigeDatei();
     roh.daten.plaene[1]!.status = "aktiv";
@@ -959,15 +845,6 @@ describe("parseBackup: Eindeutigkeit", () => {
     expect(fehlerVon(roh)).toEqual([
       "Einheiten: Mehrere Einheiten laufen (1, 2), erlaubt ist eine.",
     ]);
-  });
-
-  it("verlangt genau ein Standardprofil, sobald Profile vorhanden sind", () => {
-    const roh = gueltigeDatei();
-    roh.daten.profile[1]!.istStandard = true;
-    expect(fehlerVon(roh)).toEqual(["Profile: Mehrere Profile sind als Standard markiert (1, 2)."]);
-    roh.daten.profile[0]!.istStandard = false;
-    roh.daten.profile[1]!.istStandard = false;
-    expect(fehlerVon(roh)).toEqual(["Profile: Kein Profil ist als Standard markiert."]);
   });
 
   it("meldet eine doppelt belegte Slot-Position im selben Plan", () => {

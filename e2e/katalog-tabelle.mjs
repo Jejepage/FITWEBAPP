@@ -5,6 +5,7 @@ import { join } from "node:path";
 import {
   SHOTS,
   hinweisBestaetigen,
+  planAnlegen,
   sammleFehler,
   withApp,
 } from "./harness.mjs";
@@ -104,27 +105,33 @@ async function ablauf(browser, BASE) {
 
   await page.getByRole("link", { name: "Zurücksetzen" }).first().click();
   await page.getByText("76 von 76 Übungen").waitFor();
+  // Der Machbar-Filter bezieht sich auf das Equipment des aktiven Plans (hier nur die Stange)
+  await planAnlegen(page, { equipment: ["Stange"], base: BASE });
+  await page.goto(`${BASE}/katalog`);
   await page
     .locator("thead")
-    .getByLabel("Equipment-Profil")
-    .selectOption({ label: "Machbar: Unterwegs" });
-  await warteUrl(/profil=/);
+    .getByLabel("Machbar mit meinem Equipment")
+    .selectOption({ label: "Nur machbare" });
+  await warteUrl(/machbar=ja/);
   await page.waitForFunction(
     () =>
       document.querySelectorAll("tbody tr:not(:has(th[scope=rowgroup]))")
         .length < 76,
   );
-  const unterwegs = await zeilen().count();
-  assert.ok(unterwegs > 0 && unterwegs < 76, "Unterwegs engt ein");
-  await page.getByText(`${unterwegs} von 76 Übungen`).first().waitFor();
-  await page.locator("thead").getByLabel("Equipment-Profil").selectOption("");
+  const machbar = await zeilen().count();
+  assert.ok(machbar > 0 && machbar < 76, "Machbar engt ein");
+  await page.getByText(`${machbar} von 76 Übungen`).first().waitFor();
+  await page
+    .locator("thead")
+    .getByLabel("Machbar mit meinem Equipment")
+    .selectOption("");
   await page
     .locator("thead")
     .getByLabel("Gerät", { exact: true })
     .selectOption({ label: "Braucht Stange" });
   await warteUrl(/geraet=stange/);
   await page.waitForFunction(
-    () => new URL(location.href).searchParams.get("profil") === null,
+    () => new URL(location.href).searchParams.get("machbar") === null,
   );
   await page.waitForFunction(
     () =>
@@ -138,7 +145,7 @@ async function ablauf(browser, BASE) {
     `Gerät Stange: ${stange} Zeilen, URL ${page.url()}`,
   );
   schritt(
-    `Equipment-Filter: Profil Unterwegs → ${unterwegs}, Gerät Stange → ${stange}`,
+    `Equipment-Filter: machbar mit Stange → ${machbar}, Gerät Stange → ${stange}`,
   );
 
   // Weitere Spaltenfilter (erst nach dem Laden der Skripte bedienen, sonst geht die Auswahl

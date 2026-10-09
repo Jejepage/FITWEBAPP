@@ -98,7 +98,8 @@ export function PlanAnsicht({
                             {kandidaten[s.muster].map((k) => (
                               <option key={k.id} value={k.id}>
                                 {k.name} ({t.form.stufeKurz(k.stufe)}
-                                {k.einseitig ? `, ${t.form.einseitigKurz}` : ""})
+                                {k.einseitig ? `, ${t.form.einseitigKurz}` : ""}
+                                {k.ersatz ? `, ${t.form.ersatzKurz}` : ""})
                               </option>
                             ))}
                           </select>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { erfuellt, gleicheBewegung } from "./equipment";
-import { generierePlan, kandidatenFuerSlot, pruefePlan } from "./generator";
+import { generierePlan, kandidatenFuerSlot, pruefePlan, tauschKandidaten } from "./generator";
 import {
   SLOT_VORLAGE,
   slotKey,
@@ -11,7 +11,14 @@ import {
 import { testKatalog, testProfile } from "./test-katalog";
 import { MUSTER, type Einheit, type EquipmentArt, type Exercise, type Muster } from "./types";
 
-const KATALOG = testKatalog();
+/** Katalog mit den Ersatz-Kennzeichen des Seeds. */
+const ECHTER_KATALOG = testKatalog();
+/** Derselbe Katalog ohne Ersatz-Kennzeichen: prüft die reine Stufenlogik. */
+const KATALOG = ECHTER_KATALOG.map((u) => ({ ...u, ersatz: false }));
+const KATALOGE = [
+  ["ohne Ersatzkennzeichen", KATALOG],
+  ["mit Ersatzkennzeichen", ECHTER_KATALOG],
+] as const;
 const STUFEN = [1, 2, 3, 4, 5];
 const SEEDS = Array.from({ length: 10 }, (_, i) => i);
 const KN_HB: readonly Muster[] = ["KN", "HB"];
@@ -63,6 +70,10 @@ const ohneEinseitigKnHb = KATALOG.filter((u) => !(KN_HB.includes(u.muster) && u.
 const deaktiviere = (liste: readonly string[]): Exercise[] =>
   KATALOG.map((u) => (liste.includes(u.id) ? { ...u, aktiv: false } : u));
 
+/** Sortierschlüssel wie im Generator: Planübungen (0) vor Ersatzübungen (10), darin der Stufenrang. */
+const schluessel = (u: Exercise, wunsch: number): number =>
+  (u.ersatz ? 10 : 0) + rang(u.stufe, wunsch);
+
 /** Prüft alle Eigenschaften, die für jeden erzeugten Plan gelten müssen. */
 function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
   const { slots, hinweise } = plan(e);
@@ -85,7 +96,7 @@ function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
   const abweichend: SlotZuordnung[] = [];
   for (const muster of MUSTER) {
     const kand = kandidatenFuerSlot(e, muster);
-    const raenge = kand.map((u) => rang(u.stufe, e.stufen[muster]));
+    const raenge = kand.map((u) => schluessel(u, e.stufen[muster]));
     expect(raenge).toEqual([...raenge].sort((x, y) => x - y));
     const beste = raenge[0] ?? -1;
     // B nimmt die beste Übung, die keine Variante von A ist (sonst die zweitbeste).
@@ -104,7 +115,7 @@ function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
       const slot = slots.find((s) => s.einheit === einheit && s.muster === muster);
       const u = nachId.get(slot?.exerciseId ?? "");
       if (!slot || !u) throw new Error("Slot fehlt");
-      if (rang(u.stufe, e.stufen[muster]) > grenze) abweichend.push(slot);
+      if (schluessel(u, e.stufen[muster]) > grenze) abweichend.push(slot);
 
       // Abwechslung nur innerhalb gleicher Stufe: benutzte Übung nur, wenn keine unbenutzte
       // gleichen Rangs (außer der Übung der anderen Einheit) bereitsteht.
@@ -118,7 +129,7 @@ function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
         const andere = nachId.get(einheit === "A" ? (idB ?? "") : (idA ?? ""))!;
         const besser = kand.find(
           (k) =>
-            rang(k.stufe, e.stufen[muster]) === rang(u.stufe, e.stufen[muster]) &&
+            schluessel(k, e.stufen[muster]) === schluessel(u, e.stufen[muster]) &&
             !benutzt(k) &&
             !gleicheBewegung(k, andere),
         );
@@ -144,31 +155,39 @@ function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
 }
 
 describe("generierePlan: Eigenschaften über den echten Katalog", () => {
-  for (const profil of testProfile) {
-    it(`${profil.name}: Stufen 1 bis 5 × Seeds 0 bis 9`, () => {
-      for (const stufe of STUFEN) {
-        for (const seed of SEEDS) {
-          pruefeEigenschaften(eingabe(profil.seedKey, einheitlich(stufe), { seed }));
+  for (const [katName, uebungen] of KATALOGE) {
+    for (const profil of testProfile) {
+      it(`${profil.name} (${katName}): Stufen 1 bis 5 × Seeds 0 bis 9`, () => {
+        for (const stufe of STUFEN) {
+          for (const seed of SEEDS) {
+            pruefeEigenschaften(eingabe(profil.seedKey, einheitlich(stufe), { uebungen, seed }));
+          }
         }
-      }
-    });
+      });
 
-    it(`${profil.name}: gemischte Stufen pro Muster`, () => {
-      const stufen = { KN: 1, HB: 4, DH: 2, DV: 3, ZH: 5, ZV: 2, TR: 1, RU: 3 };
-      for (const seed of SEEDS) pruefeEigenschaften(eingabe(profil.seedKey, stufen, { seed }));
-    });
-
-    it(`${profil.name}: Folgeblock mit vorherVerwendet über Stufen und Seeds`, () => {
-      for (const stufe of STUFEN) {
-        const erster = plan(eingabe(profil.seedKey, einheitlich(stufe)));
-        const vorher = new Set(erster.slots.map((s) => s.exerciseId));
+      it(`${profil.name} (${katName}): gemischte Stufen pro Muster`, () => {
+        const stufen = { KN: 1, HB: 4, DH: 2, DV: 3, ZH: 5, ZV: 2, TR: 1, RU: 3 };
         for (const seed of SEEDS) {
-          pruefeEigenschaften(
-            eingabe(profil.seedKey, einheitlich(stufe), { vorherVerwendet: vorher, seed }),
-          );
+          pruefeEigenschaften(eingabe(profil.seedKey, stufen, { uebungen, seed }));
         }
-      }
-    });
+      });
+
+      it(`${profil.name} (${katName}): Folgeblock mit vorherVerwendet über Stufen und Seeds`, () => {
+        for (const stufe of STUFEN) {
+          const erster = plan(eingabe(profil.seedKey, einheitlich(stufe), { uebungen }));
+          const vorher = new Set(erster.slots.map((s) => s.exerciseId));
+          for (const seed of SEEDS) {
+            pruefeEigenschaften(
+              eingabe(profil.seedKey, einheitlich(stufe), {
+                uebungen,
+                vorherVerwendet: vorher,
+                seed,
+              }),
+            );
+          }
+        }
+      });
+    }
   }
 
   it("gemischte Stufen im Studio: konkrete Belegung", () => {
@@ -309,6 +328,77 @@ describe("generierePlan: konkrete Fälle", () => {
   });
 });
 
+describe("generierePlan: Ersatzübungen", () => {
+  const echt = (key: string, stufe: number, extra: Partial<GeneratorEingabe> = {}) =>
+    eingabe(key, einheitlich(stufe), { uebungen: ECHTER_KATALOG, ...extra });
+  const ersatzIds = new Set(ECHTER_KATALOG.filter((u) => u.ersatz).map((u) => u.id));
+
+  it("Studio und Zuhause: im Plan steht keine Ersatzübung (Stufen 1 bis 5 × Seeds)", () => {
+    for (const key of ["studio", "zuhause"]) {
+      for (const stufe of STUFEN) {
+        for (const seed of SEEDS) {
+          const { slots } = plan(echt(key, stufe, { seed }));
+          const ersatz = slots.map((s) => s.exerciseId).filter((id) => ersatzIds.has(id));
+          expect(ersatz, `${key} Stufe ${stufe} Seed ${seed}`).toEqual([]);
+        }
+      }
+    }
+  });
+
+  it("Zuhause Stufe 2: Goblet Squat statt Kniebeuge mit Körpergewicht", () => {
+    const { slots } = plan(echt("zuhause", 2));
+    expect(idVon(slots, "A", "KN")).toBe("KN-04");
+    expect(ids(slots, "KN")).not.toContain("KN-03");
+  });
+
+  it("Unterwegs (nur Stange): Ersatzübungen füllen auf, wo es keine Planübung gibt", () => {
+    const { slots, hinweise } = plan(echt("unterwegs", 2));
+    // DH hat ohne Geräte nur Liegestütz-Varianten, die als Ersatz gelten.
+    expect([...ids(slots, "DH")].sort()).toEqual(["DH-02", "DH-04"]);
+    // HB: ohne Geräte nur Ersatzübungen, Wunschstufe 2 zuerst, dann tiefer (HB-03 ist einseitig).
+    expect(ids(slots, "HB")).toEqual(["HB-03", "HB-01"]);
+    // ZH: Türrahmen-Rudern (Stufe 1, Ersatz) und Rudern unter dem Tisch (Stufe 3, Ersatz)
+    expect(ids(slots, "ZH")).toEqual(["ZH-08", "ZH-07"]);
+    expect(hinweise).not.toContainEqual({ code: "wenig_auswahl", muster: "ZH" });
+  });
+
+  it("Tauschliste: Planübungen zuerst, Ersatzübungen am Ende", () => {
+    const liste = kandidatenFuerSlot(echt("zuhause", 2), "KN").map((u) => u.id);
+    // Planübungen mit Kurzhanteln/Kettlebell zuerst, danach die Körpergewichts-Varianten.
+    expect(liste).toEqual([
+      "KN-04",
+      "KN-09",
+      "KN-06",
+      "KN-10",
+      "KN-12",
+      "KN-03",
+      "KN-01",
+      "KN-05",
+      "KN-11",
+      "KN-07",
+    ]);
+  });
+
+  it("Einseitig-Regel: eine einseitige Planübung schlägt die einseitige Ersatzübung HB-03", () => {
+    const { slots } = plan(echt("studio", 2));
+    const einseitig = slots
+      .filter((s) => KN_HB.includes(s.muster))
+      .map((s) => s.exerciseId)
+      .filter((id) => ECHTER_KATALOG.find((u) => u.id === id)?.einseitig);
+    expect(einseitig).toHaveLength(1);
+    expect(ersatzIds.has(einseitig[0] ?? "")).toBe(false);
+  });
+
+  it("Einseitig-Regel: gibt es keine einseitige Planübung, darf es eine Ersatzübung sein", () => {
+    const einseitigeAlsErsatz = ECHTER_KATALOG.map((u) =>
+      u.einseitig && KN_HB.includes(u.muster) ? { ...u, ersatz: true } : u,
+    );
+    const { slots, hinweise } = plan({ ...echt("studio", 2), uebungen: einseitigeAlsErsatz });
+    expect(ids(slots, "HB")).toContain("HB-03");
+    expect(hinweise.map((h) => h.code)).not.toContain("einseitig_fehlt");
+  });
+});
+
 describe("generierePlan: Folgeblock", () => {
   it("weicht bei gleichem Rang auf unbenutzte Übungen aus", () => {
     const erster = plan(eingabe("studio", einheitlich(2)));
@@ -428,6 +518,38 @@ describe("kandidatenFuerSlot", () => {
   it("schließt inaktive Übungen aus", () => {
     const e = { ...eingabe("studio", einheitlich(2)), uebungen: deaktiviere(["KN-02"]) };
     expect(kandidatenFuerSlot(e, "KN").map((u) => u.id)).not.toContain("KN-02");
+  });
+});
+
+describe("tauschKandidaten", () => {
+  const tausch = (key: string, stufe: number, muster: Muster, uebungen = ECHTER_KATALOG) =>
+    tauschKandidaten(eingabe(key, einheitlich(stufe), { uebungen }), muster).map((u) => u.id);
+
+  it("beginnt mit den machbaren Übungen wie kandidatenFuerSlot", () => {
+    const e = eingabe("zuhause", einheitlich(2), { uebungen: ECHTER_KATALOG });
+    const machbar = kandidatenFuerSlot(e, "KN").map((u) => u.id);
+    expect(tausch("zuhause", 2, "KN").slice(0, machbar.length)).toEqual(machbar);
+  });
+
+  it("hängt Ersatzübungen an, deren Equipment fehlt (Band bei Stange-Equipment)", () => {
+    const liste = tausch("unterwegs", 2, "ZH");
+    expect(liste).toEqual(["ZH-08", "ZH-07", "ZH-02"]);
+    // machbare Ersatzübungen stehen nicht doppelt
+    expect(new Set(liste).size).toBe(liste.length);
+  });
+
+  it("nimmt keine Planübung auf, deren Equipment fehlt, und keine inaktive Ersatzübung", () => {
+    expect(tausch("unterwegs", 2, "ZH")).not.toContain("ZH-03");
+    const ohneBand = ECHTER_KATALOG.map((u) => (u.id === "ZH-02" ? { ...u, aktiv: false } : u));
+    expect(tausch("unterwegs", 2, "ZH", ohneBand)).toEqual(["ZH-08", "ZH-07"]);
+  });
+
+  it("sortiert die zusätzlichen Ersatzübungen nach Wunschstufe, dann ID", () => {
+    const liste = tausch("unterwegs", 1, "DV");
+    // DV-02 (Band, Stufe 1) ist die einzige zusätzliche; alle machbaren Ersatzübungen davor
+    expect(liste.at(-1)).toBe("DV-02");
+    const rest = tausch("unterwegs", 4, "DV");
+    expect(rest.indexOf("DV-02")).toBe(rest.length - 1);
   });
 });
 

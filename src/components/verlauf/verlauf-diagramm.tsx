@@ -9,7 +9,6 @@ export interface DiagrammPunkt {
   wert: number;
   /** Tooltip-Text, z. B. "12 kg × 10" oder "1.240 kg" */
   label: string;
-  adHoc: boolean;
 }
 
 const TEXT = de.verlauf.diagramm;
@@ -91,7 +90,6 @@ function achsenIndizes(n: number): number[] {
 
 const KLASSE_GITTER = "stroke-line";
 const KLASSE_TEXT = "fill-ink-3";
-const KLASSE_FLAECHE = "fill-surface";
 
 /**
  * Liniendiagramm als Inline-SVG in der Farbe des Bewegungsmusters (Linie, Punkte, sanfte Fläche
@@ -139,8 +137,6 @@ export function VerlaufDiagramm({
     zahl.format(Math.max(...werte)),
     einheit,
   );
-  const hatAdHoc = daten.some((p) => p.adHoc);
-  const hatGeplant = daten.some((p) => !p.adHoc);
 
   return (
     <svg
@@ -181,40 +177,10 @@ export function VerlaufDiagramm({
         );
       })}
 
-      {/* Einheit der Y-Achse und Legende der Punktarten */}
+      {/* Einheit der Y-Achse */}
       <text x={2} y={14} className={KLASSE_TEXT} aria-hidden>
         {einheit}
       </text>
-      <g aria-hidden>
-        {hatAdHoc && (
-          <g transform={`translate(${B - RECHTS - 62} 9)`}>
-            <circle
-              cx={5}
-              cy={0}
-              r={4.5}
-              strokeWidth={2}
-              className={`${KLASSE_FLAECHE} ${KLASSE_LINIE}`}
-            />
-            <text x={15} y={0} dy="0.32em" className={KLASSE_TEXT}>
-              {TEXT.adHoc}
-            </text>
-          </g>
-        )}
-        {hatAdHoc && hatGeplant && (
-          <g transform={`translate(${B - RECHTS - 150} 9)`}>
-            <circle
-              cx={5}
-              cy={0}
-              r={4.5}
-              className={`${farbe.fill} stroke-surface`}
-              strokeWidth={1.5}
-            />
-            <text x={15} y={0} dy="0.32em" className={KLASSE_TEXT}>
-              {TEXT.geplant}
-            </text>
-          </g>
-        )}
-      </g>
 
       {/* X-Beschriftung */}
       {achsenIndizes(n).map((i) => (
@@ -252,30 +218,18 @@ export function VerlaufDiagramm({
         />
       )}
 
-      {/* Punkte: gefüllt = geplant, offen = Ad-hoc */}
+      {/* Punkte */}
       {daten.map((p, i) => (
         <g key={`${p.datum}-${i}`}>
-          <title>
-            {`${formatDatum(p.datum, langesDatum)}: ${p.label}${p.adHoc ? ` (${TEXT.adHoc})` : ""}`}
-          </title>
+          <title>{`${formatDatum(p.datum, langesDatum)}: ${p.label}`}</title>
           <circle cx={px(i)} cy={py(p.wert)} r={treffer} fill="transparent" />
-          {p.adHoc ? (
-            <circle
-              cx={px(i)}
-              cy={py(p.wert)}
-              r={radius}
-              strokeWidth={2}
-              className={`${KLASSE_FLAECHE} ${KLASSE_LINIE}`}
-            />
-          ) : (
-            <circle
-              cx={px(i)}
-              cy={py(p.wert)}
-              r={radius}
-              strokeWidth={2}
-              className={`${farbe.fill} stroke-surface`}
-            />
-          )}
+          <circle
+            cx={px(i)}
+            cy={py(p.wert)}
+            r={radius}
+            strokeWidth={2}
+            className={`${farbe.fill} stroke-surface`}
+          />
         </g>
       ))}
     </svg>

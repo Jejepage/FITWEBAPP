@@ -10,9 +10,9 @@ import { ladePlanStandard } from "@/server/plan-defaults";
 
 /** Nur Felder des Plan-Formulars; keine internen Felder des Frameworks ($ACTION_…). */
 const FORMULARFELD =
-  /^(profil|start|stufe_[A-Z]{2}|einheiten|zusatzblock|seed|basis|vorgaenger|gesendet|slot_[AB]-[12Z]-[1-3])$/;
+  /^(equipment|gewichte_(?:kurzhanteln|kettlebell)|start|stufe_[A-Z]{2}|einheiten|zusatzblock|seed|basis|vorgaenger|gesendet|slot_[AB]-[12Z]-[1-3])$/;
 
-type SeitenFehler = PlanFehlerCode | "vorschau_veraltet";
+type SeitenFehler = PlanFehlerCode | "vorschau_veraltet" | "gewichte_ungueltig";
 
 /** Zurück zur Vorschau mit allen Eingaben und einer Fehlermeldung (als Code, nie als Freitext). */
 function zurueckMitFehler(fd: FormData, code: SeitenFehler): never {
@@ -26,20 +26,22 @@ function zurueckMitFehler(fd: FormData, code: SeitenFehler): never {
 
 export async function planSpeichern(fd: FormData): Promise<void> {
   const standard = ladePlanStandard(db);
-  if (!standard) zurueckMitFehler(fd, "profil_unbekannt");
-
   const roh = parsePlanRohwerte(quelleAusFormData(fd));
   const { werte, fehler, vorschauVeraltet } = loesePlanWerteAuf(
     { ...roh, aktion: "aktualisieren" },
     standard,
   );
   if (fehler.startDatum) zurueckMitFehler(fd, "datum_ungueltig");
-  // Profil, Stufen usw. wurden nach der letzten Vorschau geändert: nicht stillschweigend etwas
+  if (fehler.gewichte_kurzhanteln || fehler.gewichte_kettlebell) {
+    zurueckMitFehler(fd, "gewichte_ungueltig");
+  }
+  // Equipment, Stufen usw. wurden nach der letzten Vorschau geändert: nicht stillschweigend etwas
   // anderes speichern, als der Nutzer gesehen hat.
   if (vorschauVeraltet) zurueckMitFehler(fd, "vorschau_veraltet");
 
   const r = createPlan(db, {
-    profilId: werte.profilId,
+    equipment: werte.equipment,
+    gewichte: werte.gewichte,
     startDatum: werte.startDatum,
     einheitenProWoche: werte.einheitenProWoche,
     zusatzblock: werte.zusatzblock,

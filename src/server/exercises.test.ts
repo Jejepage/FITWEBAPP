@@ -4,6 +4,7 @@ import { exercise } from "@/db/schema";
 import { neueSeedDb } from "@/db/test-utils";
 import type { Db } from "@/db/types";
 import { exerciseZuFormWerte, leereFormWerte } from "@/domain/exercise-form";
+import { testProfile } from "@/domain/test-katalog";
 import { istStandardYoutubeUrl } from "@/domain/youtube";
 import {
   alleUebungen,
@@ -16,7 +17,6 @@ import {
   setPruefstatus,
   updateExercise,
 } from "./exercises";
-import { getProfile, listProfiles } from "./profiles";
 
 let db: Db;
 beforeEach(() => {
@@ -24,6 +24,7 @@ beforeEach(() => {
 });
 
 const ids = (l: { id: string }[]) => l.map((e) => e.id);
+const equipmentVon = (key: string) => testProfile.find((p) => p.seedKey === key)!.equipment;
 
 describe("listExercises", () => {
   it("liefert alle 76 sortiert nach Muster, Stufe, ID", () => {
@@ -69,11 +70,25 @@ describe("listExercises", () => {
     ).toBe(true);
   });
 
-  it("Profil 'Unterwegs' (nur Stange) liefert genau die machbaren Übungen", () => {
-    const unterwegs = listProfiles(db).find((p) => p.seedKey === "unterwegs")!;
-    const { items } = listExercises(db, {
-      profilEquipment: unterwegs.equipment,
-    });
+  it("filtert nach Ersatzübungen; der Seed kennzeichnet reines Körpergewicht und Band", () => {
+    const ersatz = ids(listExercises(db, { ersatz: true }).items);
+    expect(ersatz).toContain("DH-04"); // Liegestütz
+    expect(ersatz).toContain("ZH-02"); // Rudern mit Band
+    expect(ersatz).toContain("RU-03"); // Plank
+    expect(ersatz).toContain("KN-05"); // Split Squat ohne Gewicht
+    expect(ersatz).toContain("RU-09"); // Pallof Press mit Band
+    // mit Kurzhanteln und Klimmzüge an der Stange: Planübung
+    expect(ersatz).not.toContain("KN-10");
+    expect(ersatz).not.toContain("ZV-06");
+    // braucht ein Gerät
+    expect(ersatz).not.toContain("KN-04");
+    const plan = ids(listExercises(db, { ersatz: false }).items);
+    expect(plan).toContain("KN-04");
+    expect(ersatz.length + plan.length).toBe(76);
+  });
+
+  it("Equipment 'nur Stange' liefert genau die machbaren Übungen", () => {
+    const { items } = listExercises(db, { machbarMit: equipmentVon("unterwegs") });
     const nach = (m: string) => ids(items.filter((e) => e.muster === m));
     expect(nach("ZH")).toEqual(["ZH-08", "ZH-07"]);
     expect(nach("KN")).toEqual(["KN-01", "KN-03", "KN-05", "KN-11", "KN-07"]);
@@ -85,11 +100,8 @@ describe("listExercises", () => {
     ).toBe(true);
   });
 
-  it("Profil 'Studio' erfüllt jede Übung", () => {
-    const studio = listProfiles(db).find((p) => p.seedKey === "studio")!;
-    expect(
-      listExercises(db, { profilEquipment: studio.equipment }).items,
-    ).toHaveLength(76);
+  it("Equipment 'alles' erfüllt jede Übung", () => {
+    expect(listExercises(db, { machbarMit: equipmentVon("studio") }).items).toHaveLength(76);
   });
 
   it("blendet inaktive Übungen standardmäßig aus", () => {
@@ -111,10 +123,9 @@ describe("listExercises", () => {
   });
 
   it("kombiniert Filter", () => {
-    const zuhause = listProfiles(db).find((p) => p.seedKey === "zuhause")!;
     const r = listExercises(db, {
       muster: "DH",
-      profilEquipment: zuhause.equipment,
+      machbarMit: equipmentVon("zuhause"),
       stufe: 2,
     });
     expect(ids(r.items)).toEqual(["DH-03", "DH-05"]);
@@ -134,10 +145,10 @@ describe("listExercises: Filter der Tabelle", () => {
     expect(listExercises(db, { q: "gibt es nicht" }).items).toHaveLength(0);
   });
 
-  it("Gerät: nur Übungen, die es in irgendeiner Gruppe verlangen", () => {
+  it("Gerät: nur Übungen, die es verlangen", () => {
     const r = listExercises(db, { geraet: "stange" }).items;
     expect(r.length).toBeGreaterThan(0);
-    expect(r.every((e) => e.equipment.some((g) => g.includes("stange")))).toBe(
+    expect(r.every((e) => e.equipment.includes("stange"))).toBe(
       true,
     );
     expect(
@@ -235,6 +246,16 @@ describe("createExercise", () => {
     ausfuehrung: ["a", "b", "c"],
     fehler: ["x", "y"],
     hinweise: "Hinweis.",
+  });
+
+  it("übernimmt das Ersatz-Kennzeichen beim Anlegen und Bearbeiten", () => {
+    const r = createExercise(db, "KN", { ...gueltig(), ersatz: true });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(getExercise(db, r.id)!.ersatz).toBe(true);
+    const werte = exerciseZuFormWerte(getExercise(db, r.id)!);
+    expect(updateExercise(db, r.id, { ...werte, ersatz: false }).ok).toBe(true);
+    expect(getExercise(db, r.id)!.ersatz).toBe(false);
   });
 
   it("vergibt die nächste freie ID und speichert alles", () => {
@@ -512,14 +533,5 @@ describe("setAktiv / setPruefstatus", () => {
     expect(getExercise(db, "KN-01")!.aktiv).toBe(false);
     expect(getExercise(db, "KN-02")!.aktiv).toBe(true);
     expect(setPruefstatus(db, "XX-00", "geprueft")).toBe(false);
-  });
-});
-
-describe("Profile", () => {
-  it("listet die drei Standardprofile", () => {
-    const p = listProfiles(db);
-    expect(p.map((x) => x.name)).toEqual(["Studio", "Zuhause", "Unterwegs"]);
-    expect(getProfile(db, p[1]!.id)!.name).toBe("Zuhause");
-    expect(getProfile(db, 9999)).toBeNull();
   });
 });

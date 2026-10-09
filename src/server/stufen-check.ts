@@ -19,7 +19,7 @@ export function istBlockFertig(db: Db, plan: Pick<Plan, "id" | "einheitenProWoch
   return zaehleAbgeschlosseneEinheiten(db, plan.id) >= WOCHEN_PRO_BLOCK * plan.einheitenProWoche;
 }
 
-/** Empfehlung je Muster (acht Einträge) auf Basis der Woche 5 und 6 des Plans, ohne Ad-hoc. */
+/** Empfehlung je Muster (acht Einträge) auf Basis der Woche 5 und 6 des Plans. */
 export function ladeStufenCheck(db: Db, plan: Pick<Plan, "id" | "stufen">): StufenCheckErgebnis[] {
   const katalog = new Map(alleUebungen(db).map((u) => [u.id, u]));
   const zeilen = db
@@ -31,7 +31,6 @@ export function ladeStufenCheck(db: Db, plan: Pick<Plan, "id" | "stufen">): Stuf
       and(
         eq(workout.planId, plan.id),
         eq(workout.status, "abgeschlossen"),
-        eq(workout.adHoc, false),
         inArray(workout.woche, [...STUFEN_CHECK_WOCHEN]),
         eq(setLog.erledigt, true),
         // Nur die geplante Übung des Slots: Ersatzübungen können eine andere Stufe haben und

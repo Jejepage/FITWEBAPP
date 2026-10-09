@@ -3,7 +3,7 @@ import { IconKreisHaken, IconWarnung } from "@/components/einstellungen/icons-ei
 import { IconHaken } from "@/components/icons";
 import { bannerFehler, bannerOk, hilfstext, kopfzeileKlein } from "@/components/ui";
 
-// Gemeinsame Bausteine für alle Formulare (Katalog, Einstellungen, Profile, Plan).
+// Gemeinsame Bausteine für alle Formulare (Katalog, Einstellungen, Plan, Equipment).
 // Rein optische Gestaltung: Props und Exporte bleiben kompatibel, neue Props sind optional.
 
 /** Roter Rahmen am Eingabefeld, wenn das Feld einen Fehler hat (Kind-Elemente von Feld). */

@@ -14,7 +14,7 @@
     "db:setup": "tsx src/db/migrate.ts",
     "katalog:seed-export": "tsx scripts/katalog-seed-export.ts",
     "check:standalone": "node scripts/check-standalone.mjs",
-    "e2e": "node e2e/katalog.mjs && node e2e/katalog-tabelle.mjs && node e2e/einstellungen.mjs && node e2e/plan.mjs && node e2e/training.mjs && node e2e/verlauf.mjs && node e2e/adhoc-backup.mjs && node e2e/auth.mjs && node e2e/pwa.mjs && node e2e/video.mjs"
+    "e2e": "node e2e/katalog.mjs && node e2e/katalog-tabelle.mjs && node e2e/einstellungen.mjs && node e2e/plan.mjs && node e2e/equipment.mjs && node e2e/training.mjs && node e2e/verlauf.mjs && node e2e/backup.mjs && node e2e/auth.mjs && node e2e/pwa.mjs && node e2e/video.mjs"
   },
   "engines": {
     "node": ">=22"

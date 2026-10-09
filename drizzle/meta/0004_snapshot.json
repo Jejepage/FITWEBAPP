@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "993761f3-af45-41ee-ad85-d31c5ccecaa8",
+  "id": "5ca12aef-cab3-4209-a476-ffc8d5fb87ff",
   "prevId": "f3feb57b-a6c1-4c64-84cc-e1154afb6e84",
   "tables": {
     "equipment_profile": {
@@ -111,6 +111,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "optionale_last": {
+          "name": "optionale_last",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "leichter_id": {
           "name": "leichter_id",
           "type": "text",
@@ -203,6 +210,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'zu_pruefen'"
+        },
+        "ersatz": {
+          "name": "ersatz",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         }
       },
       "indexes": {
