@@ -14,7 +14,6 @@ import {
   type ParseErgebnis,
   type PlanSlotZeile,
   type PlanZeile,
-  type ProfilZeile,
 } from "./backup-types";
 import { MAX_ANZAHL_GEWICHTE, MAX_GEWICHT_KG } from "./gewichte";
 import { slotKey, slotVorlageVonKey } from "./plan-types";
@@ -26,7 +25,6 @@ import { parseVideoEingabe } from "./youtube";
 /** Obergrenzen der Zeilenzahlen je Tabelle (Schutz vor absurd großen Dateien). */
 export const BACKUP_ZEILEN_LIMIT = {
   uebungen: 500,
-  profile: 50,
   plaene: 200,
   slotsJePlan: 16,
   planSlots: 200 * 16,
@@ -56,21 +54,11 @@ const einheitenProWocheSchema = z
   .number()
   .int()
   .refine((n) => n === 2 || n === 3, "muss 2 oder 3 sein");
-const nichtLeerSchema = z.string().refine((s) => s.trim() !== "", "darf nicht leer sein");
 
 const gewichteSchema = z.partialRecord(
   equipmentArtSchema,
   z.array(z.number().gt(0).max(MAX_GEWICHT_KG)).max(MAX_ANZAHL_GEWICHTE),
 );
-
-export const profilZeileSchema = z.object({
-  id: idSchema,
-  seedKey: z.string().min(1).nullable(),
-  name: nichtLeerSchema,
-  equipment: z.array(equipmentArtSchema),
-  gewichte: gewichteSchema,
-  istStandard: z.boolean(),
-});
 
 export const einstellungenZeileSchema = z.object({
   stufen: stufenSchema,
@@ -82,7 +70,8 @@ export const einstellungenZeileSchema = z.object({
 
 export const planZeileSchema = z.object({
   id: idSchema,
-  profilId: idSchema,
+  equipment: z.array(equipmentArtSchema),
+  gewichte: gewichteSchema,
   startDatum: datumSchema,
   einheitenProWoche: einheitenProWocheSchema,
   zusatzblock: z.boolean(),
@@ -110,8 +99,6 @@ export const einheitZeileSchema = z.object({
   datum: datumSchema,
   einheit: z.enum(["A", "B"]),
   woche: z.number().int().min(1).max(6),
-  profilId: idSchema,
-  adHoc: z.boolean(),
   zusatzblock: z.boolean(),
   status: z.enum(["laufend", "abgeschlossen", "abgebrochen"]),
   ersetzungen: z
@@ -179,7 +166,6 @@ export const katalogDatenSchema = z.object({
 });
 
 export const allesDatenSchema = katalogDatenSchema.extend({
-  profile: z.array(profilZeileSchema).max(BACKUP_ZEILEN_LIMIT.profile),
   einstellungen: einstellungenZeileSchema,
   plaene: z.array(planZeileSchema).max(BACKUP_ZEILEN_LIMIT.plaene),
   planSlots: z.array(planSlotZeileSchema).max(BACKUP_ZEILEN_LIMIT.planSlots),
@@ -228,7 +214,6 @@ class Meldungen {
 
 const TABELLEN = {
   uebungen: { plural: "Übungen", einzahl: "Übung" },
-  profile: { plural: "Profile", einzahl: "Profil" },
   plaene: { plural: "Pläne", einzahl: "Plan" },
   planSlots: { plural: "Plan-Slots", einzahl: "Plan-Slot" },
   einheiten: { plural: "Einheiten", einzahl: "Einheit" },
@@ -400,36 +385,7 @@ function pruefeKatalog(daten: KatalogDaten, m: Meldungen): Map<string, BackupUeb
   return nachId;
 }
 
-function pruefeProfile(profile: readonly ProfilZeile[], m: Meldungen): Map<number, ProfilZeile> {
-  const nachId = indexiere(
-    profile,
-    (p) => p.id,
-    (p) => `Profil ${p.id}`,
-    m,
-  );
-  const seedKeys = new Set<string>();
-  for (const p of profile) {
-    if (p.seedKey === null) continue;
-    if (seedKeys.has(p.seedKey))
-      m.add(`Profil ${p.id}: seedKey „${p.seedKey}“ kommt mehrfach vor.`);
-    else seedKeys.add(p.seedKey);
-  }
-  const standard = profile.filter((p) => p.istStandard);
-  if (profile.length > 0 && standard.length === 0) {
-    m.add("Profile: Kein Profil ist als Standard markiert.");
-  } else if (standard.length > 1) {
-    m.add(
-      `Profile: Mehrere Profile sind als Standard markiert (${standard.map((p) => p.id).join(", ")}).`,
-    );
-  }
-  return nachId;
-}
-
-function pruefePlaene(
-  plaene: readonly PlanZeile[],
-  profile: ReadonlyMap<number, ProfilZeile>,
-  m: Meldungen,
-): Map<number, PlanZeile> {
+function pruefePlaene(plaene: readonly PlanZeile[], m: Meldungen): Map<number, PlanZeile> {
   const nachId = indexiere(
     plaene,
     (p) => p.id,
@@ -437,7 +393,6 @@ function pruefePlaene(
     m,
   );
   for (const p of plaene) {
-    if (!profile.has(p.profilId)) m.add(`Plan ${p.id}: Profil ${p.profilId} existiert nicht.`);
     if (p.vorgaengerId === p.id) m.add(`Plan ${p.id}: Der Plan ist sein eigener Vorgänger.`);
     else if (p.vorgaengerId !== null && !nachId.has(p.vorgaengerId)) {
       m.add(`Plan ${p.id}: Vorgänger ${p.vorgaengerId} existiert nicht.`);
@@ -495,8 +450,7 @@ function pruefeSlots(
 
 function pruefeAlles(daten: AllesDaten, m: Meldungen): void {
   const uebungen = pruefeKatalog(daten, m);
-  const profile = pruefeProfile(daten.profile, m);
-  const plaene = pruefePlaene(daten.plaene, profile, m);
+  const plaene = pruefePlaene(daten.plaene, m);
   const slots = pruefeSlots(daten.planSlots, plaene, uebungen, m);
 
   const einheiten = indexiere(
@@ -508,7 +462,6 @@ function pruefeAlles(daten: AllesDaten, m: Meldungen): void {
   for (const e of daten.einheiten) {
     const name = `Einheit ${e.id}`;
     if (!plaene.has(e.planId)) m.add(`${name}: Plan ${e.planId} existiert nicht.`);
-    if (!profile.has(e.profilId)) m.add(`${name}: Profil ${e.profilId} existiert nicht.`);
     for (const [schluessel, uebungId] of Object.entries(e.ersetzungen)) {
       const slot = slots.get(Number(schluessel));
       if (!slot || slot.planId !== e.planId) {
@@ -576,7 +529,10 @@ function pruefeKopf(roh: Record<string, unknown>, erwartet?: BackupArt): string[
   else if (roh.version !== BACKUP_VERSION) {
     fehler.push(
       `Backup-Version ${anzeige(roh.version)} wird nicht unterstützt ` +
-        `(diese App liest Version ${BACKUP_VERSION}).`,
+        `(diese App liest Version ${BACKUP_VERSION}).` +
+        (roh.version === 1
+          ? " Sicherungen aus der Zeit mit Equipment-Profilen lassen sich nicht mehr einlesen."
+          : ""),
     );
   }
   const art = roh.art;
@@ -597,7 +553,6 @@ const TABELLEN_LIMITS: Record<BackupArt, readonly (readonly [string, string, num
   katalog: [["uebungen", "Übungen", BACKUP_ZEILEN_LIMIT.uebungen]],
   alles: [
     ["uebungen", "Übungen", BACKUP_ZEILEN_LIMIT.uebungen],
-    ["profile", "Profile", BACKUP_ZEILEN_LIMIT.profile],
     ["plaene", "Pläne", BACKUP_ZEILEN_LIMIT.plaene],
     ["planSlots", "Plan-Slots", BACKUP_ZEILEN_LIMIT.planSlots],
     ["einheiten", "Einheiten", BACKUP_ZEILEN_LIMIT.einheiten],

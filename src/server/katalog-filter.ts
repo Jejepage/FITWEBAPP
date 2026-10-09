@@ -23,7 +23,8 @@ export interface FilterAuswahl {
   einseitig?: boolean;
   /** true = nur Ersatzübungen, false = nur Planübungen */
   ersatz?: boolean;
-  profilId?: number;
+  /** Nur Übungen, die mit dem Equipment des aktiven Plans machbar sind */
+  machbar?: boolean;
   /** Inaktive Übungen mit anzeigen (aktiv=alle oder das ältere inaktive=1) */
   inaktive: boolean;
   /** Nur inaktive Übungen (aktiv=inaktiv) */
@@ -63,7 +64,6 @@ export function parseKatalogFilter(sp: SearchParams): FilterAuswahl {
   const stufe = Number(erster(sp.stufe));
   const einseitig = erster(sp.einseitig);
   const ersatz = erster(sp.ersatz);
-  const profil = Number(erster(sp.profil));
   const aktiv = erster(sp.aktiv);
   const status = aus(PRUEFSTATI, erster(sp.status));
   const video = erster(sp.video);
@@ -76,7 +76,7 @@ export function parseKatalogFilter(sp: SearchParams): FilterAuswahl {
     einseitig:
       einseitig === "ja" ? true : einseitig === "nein" ? false : undefined,
     ersatz: ersatz === "ja" ? true : ersatz === "nein" ? false : undefined,
-    profilId: Number.isInteger(profil) && profil > 0 ? profil : undefined,
+    machbar: erster(sp.machbar) === "ja" ? true : undefined,
     inaktive: erster(sp.inaktive) === "1" || aktiv === "alle",
     nurInaktive: aktiv === "inaktiv" ? true : undefined,
     nurZuPruefen: erster(sp.offen) === "1" || status === "zu_pruefen",
@@ -102,7 +102,7 @@ export function hatFilter(f: FilterAuswahl): boolean {
     f.stufe !== undefined ||
     f.einseitig !== undefined ||
     f.ersatz !== undefined ||
-    f.profilId !== undefined ||
+    f.machbar !== undefined ||
     f.inaktive ||
     f.nurInaktive === true ||
     f.nurZuPruefen ||
@@ -126,7 +126,7 @@ export function filterParameter(f: FilterAuswahl): URLSearchParams {
   if (f.einseitig !== undefined)
     p.set("einseitig", f.einseitig ? "ja" : "nein");
   if (f.ersatz !== undefined) p.set("ersatz", f.ersatz ? "ja" : "nein");
-  if (f.profilId !== undefined) p.set("profil", String(f.profilId));
+  if (f.machbar) p.set("machbar", "ja");
   if (f.nurInaktive) p.set("aktiv", "inaktiv");
   else if (f.inaktive) p.set("aktiv", "alle");
   if (f.pruefstatus) p.set("status", f.pruefstatus);

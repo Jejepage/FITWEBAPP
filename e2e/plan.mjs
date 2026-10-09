@@ -12,6 +12,24 @@ import {
 
 const schritt = (s) => console.log(`  ${s}`);
 
+/** Haken des Equipments setzen: genau die genannten Arten sind angekreuzt. */
+async function equipmentWaehlen(page, namen) {
+  const alle = [
+    "Maschinen/Kabelzug",
+    "Langhantel",
+    "Kurzhanteln",
+    "Kettlebell",
+    "Bank",
+    "Stange",
+    "Band",
+  ];
+  for (const n of alle) {
+    const box = page.getByRole("checkbox", { name: n, exact: true });
+    if (namen.includes(n)) await box.check();
+    else await box.uncheck();
+  }
+}
+
 /** Werte aller Slot-Auswahllisten als { "A-1-1": "KN-03", … } */
 const slotWerte = (page) =>
   page.evaluate(() =>
@@ -54,14 +72,27 @@ async function ablauf(browser, dbPfad) {
   await page.getByRole("heading", { name: "Neuer Plan", level: 1 }).waitFor();
   schritt("Leerzustand führt zu 'Neuer Plan'");
 
-  // 2. Vorschau mit Standardwerten: 16 Slots, Studio, Zusatzblock aus
+  // 2. Vorschau mit Standardwerten: 16 Slots, Voreinstellung fürs Equipment, Zusatzblock aus
   assert.equal(await page.locator("select[name^=slot_]").count(), 16);
+  for (const n of ["Kurzhanteln", "Kettlebell", "Bank", "Stange"]) {
+    assert.ok(
+      await page.getByRole("checkbox", { name: n, exact: true }).isChecked(),
+      `${n} ist vorausgewählt`,
+    );
+  }
+  for (const n of ["Maschinen/Kabelzug", "Langhantel", "Band"]) {
+    assert.ok(
+      !(await page.getByRole("checkbox", { name: n, exact: true }).isChecked()),
+      `${n} ist nicht vorausgewählt`,
+    );
+  }
   assert.equal(
-    await page
-      .getByLabel("Equipment-Profil")
-      .locator("option:checked")
-      .innerText(),
-    "Studio",
+    await page.getByLabel("Gewichte Kurzhanteln (kg)").inputValue(),
+    "2–20/2",
+  );
+  assert.equal(
+    await page.getByLabel("Gewichte Kettlebell (kg)").inputValue(),
+    "12, 16",
   );
   assert.equal(
     await page.getByRole("checkbox", { name: /Zusatzblock/ }).isChecked(),
@@ -74,25 +105,23 @@ async function ablauf(browser, dbPfad) {
   );
   await keinHorizontalScroll("Vorschau");
   await shot("2-vorschau");
-  schritt("Vorschau mit 16 Auswahllisten, Studio, Zusatzblock aus");
+  schritt("Vorschau mit 16 Auswahllisten, Equipment und Gewichte vorbelegt, Zusatzblock aus");
 
-  // 3. Profil Unterwegs: ZH nur eine Übung → in A und B gleich, mit Hinweis
-  await page
-    .getByLabel("Equipment-Profil")
-    .selectOption({ label: "Unterwegs" });
+  // 3. Nur Stange: ZH nur eine Übung → in A und B gleich, mit Hinweis
+  await equipmentWaehlen(page, ["Stange"]);
   await aktualisieren();
   await page
     .getByText(
-      "Ziehen horizontal: Mit diesem Profil gibt es nur eine Übung, sie steht in A und B.",
+      "Ziehen horizontal: Mit diesem Equipment gibt es nur eine Übung, sie steht in A und B.",
     )
     .waitFor();
   let werte = await slotWerte(page);
   assert.equal(werte["A-1-3"], "ZH-07");
   assert.equal(werte["B-2-3"], "ZH-07");
-  assert.ok(page.url().includes("profil="));
-  // Keine Mischpläne: Die Studio-Wahl aus der vorigen Vorschau darf nicht in den neuen Vorschlag wandern.
+  assert.ok(page.url().includes("equipment=stange"));
+  // Keine Mischpläne: Die Wahl aus der vorigen Vorschau darf nicht in den neuen Vorschlag wandern.
   assert.equal(await page.getByText(/obwohl es Alternativen gibt/).count(), 0);
-  const nachProfilwechsel = await slotWerte(page);
+  const nachEquipmentwechsel = await slotWerte(page);
   for (const [a, b] of [
     ["A-1-1", "B-2-2"], // KN
     ["A-2-1", "B-1-1"], // HB
@@ -103,16 +132,22 @@ async function ablauf(browser, dbPfad) {
     ["A-Z-2", "B-Z-2"], // RU
   ]) {
     assert.notEqual(
-      nachProfilwechsel[a],
-      nachProfilwechsel[b],
+      nachEquipmentwechsel[a],
+      nachEquipmentwechsel[b],
       `A und B verschieden (${a}/${b})`,
     );
   }
-  await shot("3-unterwegs");
-  schritt("Unterwegs: ZH-07 in A und B mit Hinweis");
+  // Ersatzübungen (Körpergewicht) füllen auf, wo es mit der Stange nichts anderes gibt
+  assert.deepEqual(
+    [werte["A-1-2"], werte["B-1-2"]].sort(),
+    ["DH-02", "DH-04"],
+    "DH nur mit Ersatzübungen (Liegestütz)",
+  );
+  await shot("3-nur-stange");
+  schritt("Nur Stange: ZH-07 in A und B mit Hinweis, Ersatzübungen füllen auf");
 
-  // Profil wechseln und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
+  // Equipment ändern und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
+  await equipmentWaehlen(page, ["Stange", "Maschinen/Kabelzug"]);
   await page
     .getByRole("button", { name: "Plan speichern und aktivieren" })
     .click();
@@ -131,18 +166,16 @@ async function ablauf(browser, dbPfad) {
       .get().c,
     0,
   );
-  await page
-    .getByLabel("Equipment-Profil")
-    .selectOption({ label: "Unterwegs" });
+  await equipmentWaehlen(page, ["Stange"]);
   await aktualisieren();
-  schritt("Profilwechsel ohne Aktualisieren lässt sich nicht speichern");
+  schritt("Equipmentwechsel ohne Aktualisieren lässt sich nicht speichern");
 
   // 4. Manuell tauschen und aktualisieren: Wahl bleibt erhalten
   const kn = page.locator("select[name='slot_A-1-1']");
   const optionen = await kn
     .locator("option")
     .evaluateAll((o) => o.map((x) => x.value));
-  assert.ok(optionen.length >= 3, "mehrere Kandidaten für KN mit Unterwegs");
+  assert.ok(optionen.length >= 3, "mehrere Kandidaten für KN mit nur Stange");
   const andere = optionen.find((o) => o !== werte["A-1-1"]);
   await kn.selectOption(andere);
   await aktualisieren();
@@ -165,8 +198,16 @@ async function ablauf(browser, dbPfad) {
   );
   schritt("'Neu vorschlagen' verwirft die manuelle Wahl");
 
-  // 7. 'Anders mischen' ändert die Belegung (Studio hat gleichwertige Kandidaten)
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
+  // 7. 'Anders mischen' ändert die Belegung (mit allem Equipment gibt es gleichwertige Kandidaten)
+  await equipmentWaehlen(page, [
+    "Maschinen/Kabelzug",
+    "Langhantel",
+    "Kurzhanteln",
+    "Kettlebell",
+    "Bank",
+    "Stange",
+    "Band",
+  ]);
   await aktualisieren();
   const vorher = JSON.stringify(await slotWerte(page));
   let geaendert = false;
@@ -178,30 +219,13 @@ async function ablauf(browser, dbPfad) {
   assert.ok(geaendert, "Mischen verändert mindestens einmal die Belegung");
   schritt("'Anders mischen' ändert die Belegung");
 
-  // 8. Profil ohne Equipment: fehlende Muster → Fehlermeldung, kein Speichern
-  await page.goto(`${BASE}/einstellungen/profile/neu`);
-  await page.getByLabel("Name").fill("Leer");
-  await page.getByRole("button", { name: "Speichern" }).click();
-  await page.getByRole("heading", { name: "Equipment-Profile" }).waitFor();
+  // 8. Kein Equipment: fehlende Muster → Fehlermeldung, kein Speichern
   await page.goto(`${BASE}/plan/neu`);
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Leer" });
+  await equipmentWaehlen(page, []);
   await aktualisieren();
   await page
     .getByRole("alert")
-    .filter({ hasText: "Mit diesem Profil gibt es keine Übung für" })
-    .waitFor();
-  // Ausweg aus dem Fehlerzustand: Profil wechseln und neu abschicken (Button steckt in der Meldung)
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
-  await page
-    .getByRole("alert")
-    .getByRole("button", { name: "Vorschau aktualisieren" })
-    .click();
-  await page.locator("select[name^=slot_]").first().waitFor();
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Leer" });
-  await aktualisieren();
-  await page
-    .getByRole("alert")
-    .filter({ hasText: "Mit diesem Profil gibt es keine Übung für" })
+    .filter({ hasText: "Mit diesem Equipment gibt es keine Übung für" })
     .waitFor();
   assert.equal(
     await page
@@ -211,9 +235,33 @@ async function ablauf(browser, dbPfad) {
   );
   assert.equal(await page.locator("select[name^=slot_]").count(), 0);
   await shot("8-fehlende-muster");
-  schritt("Profil ohne Equipment: Fehlermeldung, kein Speichern möglich");
+  // Ausweg aus dem Fehlerzustand: Equipment ergänzen und neu abschicken (Button steckt in der Meldung)
+  await equipmentWaehlen(page, ["Stange"]);
+  await page
+    .getByRole("alert")
+    .getByRole("button", { name: "Vorschau aktualisieren" })
+    .click();
+  await page.locator("select[name^=slot_]").first().waitFor();
+  schritt("Kein Equipment: Fehlermeldung, kein Speichern möglich");
 
-  // 9. Plan speichern (Studio, 3 Einheiten, Zusatzblock an)
+  // 8b. Ungültige Hantelgewichte werden am Feld gemeldet und lassen sich nicht speichern
+  await page.goto(`${BASE}/plan/neu`);
+  await page.getByLabel("Gewichte Kurzhanteln (kg)").fill("12,16");
+  await aktualisieren();
+  await page.getByText(/ist unklar/).first().waitFor();
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page.getByText("Bitte die Hantelgewichte prüfen.").waitFor();
+  assert.equal(
+    new Database(dbPfad, { readonly: true })
+      .prepare("select count(*) c from plan")
+      .get().c,
+    0,
+  );
+  schritt("Ungültige Hantelgewichte: Fehler am Feld, nichts gespeichert");
+
+  // 9. Plan speichern (Voreinstellung, 3 Einheiten, Zusatzblock an)
   await page.goto(`${BASE}/plan/neu`);
   await page.getByLabel("3 Einheiten pro Woche").check();
   await page.getByRole("checkbox", { name: /Zusatzblock/ }).check();
@@ -232,6 +280,7 @@ async function ablauf(browser, dbPfad) {
   await page.getByText("3 Einheiten pro Woche").first().waitFor();
   await page.getByText("Reihenfolge im Wechsel: A-B-A, dann B-A-B").waitFor();
   await page.getByText("Zusatzblock: ja").waitFor();
+  await page.getByText("Kurzhanteln, Kettlebell, Bank, Stange").waitFor();
   await keinHorizontalScroll("Plan");
   await shot("9-plan-aktiv");
   const sqlite = db();
@@ -245,17 +294,22 @@ async function ablauf(browser, dbPfad) {
       s.exercise_id,
     );
   const ersterPlan = sqlite
-    .prepare("select id, einheiten_pro_woche, zusatzblock, status from plan")
+    .prepare(
+      "select id, einheiten_pro_woche, zusatzblock, status, equipment, gewichte from plan",
+    )
     .get();
   assert.deepEqual(ersterPlan, {
     id: ersterPlan.id,
     einheiten_pro_woche: 3,
     zusatzblock: 1,
     status: "aktiv",
+    equipment: '["kurzhanteln","kettlebell","bank","stange"]',
+    gewichte:
+      '{"kurzhanteln":[2,4,6,8,10,12,14,16,18,20],"kettlebell":[12,16]}',
   });
   sqlite.close();
   schritt(
-    "Plan gespeichert: 16 Slots wie in der Vorschau, Einstellungen übernommen",
+    "Plan gespeichert: 16 Slots wie in der Vorschau, Equipment und Einstellungen übernommen",
   );
 
   // 10. Übungsnamen im Plan führen in den Katalog
@@ -274,7 +328,12 @@ async function ablauf(browser, dbPfad) {
     (v) => !vorherige.has(v),
   ).length;
   assert.ok(neuAnzahl > 0, "Folgeblock enthält mindestens eine neue Übung");
-  await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });
+  // Das Equipment des Vorgängers ist vorausgewählt
+  assert.ok(await page.getByRole("checkbox", { name: "Stange", exact: true }).isChecked());
+  assert.ok(await page.getByRole("checkbox", { name: "Bank", exact: true }).isChecked());
+  assert.ok(
+    !(await page.getByRole("checkbox", { name: "Langhantel", exact: true }).isChecked()),
+  );
   await page
     .getByRole("button", { name: "Plan speichern und aktivieren" })
     .click();

@@ -12,7 +12,7 @@ describe("parseKatalogFilter", () => {
         muster: "ZV",
         stufe: "3",
         einseitig: "ja",
-        profil: "2",
+        machbar: "ja",
         inaktive: "1",
         offen: "1",
       }),
@@ -20,7 +20,7 @@ describe("parseKatalogFilter", () => {
       muster: "ZV",
       stufe: 3,
       einseitig: true,
-      profilId: 2,
+      machbar: true,
       inaktive: true,
       nurZuPruefen: true,
       pruefstatus: "zu_pruefen",
@@ -32,7 +32,7 @@ describe("parseKatalogFilter", () => {
       muster: "XX",
       stufe: "9",
       einseitig: "vielleicht",
-      profil: "abc",
+      machbar: "vielleicht",
     });
     expect(f).toEqual({ inaktive: false, nurZuPruefen: false });
     expect(parseKatalogFilter({ muster: ["KN", "HB"] }).muster).toBe("KN");
@@ -120,7 +120,7 @@ describe("neue Filter der Tabelle", () => {
       stufe: "3",
       einseitig: "nein",
       ersatz: "ja",
-      profil: "2",
+      machbar: "ja",
       aktiv: "alle",
       status: "zu_pruefen",
       q: "klimm",

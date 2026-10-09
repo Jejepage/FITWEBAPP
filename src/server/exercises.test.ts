@@ -4,6 +4,7 @@ import { exercise } from "@/db/schema";
 import { neueSeedDb } from "@/db/test-utils";
 import type { Db } from "@/db/types";
 import { exerciseZuFormWerte, leereFormWerte } from "@/domain/exercise-form";
+import { testProfile } from "@/domain/test-katalog";
 import {
   alleUebungen,
   createExercise,
@@ -15,7 +16,6 @@ import {
   setPruefstatus,
   updateExercise,
 } from "./exercises";
-import { getProfile, listProfiles } from "./profiles";
 
 let db: Db;
 beforeEach(() => {
@@ -23,6 +23,7 @@ beforeEach(() => {
 });
 
 const ids = (l: { id: string }[]) => l.map((e) => e.id);
+const equipmentVon = (key: string) => testProfile.find((p) => p.seedKey === key)!.equipment;
 
 describe("listExercises", () => {
   it("liefert alle 60 sortiert nach Muster, Stufe, ID", () => {
@@ -74,11 +75,8 @@ describe("listExercises", () => {
     expect(ersatz.length + plan.length).toBe(60);
   });
 
-  it("Profil 'Unterwegs' (nur Stange) liefert genau die machbaren Übungen", () => {
-    const unterwegs = listProfiles(db).find((p) => p.seedKey === "unterwegs")!;
-    const { items } = listExercises(db, {
-      profilEquipment: unterwegs.equipment,
-    });
+  it("Equipment 'nur Stange' liefert genau die machbaren Übungen", () => {
+    const { items } = listExercises(db, { machbarMit: equipmentVon("unterwegs") });
     const nach = (m: string) => ids(items.filter((e) => e.muster === m));
     expect(nach("ZH")).toEqual(["ZH-07"]);
     expect(nach("KN")).toEqual(["KN-01", "KN-03", "KN-05", "KN-07"]);
@@ -89,11 +87,8 @@ describe("listExercises", () => {
     ).toBe(true);
   });
 
-  it("Profil 'Studio' erfüllt jede Übung", () => {
-    const studio = listProfiles(db).find((p) => p.seedKey === "studio")!;
-    expect(
-      listExercises(db, { profilEquipment: studio.equipment }).items,
-    ).toHaveLength(60);
+  it("Equipment 'alles' erfüllt jede Übung", () => {
+    expect(listExercises(db, { machbarMit: equipmentVon("studio") }).items).toHaveLength(60);
   });
 
   it("blendet inaktive Übungen standardmäßig aus", () => {
@@ -115,10 +110,9 @@ describe("listExercises", () => {
   });
 
   it("kombiniert Filter", () => {
-    const zuhause = listProfiles(db).find((p) => p.seedKey === "zuhause")!;
     const r = listExercises(db, {
       muster: "DH",
-      profilEquipment: zuhause.equipment,
+      machbarMit: equipmentVon("zuhause"),
       stufe: 2,
     });
     expect(ids(r.items)).toEqual(["DH-03", "DH-04"]);
@@ -520,14 +514,5 @@ describe("setAktiv / setPruefstatus", () => {
     expect(getExercise(db, "KN-01")!.aktiv).toBe(false);
     expect(getExercise(db, "KN-02")!.aktiv).toBe(true);
     expect(setPruefstatus(db, "XX-00", "geprueft")).toBe(false);
-  });
-});
-
-describe("Profile", () => {
-  it("listet die drei Standardprofile", () => {
-    const p = listProfiles(db);
-    expect(p.map((x) => x.name)).toEqual(["Studio", "Zuhause", "Unterwegs"]);
-    expect(getProfile(db, p[1]!.id)!.name).toBe("Zuhause");
-    expect(getProfile(db, 9999)).toBeNull();
   });
 });

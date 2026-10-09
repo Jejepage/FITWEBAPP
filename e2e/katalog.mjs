@@ -5,6 +5,7 @@ import {
   BASE,
   SHOTS,
   hinweisBestaetigen,
+  planAnlegen,
   sammleFehler,
   withApp,
 } from "./harness.mjs";
@@ -42,21 +43,23 @@ async function ablauf(name, viewport) {
   schritt("Liste zeigt 60 Übungen");
   await shot("1-liste");
 
-  // 2. Filter: Muster ZV + Profil Unterwegs
+  // 2. Filter: Muster ZV + machbar mit dem Equipment des aktiven Plans (nur Stange)
+  await planAnlegen(page, { equipment: ["Stange"] });
+  await page.goto(`${BASE}/katalog`);
   await page.locator("summary", { hasText: "Filter" }).click();
   await page.getByLabel("Muster").selectOption("ZV");
   await page
-    .getByLabel("Equipment-Profil")
-    .selectOption({ label: "Unterwegs" });
+    .getByLabel("Machbar mit meinem Equipment")
+    .selectOption({ label: "Nur machbare" });
   await shot("2-filter-offen");
   await page.getByRole("button", { name: "Filtern" }).click();
   await page.getByText("4 von 60 Übungen").waitFor();
   const namen = await page
     .locator("main a[href^='/katalog/ZV-']")
     .allInnerTexts();
-  assert.equal(namen.length, 4, "Unterwegs/ZV: vier Übungen");
-  assert.ok(page.url().includes("muster=ZV") && page.url().includes("profil="));
-  schritt("Filter Muster+Profil funktioniert (ZV/Unterwegs → 4)");
+  assert.equal(namen.length, 4, "Stange/ZV: vier Übungen");
+  assert.ok(page.url().includes("muster=ZV") && page.url().includes("machbar=ja"));
+  schritt("Filter Muster+machbar funktioniert (ZV/nur Stange → 4)");
 
   // Filter zurücksetzen (Bereich bleibt nach dem Filtern offen), dann Stufe+einseitig
   await page.getByRole("link", { name: "Zurücksetzen" }).first().click();
@@ -65,11 +68,11 @@ async function ablauf(name, viewport) {
   await page.getByText("4 von 60 Übungen").waitFor();
   schritt("Filter einseitig (RU → 4)");
 
-  // Unbekanntes Profil im Link: Filter wird ignoriert und nicht als aktiv angezeigt
-  await page.goto(`${BASE}/katalog?profil=999`);
+  // Ungültiger Wert im Link: Filter wird ignoriert und nicht als aktiv angezeigt
+  await page.goto(`${BASE}/katalog?machbar=vielleicht`);
   await page.getByText("60 von 60 Übungen").waitFor();
   assert.equal(await page.locator("summary", { hasText: "●" }).count(), 0);
-  schritt("Unbekanntes Profil wird ignoriert");
+  schritt("Ungültiger Machbar-Wert wird ignoriert");
 
   // 3. Detail mit Leiter
   await page.goto(`${BASE}/katalog/ZV-04`);

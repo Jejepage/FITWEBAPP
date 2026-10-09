@@ -1,12 +1,12 @@
 // Lesende Abfragen für den Verlauf (Spec F7): Einheitenliste, Einheit im Detail, Übungsverlauf
 // und Blockübersicht. Abgebrochene Einheiten zählen nicht.
 import { and, desc, eq, sql } from "drizzle-orm";
-import { equipmentProfile, exercise, plan, planSlot, setLog, workout } from "@/db/schema";
+import { exercise, plan, planSlot, setLog, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
 import { BLOCK_REIHENFOLGE } from "@/domain/ablauf";
 import type { SatzWerte } from "@/domain/training-types";
 import { WOCHEN_PRO_BLOCK } from "@/domain/training-types";
-import type { Block, Einheit, Muster } from "@/domain/types";
+import type { Block, Einheit, EquipmentArt, Muster } from "@/domain/types";
 import { uebungsVerlauf, type UebungsVerlauf, type VerlaufEinheit } from "@/domain/verlauf";
 import { alleUebungen, getExercise } from "./exercises";
 import { zuSatzWerte } from "./workouts";
@@ -16,7 +16,6 @@ export interface EinheitKurz {
   datum: string;
   einheit: Einheit;
   woche: number;
-  adHoc: boolean;
   zusatzblock: boolean;
   saetze: number;
   notiz: string | null;
@@ -30,7 +29,6 @@ export function listeEinheiten(db: Db, limit?: number): { liste: EinheitKurz[]; 
       datum: workout.datum,
       einheit: workout.einheit,
       woche: workout.woche,
-      adHoc: workout.adHoc,
       zusatzblock: workout.zusatzblock,
       notiz: workout.notiz,
       // Ausgeschrieben, weil Drizzle Spalten in der Unterabfrage sonst ohne Tabelle schreibt.
@@ -57,11 +55,9 @@ export interface EinheitDetail {
   datum: string;
   einheit: Einheit;
   woche: number;
-  adHoc: boolean;
   zusatzblock: boolean;
   status: "laufend" | "abgeschlossen" | "abgebrochen";
   notiz: string | null;
-  profilName: string;
   gruppen: EinheitGruppe[];
 }
 
@@ -69,11 +65,6 @@ export interface EinheitDetail {
 export function ladeEinheit(db: Db, id: number): EinheitDetail | null {
   const w = db.select().from(workout).where(eq(workout.id, id)).get();
   if (!w) return null;
-  const profil = db
-    .select({ name: equipmentProfile.name })
-    .from(equipmentProfile)
-    .where(eq(equipmentProfile.id, w.profilId))
-    .get();
   const slots = db.select().from(planSlot).where(eq(planSlot.planId, w.planId)).all();
   const slotNach = new Map(slots.map((s) => [s.id, s]));
   const blockRang = (b: Block | undefined) => (b ? BLOCK_REIHENFOLGE.indexOf(b) : 99);
@@ -108,11 +99,9 @@ export function ladeEinheit(db: Db, id: number): EinheitDetail | null {
     datum: w.datum,
     einheit: w.einheit,
     woche: w.woche,
-    adHoc: w.adHoc,
     zusatzblock: w.zusatzblock,
     status: w.status,
     notiz: w.notiz,
-    profilName: profil?.name ?? "",
     gruppen: [...gruppenMap.values()],
   };
 }
@@ -175,7 +164,6 @@ export function ladeUebungsVerlauf(db: Db, exerciseId: string): UebungsVerlaufDa
       datum: w.datum,
       woche: w.woche,
       einheit: w.einheit,
-      adHoc: w.adHoc,
       saetze: [],
     };
     e.saetze.push(zuSatzWerte(satz));
@@ -193,12 +181,13 @@ export function ladeUebungsVerlauf(db: Db, exerciseId: string): UebungsVerlaufDa
 export interface BlockZeile {
   planId: number;
   startDatum: string;
-  profilName: string;
+  /** Equipment des Plans */
+  equipment: EquipmentArt[];
   status: "aktiv" | "abgeschlossen";
   einheitenProWoche: number;
   /** Geplante Einheiten des Blocks (6 × pro Woche) */
   geplant: number;
-  /** Abgeschlossene, nicht abgebrochene Einheiten des Plans (auch Ad-hoc) */
+  /** Abgeschlossene, nicht abgebrochene Einheiten des Plans  */
   absolviert: number;
   /** Je Woche: wie viele Einheiten erledigt sind (höchstens pro Woche) */
   wochen: number[];
@@ -207,9 +196,8 @@ export interface BlockZeile {
 /** Alle Blöcke, der aktive zuerst, dann neueste zuerst. */
 export function blockUebersicht(db: Db): BlockZeile[] {
   const plaene = db
-    .select({ p: plan, profilName: equipmentProfile.name })
+    .select()
     .from(plan)
-    .innerJoin(equipmentProfile, eq(plan.profilId, equipmentProfile.id))
     .orderBy(desc(plan.id))
     .all();
   const zaehler = new Map(
@@ -221,7 +209,7 @@ export function blockUebersicht(db: Db): BlockZeile[] {
       .all()
       .map((z) => [z.planId, z.n]),
   );
-  const zeilen = plaene.map(({ p, profilName }): BlockZeile => {
+  const zeilen = plaene.map((p): BlockZeile => {
     const absolviert = zaehler.get(p.id) ?? 0;
     const geplant = WOCHEN_PRO_BLOCK * p.einheitenProWoche;
     const wochen = Array.from({ length: WOCHEN_PRO_BLOCK }, (_, i) =>
@@ -230,7 +218,7 @@ export function blockUebersicht(db: Db): BlockZeile[] {
     return {
       planId: p.id,
       startDatum: p.startDatum,
-      profilName,
+      equipment: p.equipment,
       status: p.status,
       einheitenProWoche: p.einheitenProWoche,
       geplant,

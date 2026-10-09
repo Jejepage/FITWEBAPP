@@ -54,20 +54,6 @@ export const exercise = sqliteTable(
   (t) => [index("exercise_muster_idx").on(t.muster)],
 );
 
-export const equipmentProfile = sqliteTable(
-  "equipment_profile",
-  {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    /** Stabiler Schlüssel der mitgelieferten Profile (studio, zuhause, unterwegs); sonst null. */
-    seedKey: text("seed_key"),
-    name: text("name").notNull(),
-    equipment: json<EquipmentArt[]>("equipment").notNull(),
-    gewichte: json<Gewichte>("gewichte").notNull(),
-    istStandard: bool("ist_standard").notNull().default(false),
-  },
-  (t) => [uniqueIndex("equipment_profile_seed_key_idx").on(t.seedKey)],
-);
-
 export const settings = sqliteTable("settings", {
   id: integer("id").primaryKey(), // immer 1
   stufen: json<Record<Muster, number>>("stufen").notNull(),
@@ -81,9 +67,10 @@ export const plan = sqliteTable(
   "plan",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    profilId: integer("profil_id")
-      .notNull()
-      .references(() => equipmentProfile.id),
+    /** Verfügbares Equipment dieses Plans (änderbar, z. B. wenn man ein Gerät dazubekommt). */
+    equipment: json<EquipmentArt[]>("equipment").notNull(),
+    /** Verfügbare Hantelgewichte in kg (Grundlage der Gewichtsvorschläge). */
+    gewichte: json<Gewichte>("gewichte").notNull(),
     startDatum: text("start_datum").notNull(), // ISO-Datum
     einheitenProWoche: integer("einheiten_pro_woche").notNull(),
     zusatzblock: bool("zusatzblock").notNull(),
@@ -129,10 +116,6 @@ export const workout = sqliteTable(
     datum: text("datum").notNull(), // ISO-Datum
     einheit: text("einheit").$type<Einheit>().notNull(),
     woche: integer("woche").notNull(),
-    profilId: integer("profil_id")
-      .notNull()
-      .references(() => equipmentProfile.id),
-    adHoc: bool("ad_hoc").notNull().default(false),
     /** Zusatzblock in dieser Einheit (überschreibt die Planvorgabe). */
     zusatzblock: bool("zusatzblock").notNull(),
     status: text("status").$type<"laufend" | "abgeschlossen" | "abgebrochen">().notNull(),

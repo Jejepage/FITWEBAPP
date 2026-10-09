@@ -9,13 +9,13 @@ import {
   MUSTER,
   MUSTER_NAMEN,
   PRUEFSTATI,
+  type EquipmentArt,
   type Exercise,
 } from "@/domain/types";
 import { videoLink } from "@/domain/youtube";
 import { de } from "@/i18n/de";
 import { MUSTER_FARBE } from "@/lib/muster-farbe";
 import type { FilterAuswahl } from "@/server/katalog-filter";
-import type { Profil } from "@/server/profiles";
 import { Badge } from "./badge";
 import { MusterPunkt, StufenPunkte } from "./muster-ui";
 
@@ -62,11 +62,11 @@ const jaNein = (wert: boolean | undefined, ja: string, nein: string) =>
 function FilterZelle({
   spalte,
   filter,
-  profile,
+  planEquipment,
 }: {
   spalte: Spalte;
   filter: FilterAuswahl;
-  profile: Profil[];
+  planEquipment: readonly EquipmentArt[] | null;
 }) {
   const alle = { wert: "", text: t.alle };
   switch (spalte) {
@@ -101,18 +101,17 @@ function FilterZelle({
     case "equipment":
       return (
         <div className="space-y-1">
-          <Auswahl
-            name="profil"
-            label={t.profil}
-            wert={filter.profilId ? String(filter.profilId) : ""}
-            optionen={[
-              { wert: "", text: tt.alleProfile },
-              ...profile.map((p) => ({
-                wert: String(p.id),
-                text: tt.mitProfil(p.name),
-              })),
-            ]}
-          />
+          {planEquipment && (
+            <Auswahl
+              name="machbar"
+              label={t.machbar}
+              wert={filter.machbar ? "ja" : ""}
+              optionen={[
+                { wert: "", text: tt.alleUebungen },
+                { wert: "ja", text: tt.nurMachbar },
+              ]}
+            />
+          )}
           <Auswahl
             name="geraet"
             label={t.geraet}
@@ -353,7 +352,7 @@ export function KatalogTabelle({
   alle,
   spalten,
   filter,
-  profile,
+  planEquipment,
   sortSpalte,
   richtung,
   sortLink,
@@ -362,7 +361,7 @@ export function KatalogTabelle({
   alle: ReadonlyMap<string, Exercise>;
   spalten: readonly Spalte[];
   filter: FilterAuswahl;
-  profile: Profil[];
+  planEquipment: readonly EquipmentArt[] | null;
   sortSpalte: Spalte | undefined;
   richtung: Richtung;
   /** Adresse, die nach dieser Spalte sortiert (wechselt auf-/absteigend) */
@@ -421,7 +420,7 @@ export function KatalogTabelle({
             <tr>
               {spalten.map((s) => (
                 <td key={s} className="border-b border-line px-4 pb-3 pt-1 align-top font-normal">
-                  <FilterZelle spalte={s} filter={filter} profile={profile} />
+                  <FilterZelle spalte={s} filter={filter} planEquipment={planEquipment} />
                 </td>
               ))}
             </tr>

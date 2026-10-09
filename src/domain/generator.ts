@@ -70,6 +70,22 @@ export function kandidatenFuerSlot(e: KandidatenEingabe, muster: Muster): Exerci
 }
 
 /**
+ * Tauschliste für das Training (z. B. unterwegs): alle mit dem Equipment machbaren Übungen wie in
+ * `kandidatenFuerSlot`, danach die übrigen Ersatzübungen des Musters, auch wenn ihr Equipment (z. B.
+ * ein Band) im Plan nicht angekreuzt ist. Ersatzübungen sind genau für den Fall gedacht, dass das
+ * Plan-Equipment gerade nicht zur Verfügung steht.
+ */
+export function tauschKandidaten(e: KandidatenEingabe, muster: Muster): Exercise[] {
+  const machbar = sortierteKandidaten(e, muster, 0);
+  const schon = new Set(machbar.map((u) => u.id));
+  const wunsch = begrenzeStufe(e.stufen[muster]);
+  const weitere = e.uebungen
+    .filter((u) => u.muster === muster && u.aktiv && u.ersatz && !schon.has(u.id))
+    .sort((a, b) => stufenRang(a.stufe, wunsch) - stufenRang(b.stufe, wunsch) || nachId(a, b));
+  return [...machbar, ...weitere];
+}
+
+/**
  * Stellt sicher, dass in KN/HB eine einseitige Übung steht; ersetzt dafür genau einen Slot.
  * Gewählt wird der Slot, dessen bester einseitiger Kandidat den kleinsten Stufenrang hat (also
  * der Wunschstufe seines Musters am nächsten liegt). Bei Gleichstand wird die schlechter

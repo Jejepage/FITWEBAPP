@@ -10,7 +10,7 @@ import type { SearchParams } from "@/server/katalog-filter";
 export const dynamic = "force-dynamic";
 
 const t = de.daten;
-const BILANZ = ["uebungen", "neu", "profile", "plaene", "einheiten", "saetze"] as const;
+const BILANZ = ["uebungen", "neu", "plaene", "einheiten", "saetze"] as const;
 
 export default async function DatenPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;

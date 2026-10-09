@@ -11,7 +11,6 @@ export interface VerlaufEinheit {
   datum: string;
   woche: number;
   einheit: Einheit;
-  adHoc: boolean;
   saetze: readonly SatzWerte[];
 }
 
@@ -20,7 +19,6 @@ export interface VerlaufZeile {
   datum: string;
   woche: number;
   einheit: Einheit;
-  adHoc: boolean;
   /** Bester Satz der Einheit; null ohne verwertbaren Messwert */
   bester: SatzWerte | null;
   /** Wert des besten Satzes für das Diagramm (geschätzte 1RM, Wdh., s oder m) */
@@ -103,7 +101,6 @@ export function uebungsVerlauf(
       datum: e.datum,
       woche: e.woche,
       einheit: e.einheit,
-      adHoc: e.adHoc,
       bester: b?.satz ?? null,
       besterWert: b?.wert ?? null,
       volumen:

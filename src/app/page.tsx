@@ -5,10 +5,10 @@ import { Schalter } from "@/components/training/schalter";
 import { bannerFehler, gruppe, knopfPrimaer, knopfText } from "@/components/ui";
 import { BlockUebersicht } from "@/components/verlauf/block-uebersicht";
 import { db } from "@/db/client";
+import { MUSTER, MUSTER_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
 import { datumLang } from "@/lib/anzeige-datum";
 import type { SearchParams } from "@/server/katalog-filter";
-import { listProfiles } from "@/server/profiles";
 import { ladeStartInfo } from "@/server/start-info";
 import { blockUebersicht, listeEinheiten } from "@/server/verlauf";
 import { startTraining } from "./training/actions";
@@ -16,7 +16,7 @@ import { startTraining } from "./training/actions";
 export const dynamic = "force-dynamic";
 
 const t = de.start;
-const FEHLER_CODES = ["kein_plan", "block_fertig"] as const;
+const FEHLER_CODES = ["kein_plan", "block_fertig", "equipment_unmoeglich"] as const;
 
 /** Hero-Fläche: Farbverlauf mit weicher Dekoration; Text darauf immer in on-accent (Weiß) */
 const heroRahmen =
@@ -82,8 +82,12 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const fehlerParam = typeof sp.fehler === "string" ? sp.fehler : undefined;
   const fehler = FEHLER_CODES.find((c) => c === fehlerParam);
+  const fehlendeMuster = (typeof sp.muster === "string" ? sp.muster : "")
+    .split(",")
+    .filter((m): m is (typeof MUSTER)[number] => (MUSTER as readonly string[]).includes(m))
+    .map((m) => MUSTER_NAMEN[m])
+    .join(", ");
   const info = ladeStartInfo(db);
-  const profile = listProfiles(db);
   const bloecke = blockUebersicht(db);
   const letzte = listeEinheiten(db, 5);
   const [einheitTeil, wocheTeil] =
@@ -95,7 +99,9 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
     <PageShell title={t.titel} breite="weit">
       {fehler && (
         <p role="alert" className={`${bannerFehler} mb-5 font-medium`}>
-          {t.fehler[fehler]}
+          {fehler === "equipment_unmoeglich"
+            ? t.fehler.equipment_unmoeglich(fehlendeMuster)
+            : t.fehler[fehler]}
         </p>
       )}
 
@@ -175,14 +181,6 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
                   </button>
                 </form>
               </section>
-              {profile.length > 1 && (
-                <Link
-                  href="/training/start"
-                  className={`${knopfText} mt-3 flex w-full justify-center`}
-                >
-                  {de.adhoc.link}
-                </Link>
-              )}
             </>
           )}
 
@@ -230,7 +228,6 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
                           </span>
                           <span className="block text-sm text-ink-3">
                             {datumLang(e.datum)} · {de.verlauf.saetze(e.saetze)}
-                            {e.adHoc ? ` · ${de.verlauf.adHoc}` : ""}
                             {e.zusatzblock ? ` · ${de.verlauf.mitZusatzblock}` : ""}
                           </span>
                         </span>

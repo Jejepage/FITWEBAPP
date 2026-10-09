@@ -26,7 +26,7 @@ export const EQUIPMENT_ARTEN = [
 ] as const;
 export type EquipmentArt = (typeof EQUIPMENT_ARTEN)[number];
 
-/** Arten, die ein Nutzer im Profil ankreuzen kann ("keins" ist kein Gerät). */
+/** Arten, die ein Nutzer beim Equipment eines Plans ankreuzen kann ("keins" ist kein Gerät). */
 export const EQUIPMENT_AUSWAHL = EQUIPMENT_ARTEN.filter(
   (e): e is Exclude<EquipmentArt, "keins"> => e !== "keins",
 );
@@ -89,7 +89,7 @@ export type ExerciseSeed = ExerciseSeedRoh & { ersatz: boolean };
 export type Einheit = "A" | "B";
 export type Block = "1" | "2" | "Z";
 
-/** Verfügbare Hantelgewichte in kg je Equipment-Art (nur zuhause relevant). */
+/** Verfügbare Hantelgewichte in kg je Equipment-Art (Kurzhanteln, Kettlebell). */
 export type Gewichte = Partial<Record<EquipmentArt, number[]>>;
 
 export const EQUIPMENT_NAMEN: Record<EquipmentArt, string> = {

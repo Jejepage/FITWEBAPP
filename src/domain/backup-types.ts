@@ -3,7 +3,11 @@
 import type { Block, Einheit, EquipmentArt, Exercise, Gewichte, Muster } from "./types";
 
 export const BACKUP_FORMAT = "fit-backup";
-export const BACKUP_VERSION = 1;
+/**
+ * Version 2: Das Equipment steht im Plan (keine Profile mehr), Einheiten haben kein Profil und
+ * kein Ad-hoc-Kennzeichen, Übungen haben das Ersatz-Kennzeichen. Version 1 wird nicht mehr gelesen.
+ */
+export const BACKUP_VERSION = 2;
 /** Größte akzeptierte Importdatei */
 export const BACKUP_MAX_BYTES = 20 * 1024 * 1024;
 
@@ -20,15 +24,6 @@ export interface KatalogDaten {
 }
 
 /** Zeilen der Tabellen, camelCase wie in Drizzle (src/db/schema.ts); Zeitstempel als ISO-Text. */
-export interface ProfilZeile {
-  id: number;
-  seedKey: string | null;
-  name: string;
-  equipment: EquipmentArt[];
-  gewichte: Gewichte;
-  istStandard: boolean;
-}
-
 export interface EinstellungenZeile {
   stufen: Record<Muster, number>;
   einheitenProWoche: number;
@@ -39,7 +34,8 @@ export interface EinstellungenZeile {
 
 export interface PlanZeile {
   id: number;
-  profilId: number;
+  equipment: EquipmentArt[];
+  gewichte: Gewichte;
   startDatum: string;
   einheitenProWoche: number;
   zusatzblock: boolean;
@@ -65,8 +61,6 @@ export interface EinheitZeile {
   datum: string;
   einheit: Einheit;
   woche: number;
-  profilId: number;
-  adHoc: boolean;
   zusatzblock: boolean;
   status: "laufend" | "abgeschlossen" | "abgebrochen";
   /** { "<plan_slot_id>": "<exercise_id>" } */
@@ -93,7 +87,6 @@ export interface SatzZeile {
 }
 
 export interface AllesDaten extends KatalogDaten {
-  profile: ProfilZeile[];
   einstellungen: EinstellungenZeile;
   plaene: PlanZeile[];
   planSlots: PlanSlotZeile[];

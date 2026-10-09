@@ -21,8 +21,8 @@ function legeBlockAn(dbPfad) {
     .prepare("select * from plan_slot where plan_id = ?")
     .all(plan.id);
   const insertWorkout = d.prepare(
-    `insert into workout (plan_id, datum, einheit, woche, profil_id, ad_hoc, zusatzblock, status, ersetzungen, beendet_am)
-     values (?, ?, ?, ?, ?, 0, 0, 'abgeschlossen', '{}', '2026-10-07T10:00:00.000Z')`,
+    `insert into workout (plan_id, datum, einheit, woche, zusatzblock, status, ersetzungen, beendet_am)
+     values (?, ?, ?, ?, 0, 'abgeschlossen', '{}', '2026-10-07T10:00:00.000Z')`,
   );
   const insertSatz = d.prepare(
     `insert into set_log (id, workout_id, plan_slot_id, exercise_id, runde, gewicht, wdh, sekunden, meter, rpe, tempo, erledigt)
@@ -46,7 +46,6 @@ function legeBlockAn(dbPfad) {
       datum,
       einheit,
       woche,
-      plan.profil_id,
     ).lastInsertRowid;
     for (const slot of slots.filter(
       (s) => s.einheit === einheit && s.block !== "Z",

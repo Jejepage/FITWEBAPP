@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { neueSeedDb } from "@/db/test-utils";
 import type { Db } from "@/db/types";
-import { getPlanSlotsMitId } from "./plans";
+import { getPlanSlotsMitId, setzePlanEquipment } from "./plans";
 import { ladePlanStandard } from "./plan-defaults";
 import { legePlanAn } from "./test-helfer";
 import { ladeTrainingsDaten, ladeUebungInfo } from "./training-daten";
@@ -113,7 +113,7 @@ describe("ladeTrainingsDaten", () => {
     const info = d.uebungen[s.exerciseId]!;
     expect(info.letzte?.saetze).toHaveLength(3);
     expect(info.letzte?.datum).toBe("2026-10-08");
-    // Zuhause-Gewichte gibt es im Studio-Profil nicht → +2,5 kg
+    // Der Plan hat keine Hantelgewichte hinterlegt → +2,5 kg
     expect(info.vorschlag).toMatchObject({ grund: "mehr_gewicht", gewicht: 12.5, wdh: 10 });
   });
 
@@ -131,7 +131,66 @@ describe("ladeTrainingsDaten", () => {
   });
 
   it("Standardwerte für den Plan sind vorhanden (Sanity)", () => {
-    expect(ladePlanStandard(db)).not.toBeNull();
+    expect(ladePlanStandard(db).equipment.length).toBeGreaterThan(0);
+  });
+
+  it("Hantelgewichte kommen aus dem Plan und lassen sich ändern, Vorschlag folgt sofort", () => {
+    const hantel = "DH-03"; // Kurzhantel-Bankdrücken
+    const erste = start();
+    const s = slotA("1", 2);
+    expect(ersetzeUebung(db, erste, s.id, hantel).ok).toBe(true);
+    for (const runde of [1, 2, 3]) {
+      speichere(erste, { ...s, exerciseId: hantel }, runde, { gewicht: 10, wdh: 12, rpe: 7 });
+    }
+    beendeWorkout(db, erste, null);
+    const zweite = start(); // B, Woche 1
+    const bSlot = getPlanSlotsMitId(db, planId).find(
+      (x) => x.einheit === "B" && x.block === "1" && x.position === 2,
+    )!;
+    expect(ersetzeUebung(db, zweite, bSlot.id, hantel).ok).toBe(true);
+    const vorschlag = () => ladeTrainingsDaten(db, zweite)!.uebungen[hantel]!.vorschlag;
+
+    // keine Hantelgewichte im Plan → +2,5 kg
+    expect(vorschlag()).toMatchObject({ grund: "mehr_gewicht", gewicht: 12.5 });
+    const equipment = ["kurzhanteln", "bank", "maschinen", "stange", "langhantel", "kettlebell", "band"] as const;
+    setzePlanEquipment(db, planId, equipment, { kurzhanteln: [10, 16, 24] });
+    expect(vorschlag()).toMatchObject({ grund: "mehr_gewicht", gewicht: 16 });
+    setzePlanEquipment(db, planId, equipment, { kurzhanteln: [10, 12, 14] });
+    expect(vorschlag()).toMatchObject({ grund: "mehr_gewicht", gewicht: 12 });
+  });
+
+  describe("Tauschliste", () => {
+    it("zeigt Planübungen vor Ersatzübungen und kennzeichnet Ersatzübungen", () => {
+      const d = ladeTrainingsDaten(db, start())!;
+      const liste = d.ersatzKandidaten[slotA("1", 1).id]!; // Kniebeuge
+      const erstesErsatz = liste.findIndex((k) => k.ersatz);
+      expect(erstesErsatz).toBeGreaterThan(0);
+      expect(liste.slice(erstesErsatz).every((k) => k.ersatz)).toBe(true);
+      expect(liste.slice(0, erstesErsatz).every((k) => !k.ersatz)).toBe(true);
+    });
+
+    it("enthält Ersatzübungen auch dann, wenn ihr Equipment im Plan fehlt (Band unterwegs)", () => {
+      setzePlanEquipment(db, planId, ["stange"], {});
+      const d = ladeTrainingsDaten(db, start())!;
+      const zhSlot = getPlanSlotsMitId(db, planId).find(
+        (x) => x.einheit === "A" && x.muster === "ZH",
+      )!;
+      const ids = d.ersatzKandidaten[zhSlot.id]!.map((k) => k.id);
+      expect(ids).toContain("ZH-02"); // Rudern mit Band, nur Ersatz
+      expect(ids).toContain("ZH-07"); // Rudern unter dem Tisch
+      expect(ids).not.toContain("ZH-03"); // braucht ein Gerät, das fehlt
+    });
+
+    it("neues Equipment erscheint sofort in der Tauschliste", () => {
+      setzePlanEquipment(db, planId, ["stange"], {});
+      const id = start();
+      const slot = slotA("1", 1);
+      const vorher = ladeTrainingsDaten(db, id)!.ersatzKandidaten[slot.id]!.map((k) => k.id);
+      expect(vorher).not.toContain("KN-02"); // Beinpresse
+      setzePlanEquipment(db, planId, ["stange", "maschinen"], {});
+      const nachher = ladeTrainingsDaten(db, id)!.ersatzKandidaten[slot.id]!.map((k) => k.id);
+      expect(nachher).toContain("KN-02");
+    });
   });
 });
 

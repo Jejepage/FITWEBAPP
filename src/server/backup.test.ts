@@ -29,11 +29,10 @@ describe("exportiere", () => {
   it("Gesamt-Backup enthält alle Tabellen mit ihren Zeilen", () => {
     const db = dbMitDaten();
     const d = exportiere(db, "alles", JETZT);
-    expect(d).toMatchObject({ format: "fit-backup", version: 1, art: "alles" });
+    expect(d).toMatchObject({ format: "fit-backup", version: 2, art: "alles" });
     expect(d.erstelltAm).toBe("2026-10-08T10:00:00.000Z");
     const a = alles(d);
     expect(a.uebungen).toHaveLength(60);
-    expect(a.profile).toHaveLength(3);
     expect(a.plaene).toHaveLength(1);
     expect(a.planSlots).toHaveLength(16);
     expect(a.einheiten).toHaveLength(5);
@@ -92,7 +91,7 @@ describe("Backup-Verträglichkeit mit gespeicherten Sätzen", () => {
     const start = Date.now();
     const roh = {
       format: "fit-backup",
-      version: 1,
+      version: 2,
       art: "katalog",
       erstelltAm: JETZT.toISOString(),
       daten: { uebungen: Array.from({ length: 300_000 }, () => ({})) },
@@ -122,7 +121,7 @@ describe("Vollimport", () => {
     const r = importiereDatei(ziel, datei, "alles");
     expect(r).toMatchObject({
       ok: true,
-      bilanz: { uebungen: 60, profile: 3, plaene: 1, einheiten: 5 },
+      bilanz: { uebungen: 60, plaene: 1, einheiten: 5 },
     });
     expect(exportiere(ziel, "alles", JETZT)).toEqual(datei);
   });
@@ -288,7 +287,6 @@ describe("Katalogimport", () => {
     expect(nachAlles.plaene).toEqual(vorherAlles.plaene);
     expect(nachAlles.einheiten).toEqual(vorherAlles.einheiten);
     expect(nachAlles.saetze).toEqual(vorherAlles.saetze);
-    expect(nachAlles.profile).toEqual(vorherAlles.profile);
   });
 
   it("lehnt ein geändertes Bewegungsmuster einer vorhandenen Übung ab", () => {

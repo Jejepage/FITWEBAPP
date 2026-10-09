@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/katalog/badge";
 import { IconZurueck } from "@/components/katalog/icons-katalog";
 import { MusterPunkt } from "@/components/katalog/muster-ui";
 import { VideoKnopf } from "@/components/katalog/video-knopf";
@@ -45,11 +44,9 @@ export default async function UebungsVerlaufPage({
         datum: z.datum,
         wert,
         label: metrik === "bester" ? besterSatzText(z) : `${formatZahl(wert)} ${einheit}`,
-        adHoc: z.adHoc,
       },
     ];
   });
-  const hatAdHoc = verlauf.zeilen.some((z) => z.adHoc);
   const umschalter = (m: Metrik, text: string) => (
     <Link
       href={`/verlauf/uebung/${daten.id}${m === "volumen" ? "?metrik=volumen" : ""}`}
@@ -114,12 +111,6 @@ export default async function UebungsVerlaufPage({
                   titel={t.diagrammTitel(daten.name, metrikName)}
                   muster={daten.muster}
                 />
-                {hatAdHoc && (
-                  <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink-3">
-                    <Badge farbe="hinweis">{t.adHoc}</Badge>
-                    {t.adHocHinweis}
-                  </p>
-                )}
               </section>
 
               <div className="min-w-0 overflow-x-auto rounded-card border border-line/50 bg-surface px-4 py-2 shadow-card">
@@ -150,7 +141,6 @@ export default async function UebungsVerlaufPage({
                           </Link>
                           <span className="block text-xs text-ink-3">
                             {t.woche(z.woche)}
-                            {z.adHoc ? ` · ${t.adHoc}` : ""}
                           </span>
                         </td>
                         <td className="py-1.5 pr-2">{besterSatzText(z)}</td>

@@ -31,6 +31,8 @@ export interface KandidatInfo {
   name: string;
   stufe: number;
   einseitig: boolean;
+  /** Ersatzübung (Körpergewicht, Band): steht in der Tauschliste hinter den Planübungen */
+  ersatz: boolean;
 }
 
 export interface GespeicherterSatzInfo {
@@ -43,9 +45,6 @@ export interface GespeicherterSatzInfo {
 
 export interface TrainingsDaten {
   workoutId: number;
-  /** Einheit mit anderem Profil als dem des Plans (Spec F6) */
-  adHoc: boolean;
-  profilName: string;
   einheit: Einheit;
   woche: number;
   zusatzblock: boolean;

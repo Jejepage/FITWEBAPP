@@ -1,7 +1,7 @@
 // Export und Import aller Daten (Spec F8). Der Import prüft die Datei vollständig (domain/backup.ts),
 // bevor er schreibt, und läuft in einer Transaktion: eine falsche Datei ändert nichts.
 import { eq } from "drizzle-orm";
-import { equipmentProfile, exercise, plan, planSlot, setLog, settings, workout } from "@/db/schema";
+import { exercise, plan, planSlot, setLog, settings, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
 import { parseBackup } from "@/domain/backup";
 import {
@@ -18,7 +18,6 @@ export interface Bilanz {
   uebungen: number;
   /** Nur Katalogimport: davon neu angelegt */
   neu?: number;
-  profile?: number;
   plaene?: number;
   einheiten?: number;
   saetze?: number;
@@ -37,7 +36,6 @@ function allesDaten(db: Db): AllesDaten {
   const einstellungen = db.select().from(settings).where(eq(settings.id, 1)).get();
   return {
     ...katalogDaten(db),
-    profile: db.select().from(equipmentProfile).all().sort(nachId),
     einstellungen: einstellungen
       ? {
           stufen: einstellungen.stufen,
@@ -134,7 +132,6 @@ export function importiereAlles(db: Db, daten: AllesDaten): ImportErgebnis {
       tx.delete(workout).run();
       tx.delete(planSlot).run();
       tx.delete(plan).run();
-      tx.delete(equipmentProfile).run();
       tx.delete(settings).run();
       tx.delete(exercise).run();
 
@@ -143,7 +140,6 @@ export function importiereAlles(db: Db, daten: AllesDaten): ImportErgebnis {
           .values({ ...u, videoUrl: u.videoUrl ?? null })
           .run();
       }
-      for (const p of daten.profile) tx.insert(equipmentProfile).values(p).run();
       tx.insert(settings)
         .values({ id: 1, ...daten.einstellungen })
         .run();
@@ -165,7 +161,6 @@ export function importiereAlles(db: Db, daten: AllesDaten): ImportErgebnis {
         ok: true,
         bilanz: {
           uebungen: daten.uebungen.length,
-          profile: daten.profile.length,
           plaene: daten.plaene.length,
           einheiten: daten.einheiten.length,
           saetze: daten.saetze.length,

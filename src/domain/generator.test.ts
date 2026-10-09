@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { erfuellt } from "./equipment";
-import { generierePlan, kandidatenFuerSlot, pruefePlan } from "./generator";
+import { generierePlan, kandidatenFuerSlot, pruefePlan, tauschKandidaten } from "./generator";
 import {
   SLOT_VORLAGE,
   slotKey,
@@ -475,6 +475,38 @@ describe("kandidatenFuerSlot", () => {
   it("schließt inaktive Übungen aus", () => {
     const e = { ...eingabe("studio", einheitlich(2)), uebungen: deaktiviere(["KN-02"]) };
     expect(kandidatenFuerSlot(e, "KN").map((u) => u.id)).not.toContain("KN-02");
+  });
+});
+
+describe("tauschKandidaten", () => {
+  const tausch = (key: string, stufe: number, muster: Muster, uebungen = ECHTER_KATALOG) =>
+    tauschKandidaten(eingabe(key, einheitlich(stufe), { uebungen }), muster).map((u) => u.id);
+
+  it("beginnt mit den machbaren Übungen wie kandidatenFuerSlot", () => {
+    const e = eingabe("zuhause", einheitlich(2), { uebungen: ECHTER_KATALOG });
+    const machbar = kandidatenFuerSlot(e, "KN").map((u) => u.id);
+    expect(tausch("zuhause", 2, "KN").slice(0, machbar.length)).toEqual(machbar);
+  });
+
+  it("hängt Ersatzübungen an, deren Equipment fehlt (Band bei Stange-Equipment)", () => {
+    const liste = tausch("unterwegs", 2, "ZH");
+    expect(liste).toEqual(["ZH-07", "ZH-02"]);
+    // machbare Ersatzübungen stehen nicht doppelt
+    expect(new Set(liste).size).toBe(liste.length);
+  });
+
+  it("nimmt keine Planübung auf, deren Equipment fehlt, und keine inaktive Ersatzübung", () => {
+    expect(tausch("unterwegs", 2, "ZH")).not.toContain("ZH-03");
+    const ohneBand = ECHTER_KATALOG.map((u) => (u.id === "ZH-02" ? { ...u, aktiv: false } : u));
+    expect(tausch("unterwegs", 2, "ZH", ohneBand)).toEqual(["ZH-07"]);
+  });
+
+  it("sortiert die zusätzlichen Ersatzübungen nach Wunschstufe, dann ID", () => {
+    const liste = tausch("unterwegs", 1, "DV");
+    // DV-02 (Band, Stufe 1) ist die einzige zusätzliche; alle machbaren Ersatzübungen davor
+    expect(liste.at(-1)).toBe("DV-02");
+    const rest = tausch("unterwegs", 4, "DV");
+    expect(rest.indexOf("DV-02")).toBe(rest.length - 1);
   });
 });
 

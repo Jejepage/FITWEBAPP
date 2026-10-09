@@ -5,7 +5,7 @@ import { MUSTER, MUSTER_NAMEN, type EquipmentArt, type Exercise } from "@/domain
 import { de } from "@/i18n/de";
 import { MUSTER_FARBE } from "@/lib/muster-farbe";
 
-const t = de.profil;
+const t = de.equipment;
 
 /**
  * Zeigt, wie viele aktive Übungen je Bewegungsmuster mit dem Equipment machbar sind: Punkt, Zahl

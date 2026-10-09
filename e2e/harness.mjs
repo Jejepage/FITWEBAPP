@@ -16,6 +16,39 @@ export async function hinweisBestaetigen(page, base = BASE) {
   await page.getByRole("navigation", { name: "Hauptnavigation" }).waitFor();
 }
 
+const EQUIPMENT_NAMEN = [
+  "Maschinen/Kabelzug",
+  "Langhantel",
+  "Kurzhanteln",
+  "Kettlebell",
+  "Bank",
+  "Stange",
+  "Band",
+];
+
+/**
+ * Legt über die Oberfläche einen Plan an. Mit `equipment` (Namen wie im Formular) wird genau dieses
+ * Equipment angekreuzt, sonst gilt die Voreinstellung.
+ */
+export async function planAnlegen(page, { equipment, base = BASE } = {}) {
+  await page.goto(`${base}/plan/neu`);
+  if (equipment) {
+    for (const n of EQUIPMENT_NAMEN) {
+      const box = page.getByRole("checkbox", { name: n, exact: true });
+      if (equipment.includes(n)) await box.check();
+      else await box.uncheck();
+    }
+    await page.getByRole("button", { name: "Vorschau aktualisieren" }).click();
+    await page.locator("select[name^=slot_]").first().waitFor();
+  }
+  await page
+    .getByRole("button", { name: "Plan speichern und aktivieren" })
+    .click();
+  await page
+    .getByRole("heading", { name: "Plan", level: 1, exact: true })
+    .waitFor();
+}
+
 /** Browser-Fehler (Konsole, HTTP >= 400) einer Seite sammeln. */
 export function sammleFehler(page) {
   const fehler = [];

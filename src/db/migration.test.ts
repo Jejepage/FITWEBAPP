@@ -1,7 +1,10 @@
 // Upgrade-Pfad: Eine bestehende Datenbank (Stand vor dem Video-Link) mit Daten bekommt die neue
 // Spalte per Migration, ohne dass Daten verloren gehen.
 import Database from "better-sqlite3";
-import { readFileSync, readdirSync } from "node:fs";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PROJEKT_ROOT } from "./test-utils";
@@ -68,6 +71,97 @@ describe("Migrationen", () => {
       { id: "KN-10", ersatz: 0 },
     ]);
     db.close();
+  });
+
+  it("0004/0005: Profile entfallen, Plan hat Equipment, Pläne und Einheiten (Testdaten) werden verworfen", () => {
+    const db = new Database(":memory:");
+    db.pragma("foreign_keys = ON");
+    for (const datei of migrationen.filter((n) => n < "0004")) anwenden(db, datei);
+    db.exec(`insert into exercise (id, name, muster, stufe, einseitig, equipment, optionale_last,
+      hauptmuskeln, belastungsart, standard_bereich, steigerungsart, ausfuehrung, fehler, hinweise,
+      aktiv, pruefstatus)
+      values ('KN-01', 'Alt', 'KN', 1, 0, '[]', '[]', '["Beine"]', 'wdh', '8–12', '["wdh"]',
+      '["a","b","c"]', '["x","y"]', 'h', 1, 'zu_pruefen')`);
+    db.exec(`insert into settings (id, stufen, einheiten_pro_woche, zusatzblock, aufwaermen_text)
+      values (1, '{"KN":3}', 3, 1, 'Text')`);
+    db.exec(`insert into equipment_profile (id, name, equipment, gewichte, ist_standard)
+      values (1, 'Studio', '["maschinen"]', '{}', 1)`);
+    db.exec(`insert into plan (id, profil_id, start_datum, einheiten_pro_woche, zusatzblock, stufen,
+      status) values (1, 1, '2026-10-07', 2, 0, '{"KN":2}', 'aktiv')`);
+    db.exec(`insert into plan_slot (id, plan_id, einheit, block, position, muster, exercise_id)
+      values (1, 1, 'A', '1', 1, 'KN', 'KN-01')`);
+    db.exec(`insert into workout (id, plan_id, datum, einheit, woche, profil_id, ad_hoc, zusatzblock,
+      status) values (1, 1, '2026-10-08', 'A', 1, 1, 0, 0, 'abgeschlossen')`);
+    db.exec(`insert into set_log (id, workout_id, plan_slot_id, exercise_id, runde, wdh, erledigt)
+      values ('satz-0001', 1, 1, 'KN-01', 1, 10, 1)`);
+
+    for (const datei of migrationen.filter((n) => n >= "0004")) anwenden(db, datei);
+
+    const tabellen = (
+      db.prepare("select name from sqlite_master where type = 'table'").all() as { name: string }[]
+    ).map((t) => t.name);
+    expect(tabellen).not.toContain("equipment_profile");
+    const spalten = (tabelle: string) =>
+      (db.prepare(`pragma table_info(${tabelle})`).all() as { name: string }[]).map((c) => c.name);
+    expect(spalten("plan")).toContain("equipment");
+    expect(spalten("plan")).toContain("gewichte");
+    expect(spalten("plan")).not.toContain("profil_id");
+    expect(spalten("workout")).not.toContain("profil_id");
+    expect(spalten("workout")).not.toContain("ad_hoc");
+
+    // Pläne, Einheiten und Sätze sind weg, Katalog und Einstellungen bleiben
+    for (const t of ["plan", "plan_slot", "workout", "set_log"]) {
+      expect(db.prepare(`select count(*) as n from ${t}`).get(), t).toEqual({ n: 0 });
+    }
+    expect(db.prepare("select name from exercise").all()).toEqual([{ name: "Alt" }]);
+    expect(db.prepare("select einheiten_pro_woche as n from settings").get()).toEqual({ n: 3 });
+
+    // Die neuen Tabellen sind benutzbar, die Fremdschlüssel stimmen
+    db.exec(`insert into plan (equipment, gewichte, start_datum, einheiten_pro_woche, zusatzblock,
+      stufen, status) values ('["bank"]', '{}', '2026-10-09', 2, 0, '{"KN":2}', 'aktiv')`);
+    expect(db.prepare("pragma foreign_key_check").all()).toEqual([]);
+    db.close();
+  });
+
+  it("0004/0005 laufen auch mit dem echten Migrator (in einer Transaktion) auf vorhandenen Daten", () => {
+    // Ordner mit nur den Migrationen bis 0003 anlegen, migrieren, Daten einfügen, dann vollständig migrieren.
+    const alt = mkdtempSync(join(tmpdir(), "fit-migration-"));
+    try {
+      cpSync(ordner, alt, { recursive: true });
+      const journal = JSON.parse(readFileSync(join(alt, "meta/_journal.json"), "utf8")) as {
+        entries: { idx: number }[];
+      };
+      writeFileSync(
+        join(alt, "meta/_journal.json"),
+        JSON.stringify({ ...journal, entries: journal.entries.filter((e) => e.idx < 4) }),
+      );
+      const sqlite = new Database(":memory:");
+      sqlite.pragma("foreign_keys = ON");
+      const db = drizzle(sqlite);
+      migrate(db, { migrationsFolder: alt });
+
+      sqlite.exec(`insert into equipment_profile (id, name, equipment, gewichte, ist_standard)
+        values (1, 'Studio', '["maschinen"]', '{}', 1)`);
+      sqlite.exec(`insert into exercise (id, name, muster, stufe, einseitig, equipment, optionale_last,
+        hauptmuskeln, belastungsart, standard_bereich, steigerungsart, ausfuehrung, fehler, hinweise,
+        aktiv, pruefstatus) values ('KN-01', 'Alt', 'KN', 1, 0, '[]', '[]', '["Beine"]', 'wdh',
+        '8–12', '["wdh"]', '["a","b","c"]', '["x","y"]', 'h', 1, 'zu_pruefen')`);
+      sqlite.exec(`insert into plan (id, profil_id, start_datum, einheiten_pro_woche, zusatzblock,
+        stufen, status) values (1, 1, '2026-10-07', 2, 0, '{"KN":2}', 'aktiv')`);
+      sqlite.exec(`insert into plan_slot (id, plan_id, einheit, block, position, muster, exercise_id)
+        values (1, 1, 'A', '1', 1, 'KN', 'KN-01')`);
+      sqlite.exec(`insert into workout (id, plan_id, datum, einheit, woche, profil_id, ad_hoc,
+        zusatzblock, status) values (1, 1, '2026-10-08', 'A', 1, 1, 0, 0, 'abgeschlossen')`);
+
+      migrate(db, { migrationsFolder: ordner });
+
+      expect(sqlite.prepare("pragma foreign_key_check").all()).toEqual([]);
+      expect(sqlite.prepare("select count(*) as n from plan").get()).toEqual({ n: 0 });
+      expect(sqlite.prepare("select count(*) as n from exercise").get()).toEqual({ n: 1 });
+      sqlite.close();
+    } finally {
+      rmSync(alt, { recursive: true, force: true });
+    }
   });
 
   it("das Journal kennt alle Migrationsdateien", () => {
