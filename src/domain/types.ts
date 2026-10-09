@@ -16,6 +16,7 @@ export const MUSTER_NAMEN: Record<Muster, string> = {
 
 export const EQUIPMENT_ARTEN = [
   "maschinen",
+  "kabelzug",
   "langhantel",
   "kurzhanteln",
   "kettlebell",
@@ -85,7 +86,8 @@ export type Block = "1" | "2" | "Z";
 export type Gewichte = Partial<Record<EquipmentArt, number[]>>;
 
 export const EQUIPMENT_NAMEN: Record<EquipmentArt, string> = {
-  maschinen: "Maschinen/Kabelzug",
+  maschinen: "Maschinen",
+  kabelzug: "Kabelzug",
   langhantel: "Langhantel",
   kurzhanteln: "Kurzhanteln",
   kettlebell: "Kettlebell",

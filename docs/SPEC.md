@@ -78,7 +78,7 @@ Pausen: 30–45 s beim Wechsel innerhalb der Kombi, 60–90 s nach jeder Runde (
 
 ### 3.1 Equipment-Arten
 
-`maschinen` (Geräte und Kabelzug im Studio), `langhantel` (inkl. Rack), `kurzhanteln`, `kettlebell`, `bank`, `stange` (Klimmzugstange o. Ä.), `band` (Widerstandsband), `keins`.
+`maschinen` (Geräte im Studio, z. B. Beinpresse, Brustpresse), `kabelzug` (Kabelzug/Seilzug, im Studio oder zuhause), `langhantel` (inkl. Rack), `kurzhanteln`, `kettlebell`, `bank`, `stange` (Klimmzugstange o. Ä.), `band` (Widerstandsband), `keins`.
 
 Alltagsgegenstände (Stuhl, Tisch, Rucksack, Wand) gelten als immer verfügbar.
 
@@ -127,7 +127,7 @@ Beispiel Goblet Squat: `[["kurzhanteln","kettlebell"]]`. Beispiel Kurzhantel-Ban
 
 Ausführung, Fehler und Hinweise erstellt Claude Code beim Seed auf Deutsch, kurz und sachlich; jeder Eintrag erhält zunächst den Status „zu prüfen".
 
-Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = kettlebell, BK = bank, ST = stange, BD = band, – = keins.
+Abkürzungen Equipment: M = maschinen, KZ = kabelzug, LH = langhantel, KH = kurzhanteln, KB = kettlebell, BK = bank, ST = stange, BD = band, – = keins.
 
 **Kniebeuge (KN)**
 | ID | Name | Equipment | Stufe | einseitig |
@@ -181,7 +181,7 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 **Ziehen horizontal (ZH)**
 | ID | Name | Equipment | Stufe | einseitig |
 |---|---|---|---|---|
-| ZH-01 | Kabelrudern sitzend | M | 1 | |
+| ZH-01 | Kabelrudern sitzend | KZ | 1 | |
 | ZH-02 | Rudern mit Band | BD | 1 | |
 | ZH-03 | Einarmiges Kurzhantelrudern auf der Bank | KH + BK | 2 | ja |
 | ZH-04 | Einarmiges Kettlebell-Rudern | KB | 2 | ja |
@@ -193,7 +193,7 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 **Ziehen vertikal (ZV)**
 | ID | Name | Equipment | Stufe | einseitig |
 |---|---|---|---|---|
-| ZV-01 | Latzug | M | 1 | |
+| ZV-01 | Latzug | KZ | 1 | |
 | ZV-02 | Schulterblatt-Klimmzug | ST | 1 | |
 | ZV-03 | Unterstützter Klimmzug (Maschine) | M | 2 | |
 | ZV-04 | Klimmzug mit Fußhilfe | ST | 2 | |
@@ -219,7 +219,7 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 | RU-02 | Bird Dog | – | 1 | ja |
 | RU-03 | Unterarmstütz (Plank) | – | 1 | |
 | RU-04 | Seitstütz | – | 2 | ja |
-| RU-05 | Pallof Press | M oder BD | 2 | ja |
+| RU-05 | Pallof Press | KZ oder BD | 2 | ja |
 | RU-06 | Hollow Hold | – | 3 | |
 | RU-07 | Hängendes Knieheben | ST | 3 | |
 | RU-08 | Turkish Get-up | KB | 4 | ja |

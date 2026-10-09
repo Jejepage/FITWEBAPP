@@ -61,7 +61,11 @@ describe("Seed-Daten", () => {
       eq.some((g) =>
         g.some(
           (a) =>
-            a === "maschinen" || a === "langhantel" || a === "kurzhanteln" || a === "kettlebell",
+            a === "maschinen" ||
+            a === "kabelzug" ||
+            a === "langhantel" ||
+            a === "kurzhanteln" ||
+            a === "kettlebell",
         ),
       );
     for (const u of uebungenSeed) {
@@ -134,6 +138,7 @@ describe("Stufenleitern", () => {
 describe("Abgleich mit docs/SPEC.md §4.2", () => {
   const ABK: Record<string, EquipmentArt> = {
     M: "maschinen",
+    KZ: "kabelzug",
     LH: "langhantel",
     KH: "kurzhanteln",
     KB: "kettlebell",

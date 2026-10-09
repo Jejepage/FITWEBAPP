@@ -3,7 +3,8 @@
 import type { Block, Einheit, EquipmentArt, Exercise, Gewichte, Muster } from "./types";
 
 export const BACKUP_FORMAT = "fit-backup";
-export const BACKUP_VERSION = 1;
+/** Version 2: eigener Kabelzug neben den Maschinen. Dateien der Version 1 werden beim Lesen angehoben. */
+export const BACKUP_VERSION = 2;
 /** Größte akzeptierte Importdatei */
 export const BACKUP_MAX_BYTES = 20 * 1024 * 1024;
 

@@ -45,7 +45,7 @@ export function naechstesGewicht(
 function artDerSteigerung(u: VorschlagEingabe["uebung"]): Art {
   const arten = new Set<string>([...u.equipment.flat(), ...u.optionaleLast]);
   if (arten.has("kurzhanteln") || arten.has("kettlebell")) return "gewicht-hantel";
-  if (arten.has("maschinen") || arten.has("langhantel")) return "gewicht-maschine";
+  if (arten.has("maschinen") || arten.has("kabelzug") || arten.has("langhantel")) return "gewicht-maschine";
   return "gewicht-alltag";
 }
 

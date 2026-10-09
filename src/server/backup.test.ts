@@ -29,7 +29,7 @@ describe("exportiere", () => {
   it("Gesamt-Backup enthält alle Tabellen mit ihren Zeilen", () => {
     const db = dbMitDaten();
     const d = exportiere(db, "alles", JETZT);
-    expect(d).toMatchObject({ format: "fit-backup", version: 1, art: "alles" });
+    expect(d).toMatchObject({ format: "fit-backup", version: 2, art: "alles" });
     expect(d.erstelltAm).toBe("2026-10-08T10:00:00.000Z");
     const a = alles(d);
     expect(a.uebungen).toHaveLength(63);
