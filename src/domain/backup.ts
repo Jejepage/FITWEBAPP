@@ -20,7 +20,7 @@ import { MAX_ANZAHL_GEWICHTE, MAX_GEWICHT_KG } from "./gewichte";
 import { slotKey, slotVorlageVonKey } from "./plan-types";
 import { equipmentArtSchema, exerciseSchema, musterSchema } from "./schemas";
 import { MAX_AUFWAERMEN_ZEICHEN } from "./settings-form";
-import { MUSTER, type Muster } from "./types";
+import { MUSTER, type EquipmentBedingung, type Muster } from "./types";
 import { parseVideoEingabe } from "./youtube";
 
 /** Obergrenzen der Zeilenzahlen je Tabelle (Schutz vor absurd großen Dateien). */
@@ -567,16 +567,49 @@ function pruefeAlles(daten: AllesDaten, m: Meldungen): void {
 
 const fehlschlag = (fehler: string[]): ParseErgebnis => ({ ok: false, fehler });
 
+// Version 1 kannte keinen eigenen Kabelzug ("maschinen" schloss ihn ein). Wie Migration
+// 0003_kabelzug: Profile mit Maschinen bekommen den Kabelzug dazu, die Kabelübungen des
+// Startkatalogs wechseln auf den Kabelzug, sofern ihre Bedingung noch der alten Vorgabe entspricht.
+const KABEL_UEBUNGEN: Record<string, readonly [alt: string, neu: EquipmentBedingung]> = {
+  "ZH-01": ['[["maschinen"]]', [["kabelzug"]]],
+  "ZV-01": ['[["maschinen"]]', [["kabelzug"]]],
+  "RU-05": ['[["maschinen","band"]]', [["kabelzug", "band"]]],
+};
+
+/** Hebt die (noch ungeprüften) Daten einer Datei der Version 1 an; das Original bleibt unberührt. */
+function hebeVersion1An(daten: Record<string, unknown>): Record<string, unknown> {
+  const neu = { ...daten };
+  if (Array.isArray(daten.uebungen)) {
+    neu.uebungen = daten.uebungen.map((u: unknown) => {
+      if (!istObjekt(u) || typeof u.id !== "string" || !Object.hasOwn(KABEL_UEBUNGEN, u.id)) {
+        return u;
+      }
+      const [alt, ersatz] = KABEL_UEBUNGEN[u.id]!;
+      return JSON.stringify(u.equipment) === alt ? { ...u, equipment: ersatz } : u;
+    });
+  }
+  if (Array.isArray(daten.profile)) {
+    neu.profile = daten.profile.map((p: unknown) => {
+      if (!istObjekt(p) || !Array.isArray(p.equipment)) return p;
+      const eq: unknown[] = p.equipment;
+      const i = eq.indexOf("maschinen");
+      if (i < 0 || eq.includes("kabelzug")) return p;
+      return { ...p, equipment: [...eq.slice(0, i + 1), "kabelzug", ...eq.slice(i + 1)] };
+    });
+  }
+  return neu;
+}
+
 function pruefeKopf(roh: Record<string, unknown>, erwartet?: BackupArt): string[] {
   const fehler: string[] = [];
   if (roh.format !== BACKUP_FORMAT) {
     fehler.push(`Die Datei ist kein FIT-Backup (Feld format ist nicht „${BACKUP_FORMAT}“).`);
   }
   if (roh.version === undefined) fehler.push("Die Backup-Version fehlt.");
-  else if (roh.version !== BACKUP_VERSION) {
+  else if (roh.version !== 1 && roh.version !== BACKUP_VERSION) {
     fehler.push(
       `Backup-Version ${anzeige(roh.version)} wird nicht unterstützt ` +
-        `(diese App liest Version ${BACKUP_VERSION}).`,
+        `(diese App liest die Versionen 1 und ${BACKUP_VERSION}).`,
     );
   }
   const art = roh.art;
@@ -629,11 +662,12 @@ function parseIntern(roh: unknown, erwartet?: BackupArt): ParseErgebnis {
   // und eine kleine Datei mit sehr vielen kaputten Zeilen würde Speicher und Zeit sprengen.
   const zuViele = pruefeZeilenzahlen(roh.daten, art);
   if (zuViele.length > 0) return fehlschlag(zuViele);
+  const rohDaten = roh.version === 1 ? hebeVersion1An(roh.daten) : roh.daten;
   const schema = art === "alles" ? allesDatenSchema : katalogDatenSchema;
-  const geprueft = schema.safeParse(roh.daten);
+  const geprueft = schema.safeParse(rohDaten);
   const m = new Meldungen();
   if (!geprueft.success) {
-    for (const issue of geprueft.error.issues) m.add(issueMeldung(issue, roh.daten));
+    for (const issue of geprueft.error.issues) m.add(issueMeldung(issue, rohDaten));
     return fehlschlag(m.ergebnis());
   }
 

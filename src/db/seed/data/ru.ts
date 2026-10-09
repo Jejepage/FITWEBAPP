@@ -120,7 +120,7 @@ export const ru: ExerciseSeed[] = [
     muster: "RU",
     stufe: 2,
     einseitig: true,
-    equipment: [["maschinen", "band"]],
+    equipment: [["kabelzug", "band"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: null,

@@ -7,7 +7,7 @@ export const zh: ExerciseSeed[] = [
     muster: "ZH",
     stufe: 1,
     einseitig: false,
-    equipment: [["maschinen"]],
+    equipment: [["kabelzug"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: null,

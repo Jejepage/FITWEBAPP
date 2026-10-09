@@ -7,7 +7,7 @@ export const zv: ExerciseSeed[] = [
     muster: "ZV",
     stufe: 1,
     einseitig: false,
-    equipment: [["maschinen"]],
+    equipment: [["kabelzug"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: "ZV-03",

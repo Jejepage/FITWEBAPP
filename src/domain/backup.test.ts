@@ -259,7 +259,7 @@ describe("parseBackup: gültige Dateien", () => {
   it("stimmt mit backupDateiSchema überein", () => {
     expect(backupDateiSchema.safeParse(gueltigeDatei()).success).toBe(true);
     expect(backupDateiSchema.safeParse(katalogDatei()).success).toBe(true);
-    expect(backupDateiSchema.safeParse({ ...katalogDatei(), version: 2 }).success).toBe(false);
+    expect(backupDateiSchema.safeParse({ ...katalogDatei(), version: 1 }).success).toBe(false);
   });
 });
 
@@ -270,11 +270,11 @@ describe("parseBackup: Kopf", () => {
   });
 
   it("lehnt eine andere Version mit klarer Meldung ab", () => {
-    expect(fehlerVon({ ...gueltigeDatei(), version: 2 })).toEqual([
-      "Backup-Version 2 wird nicht unterstützt (diese App liest Version 1).",
+    expect(fehlerVon({ ...gueltigeDatei(), version: 3 })).toEqual([
+      "Backup-Version 3 wird nicht unterstützt (diese App liest die Versionen 1 und 2).",
     ]);
-    expect(fehlerVon({ ...gueltigeDatei(), version: "1" })[0]).toContain(
-      "Backup-Version 1 wird nicht unterstützt",
+    expect(fehlerVon({ ...gueltigeDatei(), version: "2" })[0]).toContain(
+      "Backup-Version 2 wird nicht unterstützt",
     );
     expect(fehlerVon({ ...gueltigeDatei(), version: 0 })[0]).toContain("Backup-Version 0");
   });
@@ -301,6 +301,36 @@ describe("parseBackup: Kopf", () => {
     expect(fehlerVon(gueltigeDatei(), "katalog")).toEqual([
       "Die Datei enthält ein Gesamt-Backup, erwartet wurde ein Katalog-Backup.",
     ]);
+  });
+
+  it("hebt Version 1 an: Profile mit Maschinen bekommen den Kabelzug, Kabelübungen wechseln", () => {
+    const roh = gueltigeDatei();
+    const alt = { ...roh, version: 1, daten: { ...roh.daten } };
+    alt.daten.uebungen = alt.daten.uebungen.map((u) =>
+      u.id === "ZH-01"
+        ? { ...u, equipment: [["maschinen"]] }
+        : u.id === "RU-05"
+          ? { ...u, equipment: [["maschinen", "band"]] }
+          : u.id === "ZV-01"
+            ? { ...u, equipment: [["maschinen"], ["bank"]] } // vom Nutzer geändert: bleibt
+            : u,
+    );
+    const vorher = JSON.parse(JSON.stringify(alt)) as unknown;
+    const ergebnis = parseBackup(alt);
+    expect(alt).toEqual(vorher);
+    if (!ergebnis.ok) throw new Error(ergebnis.fehler.join("\n"));
+    expect(ergebnis.datei.version).toBe(BACKUP_VERSION);
+    if (ergebnis.datei.art !== "alles") throw new Error("kein Gesamt-Backup");
+    const d = ergebnis.datei.daten;
+    expect(d.profile.map((p) => p.equipment)).toEqual([
+      ["maschinen", "kabelzug", "langhantel", "bank"],
+      roh.daten.profile[1]!.equipment,
+    ]);
+    const bedingung = (id: string) => d.uebungen.find((u) => u.id === id)!.equipment;
+    expect(bedingung("ZH-01")).toEqual([["kabelzug"]]);
+    expect(bedingung("RU-05")).toEqual([["kabelzug", "band"]]);
+    expect(bedingung("ZV-01")).toEqual([["maschinen"], ["bank"]]);
+    expect(bedingung("KN-02")).toEqual([["maschinen"]]);
   });
 
   it("verlangt einen ISO-Zeitstempel in erstelltAm", () => {
