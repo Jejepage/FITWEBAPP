@@ -1,6 +1,6 @@
 // Ersetzungen einer Einheit: Welche Übungen ersetzen Planübungen, die das Equipment des Plans
 // nicht (mehr) erfüllt, z. B. nach einer Änderung des Equipments? Rein, ohne DB und UI.
-import { erfuellt } from "./equipment";
+import { erfuellt, gleicheBewegung } from "./equipment";
 import type { Block, EquipmentArt, Exercise, Muster } from "./types";
 
 export interface ErsetzSlot {
@@ -31,8 +31,9 @@ const nachId = (a: Exercise, b: Exercise): number => (a.id < b.id ? -1 : a.id > 
 
 /**
  * Passt die Planübung zum Equipment, bleibt sie. Sonst die ähnlichste Übung desselben Musters:
- * Planübungen vor Ersatzübungen, dann kleinster Stufenabstand, bei Gleichstand die niedrigere
- * Stufe, dann gleiche Einseitigkeit, dann nach ID.
+ * Planübungen vor Ersatzübungen, dann eine Variante der Planübung (z. B. mit Kettlebell statt
+ * Kurzhantel), dann kleinster Stufenabstand, bei Gleichstand die niedrigere Stufe, dann gleiche
+ * Einseitigkeit, dann nach ID.
  */
 export function ersetzungenFuerEquipment(e: ErsetzEingabe): ErsetzErgebnis {
   const katalog = new Map(e.uebungen.map((u) => [u.id, u]));
@@ -52,12 +53,17 @@ export function ersetzungenFuerEquipment(e: ErsetzEingabe): ErsetzErgebnis {
       .map((u) => ({
         u,
         ersatz: u.ersatz ? 1 : 0,
+        variante: original && gleicheBewegung(u, original) ? 0 : 1,
         abstand: Math.abs(u.stufe - stufe),
         anderer: u.einseitig === einseitig ? 0 : 1,
       }))
       .sort(
         (a, b) =>
-          a.ersatz - b.ersatz || a.abstand - b.abstand || a.u.stufe - b.u.stufe || a.anderer - b.anderer,
+          a.ersatz - b.ersatz ||
+          a.variante - b.variante ||
+          a.abstand - b.abstand ||
+          a.u.stufe - b.u.stufe ||
+          a.anderer - b.anderer,
       )[0];
     if (beste) ersetzungen[String(slot.slotId)] = beste.u.id;
     else fehlend.add(slot.muster);

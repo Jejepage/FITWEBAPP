@@ -57,7 +57,7 @@ describe("parseSpalten", () => {
 
   it("alle Spalten wählbar, Round-Trip", () => {
     expect(parseSpalten(serialisiereSpalten(SPALTEN))).toEqual([...SPALTEN]);
-    expect(SPALTEN).toHaveLength(15);
+    expect(SPALTEN).toHaveLength(14);
   });
 });
 

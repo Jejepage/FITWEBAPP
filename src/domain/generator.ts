@@ -1,5 +1,5 @@
 // Plan-Generator (Spec 2.4 und F3). Rein und deterministisch: kein Math.random, kein Date.
-import { erfuellt } from "./equipment";
+import { erfuellt, gleicheBewegung } from "./equipment";
 import {
   SLOT_VORLAGE,
   type GeneratorEingabe,
@@ -46,13 +46,17 @@ const nachId = (a: Exercise, b: Exercise): number => (a.id < b.id ? -1 : a.id > 
 function sortierteKandidaten(e: KandidatenEingabe, muster: Muster, seed: number): Exercise[] {
   const wunsch = begrenzeStufe(e.stufen[muster]);
   const zufall = seed > 0 ? mulberry32(seed * 1000 + MUSTER.indexOf(muster)) : null;
+  // Auch eine Variante einer zuletzt verwendeten Übung zählt als schon benutzt.
+  const vorher = e.vorherVerwendet
+    ? e.uebungen.filter((u) => e.vorherVerwendet!.has(u.id))
+    : [];
   return e.uebungen
     .filter((u) => u.muster === muster && u.aktiv && erfuellt(u.equipment, e.equipment))
     .sort(nachId)
     .map((u) => ({
       u,
       rang: stufenRang(u.stufe, wunsch),
-      benutzt: e.vorherVerwendet?.has(u.id) ? 1 : 0,
+      benutzt: vorher.some((v) => gleicheBewegung(u, v)) ? 1 : 0,
       los: zufall ? zufall() : 0,
     }))
     .sort(
@@ -110,7 +114,11 @@ function erzwingeEinseitig(
     const liste = kandidaten[slot.muster];
     const einseitige = liste.filter((u) => u.einseitig);
     const andere = slots.find((s) => s.muster === slot.muster && s.einheit !== slot.einheit);
-    const wahl = einseitige.find((u) => u.id !== andere?.exerciseId) ?? einseitige[0];
+    const andereUebung = andere && liste.find((u) => u.id === andere.exerciseId);
+    const wahl =
+      einseitige.find((u) => !andereUebung || !gleicheBewegung(u, andereUebung)) ??
+      einseitige.find((u) => u.id !== andere?.exerciseId) ??
+      einseitige[0];
     if (!wahl) continue;
     // Eine einseitige Planübung schlägt eine einseitige Ersatzübung, danach zählt der Stufenrang.
     const rang = Number(wahl.ersatz) * 10 + stufenRang(wahl.stufe, begrenzeStufe(stufen[slot.muster]));
@@ -133,8 +141,13 @@ export function generierePlan(e: GeneratorEingabe): GeneratorErgebnis {
 
   const slots: SlotZuordnung[] = SLOT_VORLAGE.map((vorlage) => {
     const liste = kandidaten[vorlage.muster];
-    // Gibt es nur einen Kandidaten, teilen sich A und B dieselbe Übung.
-    const wahl = (vorlage.einheit === "A" ? liste[0] : (liste[1] ?? liste[0])) as Exercise;
+    const a = liste[0] as Exercise;
+    // B: die beste Übung, die keine Variante von A ist; sonst die zweitbeste. Gibt es nur einen
+    // Kandidaten, teilen sich A und B dieselbe Übung.
+    const wahl =
+      vorlage.einheit === "A"
+        ? a
+        : (liste.find((u) => !gleicheBewegung(u, a)) ?? liste[1] ?? a);
     return { ...vorlage, exerciseId: wahl.id };
   });
   erzwingeEinseitig(slots, kandidaten, e.stufen);

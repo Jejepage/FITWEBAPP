@@ -37,7 +37,7 @@ Browser behandeln `http://192.168.x.x` nicht als sicheren Kontext. Daraus folgt:
 ### Ergänzungen zum Datenmodell der Spec
 
 - `exercise.pruefstatus` (`zu_pruefen` | `geprueft`): Die Spec verlangt den Status „zu prüfen" in §4.2, führt aber kein Feld dafür auf.
-- `exercise.optionale_last` (Equipment-Liste): Beispiele sind `–/KH` bei Split Squat und `Stuhl/BK, optional KH` bei Bulgarian Split Squat. Die Übung läuft mit `equipment: []`. Dieses Feld sagt, womit man sie beladen kann. Daraus ergibt sich, ob `gewicht` als Steigerungsart und welche Hantelstufen zählen.
+- `exercise.optionale_last` (Equipment-Liste): Beispiele sind `–/KH` bei Split Squat und `Stuhl/BK, optional KH` bei Bulgarian Split Squat. Die Übung läuft mit `equipment: []`. Dieses Feld sagt, womit man sie beladen kann. Daraus ergibt sich, ob `gewicht` als Steigerungsart und welche Hantelstufen zählen. *(Später entfallen: Varianten mit und ohne Gewicht sind eigene Übungen, siehe SPEC 3.3.)*
 - `settings.aufwaermen_text`.
 - `set_log.id` (Client-UUID) für idempotentes Speichern bei erneutem Senden.
 - Stufenleiter (`leichter_id`/`schwerer_id`) definiere ich zentral im Seed und sichere sie per Validierungstest ab (siehe unten).
@@ -54,7 +54,7 @@ src/components/     UI (mobile-first), Client Components nur wo nötig (Training
 src/server/         Queries/Repositories (Drizzle), Actions-Hilfen, Auth
 src/domain/         REINE TS-Logik, keine DB/React-Importe, voll unit-getestet
   types.ts            Muster, Equipment, Exercise, Slot … (Vertrag für alle Module)
-  equipment.ts        erfuellt(bedingung, equipment) für Gruppenlisten, Ersatz-Vorbelegung
+  equipment.ts        erfuellt(bedingung, equipment): alle Geräte vorhanden, Ersatz-Vorbelegung
   generator.ts        Plan-Generator (F3), Kandidatenlisten, Tausch-Kandidaten
   weeks.ts            Wochenvorgaben 2.5, Rundenzahl, Pausenzeiten
   progression.ts      Doppelprogression, nächste Hantelstufe, Tempo/Stufe, Stufen-Check
@@ -96,8 +96,8 @@ Nach jedem Abschnitt prüft ein **unabhängiger Reviewer-Agent** mit frischem Ko
 
 ## Wichtige Prüffälle (Tests)
 
-- **Generator:** Typische Equipment-Auswahlen (alles, zuhause, nur Stange) liefern gültige A/B-Pläne mit Regeln aus 2.4. Planübungen gehen vor Ersatzübungen (Körpergewicht, Band), die nur auffüllen. Zum Beispiel ist mit nur der Stange für ZH nur ZH-07 möglich, dann sind gleiche Übungen in A und B erlaubt („falls möglich"). Pro Woche mindestens eine einseitige KN/HB-Übung. Folgeblock bevorzugt bisher nicht genutzte Übungen. Stufenwahl: Nutzerstufe, sonst nächstniedrigere, sonst nächsthöhere.
-- **Equipment:** Gruppenlogik `[["kurzhanteln","kettlebell"]]`, `[["kurzhanteln"],["bank"]]`, `[]`.
+- **Generator:** Typische Equipment-Auswahlen (alles, zuhause, nur Stange) liefern gültige A/B-Pläne mit Regeln aus 2.4. Planübungen gehen vor Ersatzübungen (Körpergewicht, Band), die nur auffüllen. Mit nur der Stange gibt es für ZH nur Ersatzübungen (ZH-08, ZH-07). B nimmt möglichst keine Variante der A-Übung. Pro Woche mindestens eine einseitige KN/HB-Übung. Folgeblock bevorzugt bisher nicht genutzte Übungen. Stufenwahl: Nutzerstufe, sonst nächstniedrigere, sonst nächsthöhere.
+- **Equipment:** `["kurzhanteln"]`, `["kurzhanteln","bank"]` (beides nötig), `[]`.
 - **Progression:** Obergrenze in allen Sätzen bei RPE ≤ 8 führt zu Gewichtserhöhung. Hantelstufen aus den Hantelgewichten des Plans. Danach Wdh, Tempo, Stufe (Ersatzübungen ohne Tempo und Stufe). Zeit- und Streckenübungen. Woche 6 zählt nicht zur Steigerung.
 - **Seed-Validierung:** Leiter ohne Zyklen und mit gleichem Muster, Stufen strikt aufsteigend, alle IDs vorhanden, Equipment nur aus der erlaubten Liste, Seed zweimal ausführen ändert nichts.
 

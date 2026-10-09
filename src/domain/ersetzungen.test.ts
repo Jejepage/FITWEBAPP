@@ -20,7 +20,13 @@ const u = (
   id: string,
   muster: Muster,
   stufe: number,
-  o: { einseitig?: boolean; equipment?: EquipmentBedingung; aktiv?: boolean; ersatz?: boolean } = {},
+  o: {
+    einseitig?: boolean;
+    equipment?: EquipmentBedingung;
+    aktiv?: boolean;
+    ersatz?: boolean;
+    videoUrl?: string;
+  } = {},
 ): Exercise => ({
   ...basis,
   id,
@@ -30,6 +36,7 @@ const u = (
   equipment: o.equipment ?? [],
   aktiv: o.aktiv ?? true,
   ersatz: o.ersatz ?? false,
+  videoUrl: o.videoUrl ?? null,
 });
 
 const slot = (
@@ -88,7 +95,7 @@ describe("ersetzungenFuerEquipment mit dem Seed-Katalog", () => {
 });
 
 describe("ersetzungenFuerEquipment: Auswahl des Ersatzes", () => {
-  const maschine: EquipmentBedingung = [["maschinen"]];
+  const maschine: EquipmentBedingung = ["maschinen"];
 
   it("kleinster Stufenabstand zur Planübung", () => {
     const r = ersetzungenFuerEquipment({
@@ -116,6 +123,20 @@ describe("ersetzungenFuerEquipment: Auswahl des Ersatzes", () => {
     expect(r.ersetzungen["1"]).toBe("KN-92");
   });
 
+  it("eine Variante der Planübung (gleiches Video) geht vor, auch bei größerem Stufenabstand", () => {
+    const video = "https://www.youtube.com/watch?v=FQiMMHcWLLM";
+    const r = ersetzungenFuerEquipment({
+      slots: [slot(1, "KN", "KN-90")],
+      uebungen: [
+        u("KN-90", "KN", 2, { equipment: ["kurzhanteln"], videoUrl: video }),
+        u("KN-91", "KN", 2),
+        u("KN-92", "KN", 3, { equipment: ["kettlebell"], videoUrl: video }),
+      ],
+      equipment: ["kettlebell"],
+    });
+    expect(r.ersetzungen["1"]).toBe("KN-92");
+  });
+
   it("gibt es nur Ersatzübungen, wird die ähnlichste Ersatzübung gewählt", () => {
     const r = ersetzungenFuerEquipment({
       slots: [slot(1, "KN", "KN-90")],
@@ -134,7 +155,7 @@ describe("ersetzungenFuerEquipment: Auswahl des Ersatzes", () => {
       slots: [slot(1, "ZH", "ZH-90")],
       uebungen: [
         u("ZH-90", "ZH", 2, { equipment: maschine }),
-        u("ZH-91", "ZH", 1, { equipment: [["band"]], ersatz: true }),
+        u("ZH-91", "ZH", 1, { equipment: ["band"], ersatz: true }),
       ],
       equipment: [],
     });
@@ -221,9 +242,9 @@ describe("ersetzungenFuerEinheit", () => {
   const eingabe = {
     slots: [slot(1, "KN", "KN-90", "1"), slot(2, "TR", "TR-90", "Z")],
     uebungen: [
-      u("KN-90", "KN", 3, { equipment: [["maschinen"]] }),
+      u("KN-90", "KN", 3, { equipment: ["maschinen"] }),
       u("KN-91", "KN", 2),
-      u("TR-90", "TR", 2, { equipment: [["maschinen"]] }),
+      u("TR-90", "TR", 2, { equipment: ["maschinen"] }),
     ],
     equipment: [] as const,
   };

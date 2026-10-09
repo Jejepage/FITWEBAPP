@@ -106,7 +106,6 @@ export default async function KatalogPage({
     muskeln: ["muskel"],
     steigerung: [],
     leiter: [],
-    last: [],
     status: ["status"],
     aktiv: ["aktiv"],
     video: ["video"],

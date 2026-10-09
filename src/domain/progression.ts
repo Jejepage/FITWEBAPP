@@ -43,7 +43,7 @@ export function naechstesGewicht(
 }
 
 function artDerSteigerung(u: VorschlagEingabe["uebung"]): Art {
-  const arten = new Set<string>([...u.equipment.flat(), ...u.optionaleLast]);
+  const arten = new Set<string>(u.equipment);
   if (arten.has("kurzhanteln") || arten.has("kettlebell")) return "gewicht-hantel";
   if (arten.has("maschinen") || arten.has("kabelzug") || arten.has("langhantel")) return "gewicht-maschine";
   return "gewicht-alltag";
@@ -51,7 +51,7 @@ function artDerSteigerung(u: VorschlagEingabe["uebung"]): Art {
 
 /** Vereinigte Stufenliste der Hantelarten, die die Übung nutzt (aufsteigend, ohne Doppelte). */
 function hantelListe(u: VorschlagEingabe["uebung"], gewichte: Gewichte): number[] {
-  const arten = new Set<string>([...u.equipment.flat(), ...u.optionaleLast]);
+  const arten = new Set<string>(u.equipment);
   const alle: number[] = [];
   if (arten.has("kurzhanteln")) alle.push(...(gewichte.kurzhanteln ?? []));
   if (arten.has("kettlebell")) alle.push(...(gewichte.kettlebell ?? []));

@@ -10,7 +10,7 @@ import { videoLink } from "@/domain/youtube";
 import { abschnittTitel, gruppe, karte, knopfPrimaer, knopfSekundaer } from "@/components/ui";
 import { db } from "@/db/client";
 import { beschreibeBedingung } from "@/domain/equipment";
-import { EQUIPMENT_NAMEN, MUSTER_NAMEN } from "@/domain/types";
+import { MUSTER_NAMEN } from "@/domain/types";
 import { de } from "@/i18n/de";
 import { MUSTER_FARBE } from "@/lib/muster-farbe";
 import { getExercise, getLadder } from "@/server/exercises";
@@ -150,11 +150,6 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
                         </span>
                       ))}
                   </span>
-                </Eckdatum>
-                <Eckdatum name={t.optionaleLast}>
-                  {e.optionaleLast.length > 0
-                    ? e.optionaleLast.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
-                    : t.keineOptionaleLast}
                 </Eckdatum>
                 <Eckdatum name={t.hauptmuskeln}>{e.hauptmuskeln.join(", ")}</Eckdatum>
                 <Eckdatum name={t.belastung}>{t.belastungsarten[e.belastungsart]}</Eckdatum>

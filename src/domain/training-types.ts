@@ -76,7 +76,6 @@ export interface VorschlagEingabe {
     | "standardBereich"
     | "steigerungsart"
     | "equipment"
-    | "optionaleLast"
     | "schwererId"
     | "ersatz"
   >;

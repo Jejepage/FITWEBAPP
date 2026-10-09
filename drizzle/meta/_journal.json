@@ -50,6 +50,13 @@
       "when": 1791579883318,
       "tag": "0006_profile_entfernen",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1791588758657,
+      "tag": "0007_equipment_flach",
+      "breakpoints": true
     }
   ]
 }
