@@ -15,7 +15,8 @@ const schritt = (s) => console.log(`  ${s}`);
 /** Haken des Equipments setzen: genau die genannten Arten sind angekreuzt. */
 async function equipmentWaehlen(page, namen) {
   const alle = [
-    "Maschinen/Kabelzug",
+    "Maschinen",
+    "Kabelzug",
     "Langhantel",
     "Kurzhanteln",
     "Kettlebell",
@@ -80,7 +81,7 @@ async function ablauf(browser, dbPfad) {
       `${n} ist vorausgewählt`,
     );
   }
-  for (const n of ["Maschinen/Kabelzug", "Langhantel", "Band"]) {
+  for (const n of ["Maschinen", "Kabelzug", "Langhantel", "Band"]) {
     assert.ok(
       !(await page.getByRole("checkbox", { name: n, exact: true }).isChecked()),
       `${n} ist nicht vorausgewählt`,
@@ -146,7 +147,7 @@ async function ablauf(browser, dbPfad) {
   schritt("Nur Stange: ZH-08 in A, ZH-07 in B, Ersatzübungen füllen auf");
 
   // Equipment ändern und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
-  await equipmentWaehlen(page, ["Stange", "Maschinen/Kabelzug"]);
+  await equipmentWaehlen(page, ["Stange", "Maschinen"]);
   await page
     .getByRole("button", { name: "Plan speichern und aktivieren" })
     .click();
@@ -199,7 +200,8 @@ async function ablauf(browser, dbPfad) {
 
   // 7. 'Anders mischen' ändert die Belegung (mit allem Equipment gibt es gleichwertige Kandidaten)
   await equipmentWaehlen(page, [
-    "Maschinen/Kabelzug",
+    "Maschinen",
+    "Kabelzug",
     "Langhantel",
     "Kurzhanteln",
     "Kettlebell",

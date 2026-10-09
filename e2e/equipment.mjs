@@ -54,7 +54,7 @@ async function ablauf(browser, dbPfad) {
     .getByRole("heading", { name: "Equipment ändern", level: 1 })
     .waitFor();
   assert.ok(await box("Kurzhanteln").isChecked());
-  assert.ok(!(await box("Maschinen/Kabelzug").isChecked()));
+  assert.ok(!(await box("Maschinen").isChecked()));
   assert.equal(
     await page.getByLabel("Gewichte Kurzhanteln (kg)").inputValue(),
     "2–20/2",
@@ -65,13 +65,13 @@ async function ablauf(browser, dbPfad) {
   schritt("Equipment-Seite zeigt Häkchen, Gewichte und die Machbar-Vorschau");
 
   // 2. Neue Maschine und andere Hantelgewichte speichern
-  await box("Maschinen/Kabelzug").check();
+  await box("Maschinen").check();
   await page.getByLabel("Gewichte Kurzhanteln (kg)").fill("10, 20");
   await speichern();
   await page
     .getByRole("heading", { name: "Plan", level: 1, exact: true })
     .waitFor();
-  await page.getByText("Maschinen/Kabelzug, Kurzhanteln, Kettlebell").waitFor();
+  await page.getByText("Maschinen, Kurzhanteln, Kettlebell").waitFor();
   const gespeichert = abfrage("select equipment, gewichte from plan")[0];
   assert.deepEqual(JSON.parse(gespeichert.equipment), [
     "maschinen",
@@ -140,7 +140,7 @@ async function ablauf(browser, dbPfad) {
   await box("Kurzhanteln").uncheck();
   await box("Kettlebell").uncheck();
   await box("Bank").uncheck();
-  await box("Maschinen/Kabelzug").uncheck();
+  await box("Maschinen").uncheck();
   await speichern();
   await page
     .getByText(/Für \d+ Übungen? des Plans fehlt Equipment/)

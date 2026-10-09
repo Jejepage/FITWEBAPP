@@ -57,9 +57,9 @@ async function ablauf(name, viewport) {
   const namen = await page
     .locator("main a[href^='/katalog/ZV-']")
     .allInnerTexts();
-  assert.equal(namen.length, 4, "Stange/ZV: vier Übungen");
+  assert.equal(namen.length, 5, "Stange/ZV: fünf Übungen");
   assert.ok(page.url().includes("muster=ZV") && page.url().includes("machbar=ja"));
-  schritt("Filter Muster+machbar funktioniert (ZV/nur Stange → 4)");
+  schritt("Filter Muster+machbar funktioniert (ZV/nur Stange → 5)");
 
   // Filter zurücksetzen (Bereich bleibt nach dem Filtern offen), dann Stufe+einseitig
   await page.getByRole("link", { name: "Zurücksetzen" }).first().click();

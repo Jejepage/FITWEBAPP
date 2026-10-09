@@ -190,7 +190,8 @@ async function ablauf(browser, dbPfad) {
   assert.equal(plaene[1].status, "aktiv");
   assert.equal(plaene[1].vorgaenger_id, altPlan.id);
   const stufen = JSON.parse(plaene[1].stufen);
-  assert.deepEqual([stufen.KN, stufen.HB, stufen.DH, stufen.ZV], [3, 1, 4, 2]);
+  // ZV: Schulterblatt-Klimmzug (ZV-02, 6–10 Wdh) erreicht mit 10 Wdh die Obergrenze → Stufe 3
+  assert.deepEqual([stufen.KN, stufen.HB, stufen.DH, stufen.ZV], [3, 1, 4, 3]);
   d.close();
   assert.equal(
     await page.getByRole("heading", { name: "Stufen-Check" }).count(),

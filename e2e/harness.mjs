@@ -17,7 +17,8 @@ export async function hinweisBestaetigen(page, base = BASE) {
 }
 
 const EQUIPMENT_NAMEN = [
-  "Maschinen/Kabelzug",
+  "Maschinen",
+  "Kabelzug",
   "Langhantel",
   "Kurzhanteln",
   "Kettlebell",
