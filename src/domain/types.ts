@@ -16,6 +16,7 @@ export const MUSTER_NAMEN: Record<Muster, string> = {
 
 export const EQUIPMENT_ARTEN = [
   "maschinen",
+  "kabelzug",
   "langhantel",
   "kurzhanteln",
   "kettlebell",
@@ -81,9 +82,9 @@ export interface Exercise {
 }
 
 /** Was in den Seed-Dateien steht; `ersatz` leitet data/index.ts ab, der Rest kommt vom Seed-Runner. */
-export type ExerciseSeedRoh = Omit<Exercise, "bild" | "videoUrl" | "aktiv" | "pruefstatus" | "ersatz">;
+export type ExerciseSeedRoh = Omit<Exercise, "bild" | "aktiv" | "pruefstatus" | "ersatz">;
 
-/** Eine Seed-Übung samt Ersatz-Kennzeichen (der Seed-Runner ergänzt bild/videoUrl/aktiv/pruefstatus). */
+/** Eine Seed-Übung samt Ersatz-Kennzeichen (der Seed-Runner ergänzt bild/aktiv/pruefstatus). */
 export type ExerciseSeed = ExerciseSeedRoh & { ersatz: boolean };
 
 export type Einheit = "A" | "B";
@@ -93,7 +94,8 @@ export type Block = "1" | "2" | "Z";
 export type Gewichte = Partial<Record<EquipmentArt, number[]>>;
 
 export const EQUIPMENT_NAMEN: Record<EquipmentArt, string> = {
-  maschinen: "Maschinen/Kabelzug",
+  maschinen: "Maschinen",
+  kabelzug: "Kabelzug",
   langhantel: "Langhantel",
   kurzhanteln: "Kurzhanteln",
   kettlebell: "Kettlebell",

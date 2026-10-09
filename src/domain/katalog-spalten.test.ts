@@ -161,7 +161,8 @@ describe("sortiereKatalog", () => {
       ...katalog.find((e) => e.id === "KN-02")!,
       videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     };
-    const liste = katalog.map((e) => (e.id === "KN-02" ? mit : e));
+    // Der Seed bringt für jede Übung einen Link mit; hier hat nur KN-02 einen.
+    const liste = katalog.map((e) => (e.id === "KN-02" ? mit : { ...e, videoUrl: null }));
     const kn = sortiereKatalog(liste, "video", "ab").filter(
       (e) => e.muster === "KN",
     );

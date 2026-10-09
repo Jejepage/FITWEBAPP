@@ -29,6 +29,7 @@ export const hb: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Der Rücken bleibt in der Endposition gerade, das Becken wird nicht höher als bis zur Linie Schulter–Knie gedrückt. Zu leicht: HB-03 Einbeinige Hüftbrücke.",
+    videoUrl: "https://www.youtube.com/watch?v=R27gxYThmMM",
   },
   {
     id: "HB-02",
@@ -59,6 +60,7 @@ export const hb: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Richte dich nur bis zur geraden Linie auf, nicht darüber hinaus. Ohne Gerät: HB-01 Hüftbrücke.",
+    videoUrl: "https://www.youtube.com/watch?v=Hn1-8C3k19Q",
   },
   {
     id: "HB-03",
@@ -69,7 +71,7 @@ export const hb: ExerciseSeedRoh[] = [
     equipment: [],
     optionaleLast: [],
     leichterId: "HB-01",
-    schwererId: "HB-09",
+    schwererId: "HB-10",
     hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rumpf"],
     belastungsart: "wdh",
     standardBereich: "8–12",
@@ -83,7 +85,8 @@ export const hb: ExerciseSeedRoh[] = [
     ],
     fehler: ["Becken kippt zur Seite", "Hohlkreuz beim Hochdrücken", "Schwung statt Kontrolle"],
     hinweise:
-      "Halte das freie Bein gestreckt in einer Linie mit dem Oberschenkel des Standbeins. Höher führt ins Hohlkreuz. Zu schwer: HB-01 Hüftbrücke. Zu leicht: HB-09 Einbeiniges rumänisches Kreuzheben.",
+      "Halte das freie Bein gestreckt in einer Linie mit dem Oberschenkel des Standbeins. Höher führt ins Hohlkreuz. Zu schwer: HB-01 Hüftbrücke. Zu leicht: HB-10 Einbeiniger Hip Thrust.",
+    videoUrl: "https://www.youtube.com/watch?v=GYTG7p3doi4",
   },
   {
     id: "HB-04",
@@ -113,7 +116,8 @@ export const hb: ExerciseSeedRoh[] = [
       "Überstreckung oben",
     ],
     hinweise:
-      "Gehe nur so tief, wie der Rücken gerade bleibt, meist bis unter das Knie. Zu schwer: HB-01 Hüftbrücke oder HB-05 Kettlebell-Kreuzheben (zum Üben der Bewegung).",
+      "Gehe nur so tief, wie der Rücken gerade bleibt, meist bis unter das Knie. Zu schwer: HB-01 Hüftbrücke oder HB-05 Kettlebell-Kreuzheben (zum Üben der Bewegung). Zu leicht oder Hanteln am Limit: HB-09 Einbeiniges rumänisches Kreuzheben mit Kurzhantel.",
+    videoUrl: "https://www.youtube.com/watch?v=n9HS63PRILs",
   },
   {
     id: "HB-05",
@@ -144,6 +148,7 @@ export const hb: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Wenn die Beweglichkeit zum Greifen fehlt, erhöhe die Kettlebell auf einem Block oder Stapel Bücher. Zu leicht: HB-06 Kettlebell-Swing.",
+    videoUrl: "https://www.youtube.com/watch?v=twqvFuLfh98",
   },
   {
     id: "HB-06",
@@ -174,6 +179,7 @@ export const hb: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Wähle ein Gewicht, bei dem der Rücken in jeder Wiederholung gerade bleibt. Halte den Platz frei. Brich bei nachlassender Technik ab und setze die Kettlebell vor dir ab, ohne sie abzufangen. Zu schwer: HB-05 Kettlebell-Kreuzheben, um die Hüftbewegung zuerst ohne Schwung zu üben.",
+    videoUrl: "https://www.youtube.com/watch?v=w8jgDA6ZNus",
   },
   {
     id: "HB-07",
@@ -181,7 +187,7 @@ export const hb: ExerciseSeedRoh[] = [
     muster: "HB",
     stufe: 3,
     einseitig: false,
-    equipment: [["bank"], ["kurzhanteln", "langhantel"]],
+    equipment: [["bank"], ["kurzhanteln", "kettlebell", "langhantel"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
@@ -191,7 +197,7 @@ export const hb: ExerciseSeedRoh[] = [
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
       "Setze dich auf den Boden, der obere Rücken liegt an der Bankkante, die Füße stehen hüftbreit.",
-      "Lege die Hantel quer über die Hüfte und halte sie mit beiden Händen fest.",
+      "Lege die Hantel quer über die Hüfte (eine Kettlebell am Griff auf die Hüfte) und halte sie mit beiden Händen fest.",
       "Drücke die Fersen in den Boden und hebe die Hüfte, bis Oberschenkel und Rumpf eine Linie bilden.",
       "Das Kinn bleibt leicht zur Brust, der Blick geht nach vorn.",
       "Senke die Hüfte kontrolliert ab.",
@@ -203,7 +209,8 @@ export const hb: ExerciseSeedRoh[] = [
       "Hantel rutscht, weil sie nicht gesichert ist",
     ],
     hinweise:
-      "Ein Polster oder zusammengerolltes Handtuch unter der Hantel entlastet die Hüftknochen. Stelle die Bank an eine Wand. Bei der Langhantel muss sie gegen Wegrollen gesichert sein. Zu schwer: HB-01 Hüftbrücke oder HB-03 Einbeinige Hüftbrücke ohne Gewicht.",
+      "Ein Polster oder zusammengerolltes Handtuch unter der Hantel entlastet die Hüftknochen. Stelle die Bank an eine Wand; zuhause geht auch ein stabiles Sofa. Bei der Langhantel muss sie gegen Wegrollen gesichert sein. Zu schwer: HB-01 Hüftbrücke oder HB-10 Einbeiniger Hip Thrust ohne Gewicht.",
+    videoUrl: "https://www.youtube.com/watch?v=XVAp1A1nnxU",
   },
   {
     id: "HB-08",
@@ -234,6 +241,7 @@ export const hb: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Beginne mit leichtem Gewicht und achte auf einen geraden Rücken. Zu schwer: HB-04 Rumänisches Kreuzheben mit Kurzhanteln.",
+    videoUrl: "https://www.youtube.com/watch?v=uoVxb3S4ZXY",
   },
   {
     id: "HB-09",
@@ -243,7 +251,7 @@ export const hb: ExerciseSeedRoh[] = [
     einseitig: true,
     equipment: [],
     optionaleLast: ["kurzhanteln", "kettlebell"],
-    leichterId: "HB-03",
+    leichterId: "HB-10",
     schwererId: null,
     hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rumpf"],
     belastungsart: "wdh",
@@ -263,6 +271,38 @@ export const hb: ExerciseSeedRoh[] = [
       "Gewicht schwingt vom Körper weg",
     ],
     hinweise:
-      "Eine Hand an Wand oder Stuhl hilft beim Gleichgewicht. Zu schwer: HB-03 Einbeinige Hüftbrücke.",
+      "Eine Hand an Wand oder Stuhl hilft beim Gleichgewicht. Ohne Gewicht ist die Übung vor allem Gleichgewichtstraining; zum Steigern nimm eine Kurzhantel oder Kettlebell in die Hand auf der Seite des freien Beins. Zu schwer: HB-10 Einbeiniger Hip Thrust.",
+    videoUrl: "https://www.youtube.com/watch?v=VRF34kJgkdA",
+  },
+  {
+    id: "HB-10",
+    name: "Einbeiniger Hip Thrust",
+    muster: "HB",
+    stufe: 3,
+    einseitig: true,
+    equipment: [],
+    optionaleLast: ["kurzhanteln", "kettlebell"],
+    leichterId: "HB-03",
+    schwererId: "HB-09",
+    hauptmuskeln: ["Gesäß", "Oberschenkelrückseite", "Rumpf"],
+    belastungsart: "wdh",
+    standardBereich: "8–12",
+    steigerungsart: ["wdh", "tempo", "gewicht", "stufe"],
+    ausfuehrung: [
+      "Setze dich vor ein stabiles Sofa oder eine Bank und lege den oberen Rücken (unterhalb der Schulterblätter) an die Kante.",
+      "Stelle einen Fuß hüftbreit vor dir auf, das Knie ist etwa 90° gebeugt; ziehe das andere Knie zur Brust oder strecke das Bein.",
+      "Drücke die Ferse des Standbeins in den Boden und hebe die Hüfte, bis Oberschenkel und Rumpf eine Linie bilden.",
+      "Halte das Becken waagerecht, das Kinn bleibt leicht zur Brust.",
+      "Senke die Hüfte kontrolliert ab, ohne den Boden abzulegen, und wechsle nach dem Satz die Seite.",
+    ],
+    fehler: [
+      "Becken kippt zur Seite",
+      "Hohlkreuz oben statt Streckung aus der Hüfte",
+      "Fuß steht zu weit vorn, die Oberschenkelrückseite krampft",
+      "Abdrücken mit Schwung",
+    ],
+    hinweise:
+      "Sofa oder Bank dürfen nicht wegrutschen, stelle sie an eine Wand. Zum Steigern lege eine Kurzhantel oder Kettlebell auf die Hüfte des Standbeins. Zu schwer: HB-03 Einbeinige Hüftbrücke. Zu leicht: HB-09 Einbeiniges rumänisches Kreuzheben.",
+    videoUrl: "https://www.youtube.com/watch?v=zDDYguoMJTQ",
   },
 ];

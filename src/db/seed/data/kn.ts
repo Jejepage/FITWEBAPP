@@ -29,6 +29,7 @@ export const kn: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Wähle einen Stuhl so, dass die Knie im Sitzen etwa im rechten Winkel stehen; eine höhere Sitzfläche macht es leichter. Der Stuhl darf nicht wegrutschen, stelle ihn z. B. an die Wand. Zu leicht: KN-03 Kniebeuge mit Körpergewicht.",
+    videoUrl: "https://www.youtube.com/watch?v=AVOS2JYsgrs",
   },
   {
     id: "KN-02",
@@ -59,6 +60,7 @@ export const kn: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Stelle den Sitz so ein, dass das Becken beim Beugen am Polster bleibt. Ohne Gerät: KN-03 Kniebeuge mit Körpergewicht.",
+    videoUrl: "https://www.youtube.com/watch?v=envAdDzXz0k",
   },
   {
     id: "KN-03",
@@ -88,6 +90,7 @@ export const kn: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Die Knie dürfen leicht über die Zehen hinausgehen, wenn die Fersen am Boden bleiben. Zu schwer: KN-01 Kniebeuge auf Stuhl/Box. Zu leicht: KN-05 Split Squat (stationärer Ausfallschritt).",
+    videoUrl: "https://www.youtube.com/watch?v=YzeTDC33PnI",
   },
   {
     id: "KN-04",
@@ -117,6 +120,7 @@ export const kn: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Das Gewicht vor der Brust hilft, den Oberkörper aufrecht zu halten. Ohne Gewicht: KN-03 Kniebeuge mit Körpergewicht. Zu leicht: KN-06 Ausfallschritt rückwärts.",
+    videoUrl: "https://www.youtube.com/watch?v=FQiMMHcWLLM",
   },
   {
     id: "KN-05",
@@ -146,6 +150,7 @@ export const kn: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Halte dich bei Bedarf an einer Wand oder Stuhllehne fest. Zu schwer: KN-03 Kniebeuge mit Körpergewicht. Zu leicht: KN-07 Bulgarian Split Squat.",
+    videoUrl: "https://www.youtube.com/watch?v=Tc5AyyRp9s8",
   },
   {
     id: "KN-06",
@@ -153,8 +158,8 @@ export const kn: ExerciseSeedRoh[] = [
     muster: "KN",
     stufe: 3,
     einseitig: true,
-    equipment: [["kurzhanteln", "kettlebell"]],
-    optionaleLast: [],
+    equipment: [],
+    optionaleLast: ["kurzhanteln", "kettlebell"],
     leichterId: "KN-04",
     schwererId: null,
     hauptmuskeln: ["Oberschenkelvorderseite", "Gesäß", "Oberschenkelrückseite"],
@@ -162,7 +167,7 @@ export const kn: ExerciseSeedRoh[] = [
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
-      "Halte in jeder Hand eine Kurzhantel (oder eine Kettlebell vor der Brust) und stelle dich aufrecht hin.",
+      "Stelle dich aufrecht hin, die Hände an der Hüfte oder bei Bedarf eine Kurzhantel in jeder Hand (oder eine Kettlebell vor der Brust).",
       "Mache mit einem Bein einen großen Schritt nach hinten und setze den Fußballen auf.",
       "Senke das hintere Knie kontrolliert Richtung Boden, das vordere Knie bleibt über dem Fuß.",
       "Drücke dich über das vordere Bein zurück in den Stand.",
@@ -174,7 +179,8 @@ export const kn: ExerciseSeedRoh[] = [
       "Schwung statt Kraft beim Hochkommen",
     ],
     hinweise:
-      "Der Schritt nach hinten ist für die Knie meist angenehmer als nach vorn. Zu schwer: KN-04 Goblet Squat. Ohne Hantel: KN-05 Split Squat (stationärer Ausfallschritt).",
+      "Der Schritt nach hinten ist für die Knie meist angenehmer als nach vorn. Starte ohne Gewicht und nimm erst Hanteln dazu, wenn 12 saubere Wiederholungen pro Seite gelingen. Zu schwer: KN-04 Goblet Squat oder KN-05 Split Squat (stationärer Ausfallschritt), bei dem die Füße stehen bleiben.",
+    videoUrl: "https://www.youtube.com/watch?v=f0UrZLvp3Dw",
   },
   {
     id: "KN-07",
@@ -204,6 +210,7 @@ export const kn: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Wähle einen Stuhl so, dass die Unterlage etwa Kniehöhe hat und er nicht wegrutscht, z. B. an die Wand gestellt. Zu schwer: KN-05 Split Squat (stationärer Ausfallschritt).",
+    videoUrl: "https://www.youtube.com/watch?v=DQ1lm1QoYIg",
   },
   {
     id: "KN-08",
@@ -233,5 +240,6 @@ export const kn: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Stelle die Sicherheitsstreben knapp unter die tiefste Position. Lerne die Technik mit der leeren Stange. Zu schwer: KN-04 Goblet Squat oder KN-02 Beinpresse.",
+    videoUrl: "https://www.youtube.com/watch?v=ny7lV01GvFM",
   },
 ];

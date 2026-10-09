@@ -7,7 +7,7 @@ export const zv: ExerciseSeedRoh[] = [
     muster: "ZV",
     stufe: 1,
     einseitig: false,
-    equipment: [["maschinen"]],
+    equipment: [["kabelzug"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: "ZV-03",
@@ -28,11 +28,12 @@ export const zv: ExerciseSeedRoh[] = [
       "Gewicht nach oben unkontrolliert zurückfallen lassen",
     ],
     hinweise:
-      "Ziehe die Stange immer vor den Körper, nicht hinter den Nacken. Zu leicht: ZV-03 Unterstützter Klimmzug (Maschine). Ohne Maschine: ZV-02 Hängen an der Stange.",
+      "Ziehe die Stange immer vor den Körper, nicht hinter den Nacken. Zu leicht: ZV-03 Unterstützter Klimmzug (Maschine). Ohne Maschine: ZV-04 Klimmzug mit Fußhilfe oder ZV-02 Schulterblatt-Klimmzug.",
+    videoUrl: "https://www.youtube.com/watch?v=JUruRn5Y6Zc",
   },
   {
     id: "ZV-02",
-    name: "Hängen an der Stange",
+    name: "Schulterblatt-Klimmzug",
     muster: "ZV",
     stufe: 1,
     einseitig: false,
@@ -40,24 +41,26 @@ export const zv: ExerciseSeedRoh[] = [
     optionaleLast: [],
     leichterId: null,
     schwererId: "ZV-04",
-    hauptmuskeln: ["Unterarme", "Latissimus", "Schultern", "oberer Rücken"],
-    belastungsart: "zeit",
-    standardBereich: "20–40 s",
-    steigerungsart: ["zeit", "stufe"],
+    hauptmuskeln: ["Latissimus", "unterer Trapez", "Unterarme", "Schultern"],
+    belastungsart: "wdh",
+    standardBereich: "6–10",
+    steigerungsart: ["wdh", "tempo", "stufe"],
     ausfuehrung: [
       "Greife die Stange etwas breiter als schulterbreit; steige mit Hilfe eines Stuhls auf, falls sie zu hoch hängt.",
-      "Hänge mit gestreckten Armen und ziehe die Schultern leicht nach unten, weg von den Ohren.",
-      "Halte den Körper ruhig, die Füße schweben leicht über dem Boden.",
-      "Beende die Übung kontrolliert: Stelle erst die Füße ab und lasse dann los.",
+      "Hänge mit gestreckten Armen, die Schultern sind entspannt nach oben gerutscht.",
+      "Ziehe nur die Schulterblätter nach unten und leicht zusammen, der Körper hebt sich dabei wenige Zentimeter; die Arme bleiben gestreckt.",
+      "Halte oben kurz und lasse die Schultern langsam wieder nach oben gleiten.",
+      "Beende den Satz kontrolliert: Stelle erst die Füße ab und lasse dann los.",
     ],
     fehler: [
-      "Schultern passiv bis zu den Ohren hochgezogen",
+      "Ellbogen beugen sich, es wird ein halber Klimmzug",
       "Mit den Beinen schwingen",
-      "Zu lange gehalten, bis der Griff abrupt versagt",
+      "Schultern unten ruckartig fallen lassen",
       "Absprung von der Stange statt kontrolliertem Abstieg",
     ],
     hinweise:
-      "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Wenn dir die Schultern unangenehm werden, verkürze die Haltezeit oder stelle die Füße teilweise auf einen Stuhl. Zu leicht: ZV-04 Klimmzug mit Fußhilfe.",
+      "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Zu schwer: zuerst nur 20–40 s aktiv hängen (Schultern leicht nach unten gezogen) oder die Füße teilweise auf einem Stuhl lassen. Wenn dir die Schultern unangenehm werden, verkürze den Satz. Zu leicht: ZV-04 Klimmzug mit Fußhilfe.",
+    videoUrl: "https://www.youtube.com/watch?v=-ZIpSoTRsuE",
   },
   {
     id: "ZV-03",
@@ -86,7 +89,8 @@ export const zv: ExerciseSeedRoh[] = [
       "Unten die Arme völlig entspannt in die Schultern fallen lassen",
     ],
     hinweise:
-      "Weniger Unterstützung macht die Übung schwerer. Zu schwer: ZV-01 Latzug. Ohne Maschine: ZV-04 Klimmzug mit Fußhilfe.",
+      "Weniger Unterstützung macht die Übung schwerer. Zu schwer: ZV-01 Latzug. Ohne Maschine: ZV-04 Klimmzug mit Fußhilfe. Zu leicht: an der Klimmzugstange mit ZV-05 Negativer Klimmzug oder ZV-06 Klimmzug weitermachen.",
+    videoUrl: "https://www.youtube.com/watch?v=-ocPaR4lV2c",
   },
   {
     id: "ZV-04",
@@ -114,7 +118,8 @@ export const zv: ExerciseSeedRoh[] = [
       "Kinn nach vorn schieben statt die Brust zur Stange zu bringen",
     ],
     hinweise:
-      "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Der Stuhl steht rutschfest. Die Hilfe ist richtig, wenn du die letzten Wiederholungen noch sauber schaffst; mit der Zeit nutzt du die Beine weniger. Zu schwer: ZV-02 Hängen an der Stange. Zu leicht: ZV-05 Negativer Klimmzug.",
+      "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Der Stuhl steht rutschfest. Die Hilfe ist richtig, wenn du die letzten Wiederholungen noch sauber schaffst; mit der Zeit nutzt du die Beine weniger. Zu schwer: ZV-02 Schulterblatt-Klimmzug. Zu leicht: ZV-05 Negativer Klimmzug.",
+    videoUrl: "https://www.youtube.com/watch?v=nxtoArFXJ2Y",
   },
   {
     id: "ZV-05",
@@ -144,6 +149,7 @@ export const zv: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Der Stuhl steht rutschfest. Die Übung belastet beim Abwärtsbewegen Schultern und Ellbogen stark, plane deshalb ausreichend Pausen. Zu schwer: ZV-04 Klimmzug mit Fußhilfe. Zu leicht: ZV-06 Klimmzug.",
+    videoUrl: "https://www.youtube.com/watch?v=vt8hJE3qd04",
   },
   {
     id: "ZV-06",
@@ -173,6 +179,7 @@ export const zv: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Steige nach dem Satz kontrolliert von der Stange ab. Zu schwer: ZV-05 Negativer Klimmzug oder ZV-04 Klimmzug mit Fußhilfe. Zu leicht: ZV-07 Klimmzug mit Zusatzgewicht.",
+    videoUrl: "https://www.youtube.com/watch?v=Fo93XyyqGhQ",
   },
   {
     id: "ZV-07",
@@ -180,8 +187,8 @@ export const zv: ExerciseSeedRoh[] = [
     muster: "ZV",
     stufe: 5,
     einseitig: false,
-    equipment: [["stange"], ["kurzhanteln", "kettlebell"]],
-    optionaleLast: [],
+    equipment: [["stange"]],
+    optionaleLast: ["kurzhanteln", "kettlebell"],
     leichterId: "ZV-06",
     schwererId: null,
     hauptmuskeln: ["Latissimus", "Bizeps", "oberer Rücken", "Unterarme"],
@@ -189,19 +196,20 @@ export const zv: ExerciseSeedRoh[] = [
     standardBereich: "3–6",
     steigerungsart: ["wdh", "gewicht", "tempo"],
     ausfuehrung: [
-      "Klemme eine Kurzhantel (senkrecht) oder die Kettlebell (am Horn) fest zwischen die Füße.",
+      "Packe das Zusatzgewicht (Kurzhantel, Kettlebell, Wasserflaschen oder Bücher) in einen Rucksack, gut gepolstert und eng am Rücken; im Studio geht auch ein Dip-Gürtel.",
       "Greife die Stange etwas breiter als schulterbreit und starte im ruhigen Hang mit den Schultern nach unten.",
       "Ziehe dich kontrolliert hoch, bis das Kinn über der Stange ist.",
       "Senke dich langsam bis zu den gestreckten Armen.",
-      "Lasse dich ab, stelle Füße und Gewicht auf einen Stuhl und lasse erst dann die Stange los.",
+      "Stelle nach dem Satz erst die Füße auf einen Stuhl oder den Boden und lasse dann die Stange los.",
     ],
     fehler: [
-      "Gewicht schwingt hin und her",
+      "Rucksack sitzt locker und schwingt hin und her",
       "Zu schwere Last, sodass die Technik nachlässt",
       "Verkürzte Bewegung unten oder oben",
-      "Gewicht beim Absteigen fallen lassen",
+      "Ungebremst von der Stange abspringen",
     ],
     hinweise:
-      "Prüfe, dass die Stange fest montiert ist und dein Körpergewicht plus Zusatzlast sicher trägt. Starte mit 2–4 kg und steigere die Last in kleinen Schritten, erst wenn ZV-06 Klimmzug sauber in der oberen Wiederholungszahl gelingt. Zu schwer (auch bei Schulter- oder Ellbogenbeschwerden): ZV-06 Klimmzug.",
+      "Klemme das Gewicht nicht zwischen die Füße, es kann herausrutschen und auf die Füße fallen. Prüfe, dass die Stange fest montiert ist und dein Körpergewicht plus Zusatzlast sicher trägt. Starte mit 2–4 kg und steigere die Last in kleinen Schritten, erst wenn ZV-06 Klimmzug sauber in der oberen Wiederholungszahl gelingt. Zu schwer (auch bei Schulter- oder Ellbogenbeschwerden): ZV-06 Klimmzug.",
+    videoUrl: "https://www.youtube.com/watch?v=w03zwFAx-vU",
   },
 ];

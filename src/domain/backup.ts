@@ -530,7 +530,7 @@ function pruefeKopf(roh: Record<string, unknown>, erwartet?: BackupArt): string[
     fehler.push(
       `Backup-Version ${anzeige(roh.version)} wird nicht unterstützt ` +
         `(diese App liest Version ${BACKUP_VERSION}).` +
-        (roh.version === 1
+        (typeof roh.version === "number" && roh.version < BACKUP_VERSION
           ? " Sicherungen aus der Zeit mit Equipment-Profilen lassen sich nicht mehr einlesen."
           : ""),
     );
@@ -584,11 +584,12 @@ function parseIntern(roh: unknown, erwartet?: BackupArt): ParseErgebnis {
   // und eine kleine Datei mit sehr vielen kaputten Zeilen würde Speicher und Zeit sprengen.
   const zuViele = pruefeZeilenzahlen(roh.daten, art);
   if (zuViele.length > 0) return fehlschlag(zuViele);
+  const rohDaten = roh.daten;
   const schema = art === "alles" ? allesDatenSchema : katalogDatenSchema;
-  const geprueft = schema.safeParse(roh.daten);
+  const geprueft = schema.safeParse(rohDaten);
   const m = new Meldungen();
   if (!geprueft.success) {
-    for (const issue of geprueft.error.issues) m.add(issueMeldung(issue, roh.daten));
+    for (const issue of geprueft.error.issues) m.add(issueMeldung(issue, rohDaten));
     return fehlschlag(m.ergebnis());
   }
 

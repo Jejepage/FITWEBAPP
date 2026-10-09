@@ -107,16 +107,14 @@ async function ablauf(browser, dbPfad) {
   await shot("2-vorschau");
   schritt("Vorschau mit 16 Auswahllisten, Equipment und Gewichte vorbelegt, Zusatzblock aus");
 
-  // 3. Nur Stange: ZH nur eine Übung → in A und B gleich, mit Hinweis
+  // 3. Nur Stange: ZH hat Türrahmen-Rudern (Stufe 1) und Tisch-Rudern (Stufe 3) → A und B verschieden
   await equipmentWaehlen(page, ["Stange"]);
   await aktualisieren();
-  await page
-    .getByText(
-      "Ziehen horizontal: Mit diesem Equipment gibt es nur eine Übung, sie steht in A und B.",
-    )
-    .waitFor();
+  await page.waitForFunction(
+    () => document.querySelector("select[name='slot_A-1-3']")?.value === "ZH-08",
+  );
   let werte = await slotWerte(page);
-  assert.equal(werte["A-1-3"], "ZH-07");
+  assert.equal(werte["A-1-3"], "ZH-08");
   assert.equal(werte["B-2-3"], "ZH-07");
   assert.ok(page.url().includes("equipment=stange"));
   // Keine Mischpläne: Die Wahl aus der vorigen Vorschau darf nicht in den neuen Vorschlag wandern.
@@ -127,6 +125,7 @@ async function ablauf(browser, dbPfad) {
     ["A-2-1", "B-1-1"], // HB
     ["A-1-2", "B-1-2"], // DH
     ["A-2-2", "B-2-2"], // DV
+    ["A-1-3", "B-2-3"], // ZH
     ["A-2-3", "B-1-3"], // ZV
     ["A-Z-1", "B-Z-1"], // TR
     ["A-Z-2", "B-Z-2"], // RU
@@ -144,7 +143,7 @@ async function ablauf(browser, dbPfad) {
     "DH nur mit Ersatzübungen (Liegestütz)",
   );
   await shot("3-nur-stange");
-  schritt("Nur Stange: ZH-07 in A und B mit Hinweis, Ersatzübungen füllen auf");
+  schritt("Nur Stange: ZH-08 in A, ZH-07 in B, Ersatzübungen füllen auf");
 
   // Equipment ändern und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
   await equipmentWaehlen(page, ["Stange", "Maschinen/Kabelzug"]);

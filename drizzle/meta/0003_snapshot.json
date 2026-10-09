@@ -1,8 +1,8 @@
 {
+  "id": "f3feb57b-a6c1-4c64-84cc-e1154afb6e84",
+  "prevId": "589012b0-6d3c-41ee-9e55-5fde1675dd1c",
   "version": "6",
   "dialect": "sqlite",
-  "id": "5ca12aef-cab3-4209-a476-ffc8d5fb87ff",
-  "prevId": "589012b0-6d3c-41ee-9e55-5fde1675dd1c",
   "tables": {
     "equipment_profile": {
       "name": "equipment_profile",
@@ -210,14 +210,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'zu_pruefen'"
-        },
-        "ersatz": {
-          "name": "ersatz",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         }
       },
       "indexes": {
@@ -308,36 +300,36 @@
           "columns": [
             "status"
           ],
-          "isUnique": true,
-          "where": "\"plan\".\"status\" = 'aktiv'"
+          "where": "\"plan\".\"status\" = 'aktiv'",
+          "isUnique": true
         }
       },
       "foreignKeys": {
         "plan_profil_id_equipment_profile_id_fk": {
           "name": "plan_profil_id_equipment_profile_id_fk",
           "tableFrom": "plan",
-          "tableTo": "equipment_profile",
           "columnsFrom": [
             "profil_id"
           ],
+          "tableTo": "equipment_profile",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "plan_vorgaenger_id_plan_id_fk": {
           "name": "plan_vorgaenger_id_plan_id_fk",
           "tableFrom": "plan",
-          "tableTo": "plan",
           "columnsFrom": [
             "vorgaenger_id"
           ],
+          "tableTo": "plan",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -413,28 +405,28 @@
         "plan_slot_plan_id_plan_id_fk": {
           "name": "plan_slot_plan_id_plan_id_fk",
           "tableFrom": "plan_slot",
-          "tableTo": "plan",
           "columnsFrom": [
             "plan_id"
           ],
+          "tableTo": "plan",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "plan_slot_exercise_id_exercise_id_fk": {
           "name": "plan_slot_exercise_id_exercise_id_fk",
           "tableFrom": "plan_slot",
-          "tableTo": "exercise",
           "columnsFrom": [
             "exercise_id"
           ],
+          "tableTo": "exercise",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -559,41 +551,41 @@
         "set_log_workout_id_workout_id_fk": {
           "name": "set_log_workout_id_workout_id_fk",
           "tableFrom": "set_log",
-          "tableTo": "workout",
           "columnsFrom": [
             "workout_id"
           ],
+          "tableTo": "workout",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "set_log_plan_slot_id_plan_slot_id_fk": {
           "name": "set_log_plan_slot_id_plan_slot_id_fk",
           "tableFrom": "set_log",
-          "tableTo": "plan_slot",
           "columnsFrom": [
             "plan_slot_id"
           ],
+          "tableTo": "plan_slot",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "set_log_exercise_id_exercise_id_fk": {
           "name": "set_log_exercise_id_exercise_id_fk",
           "tableFrom": "set_log",
-          "tableTo": "exercise",
           "columnsFrom": [
             "exercise_id"
           ],
+          "tableTo": "exercise",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -763,28 +755,28 @@
         "workout_plan_id_plan_id_fk": {
           "name": "workout_plan_id_plan_id_fk",
           "tableFrom": "workout",
-          "tableTo": "plan",
           "columnsFrom": [
             "plan_id"
           ],
+          "tableTo": "plan",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "workout_profil_id_equipment_profile_id_fk": {
           "name": "workout_profil_id_equipment_profile_id_fk",
           "tableFrom": "workout",
-          "tableTo": "equipment_profile",
           "columnsFrom": [
             "profil_id"
           ],
+          "tableTo": "equipment_profile",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -795,9 +787,9 @@
   "views": {},
   "enums": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
+    "tables": {}
   },
   "internal": {
     "indexes": {}

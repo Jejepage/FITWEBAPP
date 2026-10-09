@@ -29,10 +29,10 @@ describe("exportiere", () => {
   it("Gesamt-Backup enthält alle Tabellen mit ihren Zeilen", () => {
     const db = dbMitDaten();
     const d = exportiere(db, "alles", JETZT);
-    expect(d).toMatchObject({ format: "fit-backup", version: 2, art: "alles" });
+    expect(d).toMatchObject({ format: "fit-backup", version: 3, art: "alles" });
     expect(d.erstelltAm).toBe("2026-10-08T10:00:00.000Z");
     const a = alles(d);
-    expect(a.uebungen).toHaveLength(60);
+    expect(a.uebungen).toHaveLength(63);
     expect(a.plaene).toHaveLength(1);
     expect(a.planSlots).toHaveLength(16);
     expect(a.einheiten).toHaveLength(5);
@@ -91,7 +91,7 @@ describe("Backup-Verträglichkeit mit gespeicherten Sätzen", () => {
     const start = Date.now();
     const roh = {
       format: "fit-backup",
-      version: 2,
+      version: 3,
       art: "katalog",
       erstelltAm: JETZT.toISOString(),
       daten: { uebungen: Array.from({ length: 300_000 }, () => ({})) },
@@ -121,7 +121,7 @@ describe("Vollimport", () => {
     const r = importiereDatei(ziel, datei, "alles");
     expect(r).toMatchObject({
       ok: true,
-      bilanz: { uebungen: 60, plaene: 1, einheiten: 5 },
+      bilanz: { uebungen: 63, plaene: 1, einheiten: 5 },
     });
     expect(exportiere(ziel, "alles", JETZT)).toEqual(datei);
   });
@@ -278,9 +278,9 @@ describe("Katalogimport", () => {
     datei.daten.uebungen.push(neu);
 
     const r = importiereDatei(db, datei, "katalog");
-    expect(r).toEqual({ ok: true, bilanz: { uebungen: 61, neu: 1 } });
+    expect(r).toEqual({ ok: true, bilanz: { uebungen: 64, neu: 1 } });
     const nach = alleUebungen(db);
-    expect(nach).toHaveLength(61);
+    expect(nach).toHaveLength(64);
     const geaendert = nach.find((u) => u.id === datei.daten.uebungen[1]!.id)!;
     expect(geaendert).toMatchObject({ name: "Umbenannt", aktiv: false });
     const nachAlles = alles(exportiere(db, "alles", JETZT));

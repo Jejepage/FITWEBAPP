@@ -4,10 +4,10 @@ import type { Block, Einheit, EquipmentArt, Exercise, Gewichte, Muster } from ".
 
 export const BACKUP_FORMAT = "fit-backup";
 /**
- * Version 2: Das Equipment steht im Plan (keine Profile mehr), Einheiten haben kein Profil und
- * kein Ad-hoc-Kennzeichen, Übungen haben das Ersatz-Kennzeichen. Version 1 wird nicht mehr gelesen.
+ * Version 3: Das Equipment steht im Plan (keine Profile mehr), Einheiten haben kein Profil und
+ * kein Ad-hoc-Kennzeichen, Übungen haben das Ersatz-Kennzeichen. Ältere Versionen (mit Equipment-Profilen) werden nicht gelesen.
  */
-export const BACKUP_VERSION = 2;
+export const BACKUP_VERSION = 3;
 /** Größte akzeptierte Importdatei */
 export const BACKUP_MAX_BYTES = 20 * 1024 * 1024;
 

@@ -26,22 +26,29 @@
     {
       "idx": 3,
       "version": "6",
-      "when": 1791573586931,
-      "tag": "0003_ersatz",
+      "when": 1791579880318,
+      "tag": "0003_kabelzug",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "6",
-      "when": 1791574332296,
-      "tag": "0004_plan_equipment_neu",
+      "when": 1791579881318,
+      "tag": "0004_ersatz",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "6",
-      "when": 1791574341214,
-      "tag": "0005_profile_entfernen",
+      "when": 1791579882318,
+      "tag": "0005_plan_equipment_neu",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1791579883318,
+      "tag": "0006_profile_entfernen",
       "breakpoints": true
     }
   ]

@@ -1,9 +1,70 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6e8584e2-169e-4ad9-ab49-4628a368522c",
-  "prevId": "68afd277-e605-4be3-89ed-b3c6bfdf11c6",
+  "id": "68afd277-e605-4be3-89ed-b3c6bfdf11c6",
+  "prevId": "5ca12aef-cab3-4209-a476-ffc8d5fb87ff",
   "tables": {
+    "equipment_profile": {
+      "name": "equipment_profile",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "seed_key": {
+          "name": "seed_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "equipment": {
+          "name": "equipment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "gewichte": {
+          "name": "gewichte",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ist_standard": {
+          "name": "ist_standard",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "equipment_profile_seed_key_idx": {
+          "name": "equipment_profile_seed_key_idx",
+          "columns": [
+            "seed_key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "exercise": {
       "name": "exercise",
       "columns": {
@@ -183,6 +244,13 @@
           "notNull": true,
           "autoincrement": true
         },
+        "profil_id": {
+          "name": "profil_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "equipment": {
           "name": "equipment",
           "type": "text",
@@ -259,6 +327,19 @@
         }
       },
       "foreignKeys": {
+        "plan_profil_id_equipment_profile_id_fk": {
+          "name": "plan_profil_id_equipment_profile_id_fk",
+          "tableFrom": "plan",
+          "tableTo": "equipment_profile",
+          "columnsFrom": [
+            "profil_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "plan_vorgaenger_id_plan_id_fk": {
           "name": "plan_vorgaenger_id_plan_id_fk",
           "tableFrom": "plan",
@@ -623,6 +704,21 @@
           "notNull": true,
           "autoincrement": false
         },
+        "profil_id": {
+          "name": "profil_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ad_hoc": {
+          "name": "ad_hoc",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
         "zusatzblock": {
           "name": "zusatzblock",
           "type": "integer",
@@ -689,6 +785,19 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "workout_profil_id_equipment_profile_id_fk": {
+          "name": "workout_profil_id_equipment_profile_id_fk",
+          "tableFrom": "workout",
+          "tableTo": "equipment_profile",
+          "columnsFrom": [
+            "profil_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },

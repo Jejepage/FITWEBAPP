@@ -238,7 +238,7 @@ describe("parseBackup: gültige Dateien", () => {
   it("stimmt mit backupDateiSchema überein", () => {
     expect(backupDateiSchema.safeParse(gueltigeDatei()).success).toBe(true);
     expect(backupDateiSchema.safeParse(katalogDatei()).success).toBe(true);
-    expect(backupDateiSchema.safeParse({ ...katalogDatei(), version: 1 }).success).toBe(false);
+    expect(backupDateiSchema.safeParse({ ...katalogDatei(), version: 2 }).success).toBe(false);
   });
 });
 
@@ -249,15 +249,15 @@ describe("parseBackup: Kopf", () => {
   });
 
   it("lehnt eine andere Version mit klarer Meldung ab", () => {
-    expect(fehlerVon({ ...gueltigeDatei(), version: 3 })).toEqual([
-      "Backup-Version 3 wird nicht unterstützt (diese App liest Version 2).",
+    expect(fehlerVon({ ...gueltigeDatei(), version: 4 })).toEqual([
+      "Backup-Version 4 wird nicht unterstützt (diese App liest Version 3).",
     ]);
-    // Version 1 stammt aus der Zeit mit Equipment-Profilen
-    expect(fehlerVon({ ...gueltigeDatei(), version: 1 })).toEqual([
-      "Backup-Version 1 wird nicht unterstützt (diese App liest Version 2). Sicherungen aus der Zeit mit Equipment-Profilen lassen sich nicht mehr einlesen.",
+    // Version 2 und älter stammen aus der Zeit mit Equipment-Profilen
+    expect(fehlerVon({ ...gueltigeDatei(), version: 2 })).toEqual([
+      "Backup-Version 2 wird nicht unterstützt (diese App liest Version 3). Sicherungen aus der Zeit mit Equipment-Profilen lassen sich nicht mehr einlesen.",
     ]);
-    expect(fehlerVon({ ...gueltigeDatei(), version: "2" })[0]).toContain(
-      "Backup-Version 2 wird nicht unterstützt",
+    expect(fehlerVon({ ...gueltigeDatei(), version: "3" })[0]).toContain(
+      "Backup-Version 3 wird nicht unterstützt",
     );
     expect(fehlerVon({ ...gueltigeDatei(), version: 0 })[0]).toContain("Backup-Version 0");
   });

@@ -38,10 +38,24 @@ async function ablauf(browser, dbPfad) {
   };
   await hinweisBestaetigen(page);
 
-  // --- 1. Link eintragen (unübliche Schreibweise) ------------------------------------------------
+  // --- 0. Der Seed bringt für jede Übung einen Link mit ----------------------------------------
   await page.goto(`${BASE}/katalog/KN-03/bearbeiten`);
   const feld = page.getByLabel("YouTube-Link (optional)");
-  assert.equal(await feld.inputValue(), "", "Seed-Übungen haben keinen Link");
+  const seedLink = lies("select video_url v from exercise where id = 'KN-03'").v;
+  assert.match(seedLink, /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]{11}$/);
+  assert.equal(await feld.inputValue(), seedLink, "Seed-Link steht im Formular");
+  assert.equal(
+    lies("select count(*) c from exercise where video_url is null").c,
+    0,
+    "jede Seed-Übung hat einen Link",
+  );
+  schritt("Seed-Übungen bringen einen YouTube-Link mit");
+  // Für die folgenden Schritte: alle Links leeren, damit nur KN-03 einen bekommt.
+  schreibe("update exercise set video_url = null");
+  await page.reload();
+
+  // --- 1. Link eintragen (unübliche Schreibweise) ------------------------------------------------
+  assert.equal(await feld.inputValue(), "", "Links geleert");
   await feld.fill("youtu.be/dQw4w9WgXcQ?t=42&si=abc");
   await page.getByRole("button", { name: "Speichern" }).click();
   await page.waitForURL(/\/katalog\/KN-03$/); // erst nach dem Speichern auf der Detailseite

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { exerciseSeedSchema } from "@/domain/schemas";
+import { istStandardYoutubeUrl } from "@/domain/youtube";
 import {
   EQUIPMENT_ARTEN,
   MUSTER,
@@ -17,13 +18,13 @@ import { seed } from "./run";
 const byId = new Map(uebungenSeed.map((u) => [u.id, u]));
 
 describe("Seed-Daten", () => {
-  it("enthält 60 Übungen mit eindeutigen IDs", () => {
-    expect(uebungenSeed).toHaveLength(60);
-    expect(byId.size).toBe(60);
+  it("enthält 63 Übungen mit eindeutigen IDs", () => {
+    expect(uebungenSeed).toHaveLength(63);
+    expect(byId.size).toBe(63);
   });
 
   it("Anzahl je Muster stimmt mit der Spec überein", () => {
-    const soll = { KN: 8, HB: 9, DH: 7, DV: 8, ZH: 7, ZV: 7, TR: 6, RU: 8 };
+    const soll = { KN: 8, HB: 10, DH: 7, DV: 8, ZH: 8, ZV: 7, TR: 7, RU: 8 };
     for (const m of MUSTER) {
       expect(uebungenSeed.filter((u) => u.muster === m)).toHaveLength(soll[m]);
     }
@@ -60,18 +61,31 @@ describe("Seed-Daten", () => {
       eq.some((g) =>
         g.some(
           (a) =>
-            a === "maschinen" || a === "langhantel" || a === "kurzhanteln" || a === "kettlebell",
+            a === "maschinen" ||
+            a === "kabelzug" ||
+            a === "langhantel" ||
+            a === "kurzhanteln" ||
+            a === "kettlebell",
         ),
       );
     for (const u of uebungenSeed) {
-      // TR-01: Last ist der Rucksack selbst (Alltagsgegenstand), Gewicht wird darin variiert.
-      if (u.steigerungsart.includes("gewicht") && u.id !== "TR-01") {
+      // TR-01/TR-07: Last ist Rucksack bzw. Tasche selbst (Alltagsgegenstand), Gewicht wird darin variiert.
+      if (u.steigerungsart.includes("gewicht") && u.id !== "TR-01" && u.id !== "TR-07") {
         expect(beladbar(u.equipment, u.optionaleLast), `${u.id} gewicht`).toBe(true);
       }
       if (u.steigerungsart.includes("stufe")) {
         expect(u.schwererId, `${u.id} stufe`).not.toBeNull();
       }
     }
+  });
+
+  it("jede Übung hat einen YouTube-Link in Standardform, keiner doppelt", () => {
+    for (const u of uebungenSeed) {
+      expect(u.videoUrl, u.id).not.toBeNull();
+      expect(istStandardYoutubeUrl(u.videoUrl!), `${u.id} ${u.videoUrl}`).toBe(true);
+    }
+    const links = uebungenSeed.map((u) => u.videoUrl);
+    expect(new Set(links).size).toBe(links.length);
   });
 });
 
@@ -83,8 +97,8 @@ describe("Ersatzübungen im Seed", () => {
       "HB-01", "HB-03",
       "DH-02", "DH-04", "DH-07",
       "DV-02", "DV-03", "DV-07", "DV-08",
-      "ZH-02", "ZH-07",
-      "TR-01", "TR-03",
+      "ZH-02", "ZH-07", "ZH-08",
+      "TR-01", "TR-03", "TR-07",
       "RU-01", "RU-02", "RU-03", "RU-04", "RU-06",
     ]);
   });
@@ -145,6 +159,7 @@ describe("Stufenleitern", () => {
 describe("Abgleich mit docs/SPEC.md §4.2", () => {
   const ABK: Record<string, EquipmentArt> = {
     M: "maschinen",
+    KZ: "kabelzug",
     LH: "langhantel",
     KH: "kurzhanteln",
     KB: "kettlebell",
@@ -157,10 +172,11 @@ describe("Abgleich mit docs/SPEC.md §4.2", () => {
     equipment: EquipmentBedingung;
     optional: EquipmentArt[];
   } {
-    const z = zelle.trim();
+    const lasten = (text: string) => (text.match(/\b(KH|KB)\b/g) ?? []).map((a) => ABK[a]!);
+    // "ST, Last im Rucksack: KH / KB": Pflicht-Equipment vor dem Komma, optionale Last danach.
+    const [z, last] = zelle.trim().split(", ") as [string, string | undefined];
     if (z.startsWith("–") || z.startsWith("Stuhl")) {
-      const optional = (z.match(/\b(KH|KB)\b/g) ?? []).map((a) => ABK[a]!);
-      return { equipment: [], optional };
+      return { equipment: [], optional: lasten(zelle) };
     }
     const gruppen = z.split(" + ").map((g) =>
       g.split(" oder ").map((a) => {
@@ -169,7 +185,7 @@ describe("Abgleich mit docs/SPEC.md §4.2", () => {
         return art;
       }),
     );
-    return { equipment: gruppen, optional: [] };
+    return { equipment: gruppen, optional: last ? lasten(last) : [] };
   }
 
   const text = readFileSync(join(PROJEKT_ROOT, "docs/SPEC.md"), "utf8");
@@ -179,8 +195,8 @@ describe("Abgleich mit docs/SPEC.md §4.2", () => {
     ),
   ];
 
-  it("findet alle 60 Zeilen in der Spec", () => {
-    expect(zeilen).toHaveLength(60);
+  it("findet alle 63 Zeilen in der Spec", () => {
+    expect(zeilen).toHaveLength(63);
   });
 
   it.each(zeilen.map((m) => [m[1]!, m] as const))("%s stimmt mit der Spec überein", (id, m) => {
@@ -203,7 +219,7 @@ describe("Seed-Runner", () => {
 
   it("legt Katalog und eine Settings-Zeile an", () => {
     seed(db);
-    expect(db.select().from(exercise).all()).toHaveLength(60);
+    expect(db.select().from(exercise).all()).toHaveLength(63);
     const s = db.select().from(settings).all();
     expect(s).toHaveLength(1);
     expect(s[0]!.einheitenProWoche).toBe(2);
@@ -218,7 +234,7 @@ describe("Seed-Runner", () => {
       .run();
     db.update(settings).set({ einheitenProWoche: 3 }).where(eq(settings.id, 1)).run();
     seed(db);
-    expect(db.select().from(exercise).all()).toHaveLength(60);
+    expect(db.select().from(exercise).all()).toHaveLength(63);
     const kn04 = db.select().from(exercise).where(eq(exercise.id, "KN-04")).get()!;
     expect(kn04).toMatchObject({
       name: "Meine Kniebeuge",

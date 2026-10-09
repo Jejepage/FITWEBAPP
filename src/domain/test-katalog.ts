@@ -6,7 +6,6 @@ export function testKatalog(): Exercise[] {
   return uebungenSeed.map((u) => ({
     ...u,
     bild: null,
-    videoUrl: null,
     aktiv: true,
     pruefstatus: "zu_pruefen" as const,
   }));

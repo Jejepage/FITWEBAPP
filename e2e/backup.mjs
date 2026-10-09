@@ -105,7 +105,7 @@ async function ablauf(browser, dbPfad) {
   const alles = JSON.parse(readFileSync(allesPfad, "utf8"));
   assert.equal(alles.format, "fit-backup");
   assert.equal(alles.art, "alles");
-  assert.equal(alles.daten.uebungen.length, 60);
+  assert.equal(alles.daten.uebungen.length, 63);
   assert.equal(alles.daten.einheiten.length, 1);
   assert.equal(alles.daten.plaene.length, 1);
   const [dl2] = await Promise.all([
@@ -120,7 +120,7 @@ async function ablauf(browser, dbPfad) {
     ["uebungen"],
   );
   schritt(
-    "Export: Gesamt-Backup (60 Übungen, 1 Plan, 1 Einheit) und Katalog als Download",
+    "Export: Gesamt-Backup (63 Übungen, 1 Plan, 1 Einheit) und Katalog als Download",
   );
 
   // --- 4. Katalogimport stellt Änderungen wieder her ---------------------------------------
@@ -138,7 +138,7 @@ async function ablauf(browser, dbPfad) {
     .getByRole("button", { name: "Katalog importieren" })
     .click();
   await page.getByText("Import erfolgreich.").waitFor();
-  await page.getByText(/60 Übungen/).waitFor();
+  await page.getByText(/63 Übungen/).waitFor();
   const kn = abfrage("select name, aktiv from exercise where id = 'KN-03'")[0];
   assert.deepEqual([kn.name, kn.aktiv], [originalName, 1]);
   assert.equal(
@@ -171,7 +171,7 @@ async function ablauf(browser, dbPfad) {
     abfrage("select aufwaermen_text t from settings")[0].t,
     "Zwischenstand",
   );
-  assert.equal(abfrage("select count(*) c from exercise")[0].c, 60);
+  assert.equal(abfrage("select count(*) c from exercise")[0].c, 63);
   await page.goto(`${BASE}/verlauf`);
   await page.getByText("Einheit A · Woche 1").first().waitFor();
   schritt(

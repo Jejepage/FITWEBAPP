@@ -10,7 +10,7 @@ export const tr: ExerciseSeedRoh[] = [
     equipment: [],
     optionaleLast: [],
     leichterId: null,
-    schwererId: "TR-03",
+    schwererId: "TR-07",
     hauptmuskeln: ["Rückenstrecker", "Schultern", "Rumpf", "Gesäß"],
     belastungsart: "strecke",
     standardBereich: "20–40 m",
@@ -29,7 +29,8 @@ export const tr: ExerciseSeedRoh[] = [
       "Zu kurze, hastige Schritte",
     ],
     hinweise:
-      "Packe zu Beginn nur so viel ein, dass die Haltung sauber bleibt, und steigere dann Strecke und Gewicht schrittweise. Du brauchst eine freie, rutschfeste Strecke von etwa 10 bis 20 m, Hin- und Rückweg zählen mit. Zu leicht: TR-03 Bärengang.",
+      "Packe zu Beginn nur so viel ein, dass die Haltung sauber bleibt, und steigere dann Strecke und Gewicht schrittweise. Du brauchst eine freie, rutschfeste Strecke von etwa 10 bis 20 m, Hin- und Rückweg zählen mit. Zu leicht: TR-07 Einseitiges Tragen mit Tasche.",
+    videoUrl: "https://www.youtube.com/watch?v=9wV58My4WKY",
   },
   {
     id: "TR-02",
@@ -60,6 +61,7 @@ export const tr: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Hebe und setze die Gewichte immer aus den Beinen, nicht mit gebeugtem Rücken. Plane eine freie, rutschfeste Strecke von etwa 10 bis 20 m ein. Zu schwer: TR-01 Rucksack tragen. Zu leicht: TR-04 Koffertragen einarmig.",
+    videoUrl: "https://www.youtube.com/watch?v=KBXAJnbr0Dk",
   },
   {
     id: "TR-03",
@@ -69,7 +71,7 @@ export const tr: ExerciseSeedRoh[] = [
     einseitig: false,
     equipment: [],
     optionaleLast: [],
-    leichterId: "TR-01",
+    leichterId: null,
     schwererId: null,
     hauptmuskeln: ["Schultern", "Rumpf", "Oberschenkelvorderseite", "Unterarme"],
     belastungsart: "strecke",
@@ -89,7 +91,8 @@ export const tr: ExerciseSeedRoh[] = [
       "Knie gehen zu hoch oder berühren den Boden",
     ],
     hinweise:
-      "Die Handgelenke werden stark belastet; wärme sie vorher auf und stütze dich bei Beschwerden auf Fäuste oder Griffe. Du brauchst eine freie, rutschfeste Fläche von etwa 5 bis 10 m, die du hin und zurück gehst. Zu schwer: TR-01 Rucksack tragen.",
+      "Die Handgelenke werden stark belastet; wärme sie vorher auf und stütze dich bei Beschwerden auf Fäuste oder Griffe. Du brauchst eine freie, rutschfeste Fläche von etwa 5 bis 10 m, die du hin und zurück gehst. Der Bärengang ist kein Tragen im engeren Sinn, sondern eine Alternative ohne Gewicht. Zu schwer: TR-01 Rucksack tragen.",
+    videoUrl: "https://www.youtube.com/watch?v=t7zUTw60rBs",
   },
   {
     id: "TR-04",
@@ -119,15 +122,16 @@ export const tr: ExerciseSeedRoh[] = [
       "Gewicht schwingt gegen das Bein",
     ],
     hinweise:
-      "Der Bereich gilt pro Seite, tausche die Hand nach jedem Durchgang. Halte das Gewicht nah am Körper und plane eine freie, rutschfeste Strecke von etwa 10 bis 15 m ein. Zu schwer: TR-02 Farmer's Walk. Zu leicht: TR-05 Front-Rack-Tragen.",
+      "Der Bereich gilt pro Seite, tausche die Hand nach jedem Durchgang. Halte das Gewicht nah am Körper und plane eine freie, rutschfeste Strecke von etwa 10 bis 15 m ein. Zu schwer: TR-02 Farmer's Walk. Zu leicht: TR-05 Goblet-Tragen.",
+    videoUrl: "https://www.youtube.com/watch?v=lkOTG1cVVno",
   },
   {
     id: "TR-05",
-    name: "Front-Rack-Tragen",
+    name: "Goblet-Tragen",
     muster: "TR",
     stufe: 3,
     einseitig: false,
-    equipment: [["kettlebell"]],
+    equipment: [["kurzhanteln", "kettlebell"]],
     optionaleLast: [],
     leichterId: "TR-04",
     schwererId: "TR-06",
@@ -136,20 +140,21 @@ export const tr: ExerciseSeedRoh[] = [
     standardBereich: "15–30 m",
     steigerungsart: ["gewicht", "strecke", "stufe"],
     ausfuehrung: [
-      "Nimm eine Kettlebell mit geradem Rücken aus der Hocke auf und halte sie am Horn mit beiden Händen vor der Brust.",
-      "Halte die Ellbogen eng am Körper, die Kettlebell liegt nah an der Brust.",
+      "Nimm das Gewicht mit geradem Rücken aus der Hocke auf und halte es vor der Brust: die Kettlebell am Horn, die Kurzhantel senkrecht an einem Ende.",
+      "Halte die Ellbogen eng am Körper, das Gewicht liegt nah an der Brust.",
       "Stehe aufrecht, die Rippen bleiben unten und der Bauch ist angespannt.",
-      "Gehe mit kleinen, kontrollierten Schritten die Strecke.",
-      "Gehe in die Hocke und setze die Kettlebell kontrolliert ab.",
+      "Gehe mit ruhigen, kontrollierten Schritten die Strecke.",
+      "Gehe in die Hocke und setze das Gewicht kontrolliert ab.",
     ],
     fehler: [
       "Hohlkreuz durch nach hinten gelehnten Oberkörper",
       "Ellbogen lösen sich vom Körper",
       "Schultern werden hochgezogen",
-      "Kettlebell sinkt nach unten und zieht den Oberkörper nach vorn",
+      "Gewicht sinkt nach unten und zieht den Oberkörper nach vorn",
     ],
     hinweise:
-      "Beginne mit einem leichten Gewicht und prüfe, ob Handgelenke und Schultern die Haltung gut tragen. Plane eine freie, rutschfeste Strecke von etwa 10 bis 15 m ein. Zu schwer: TR-04 Koffertragen einarmig. Zu leicht: TR-06 Überkopf-Tragen einarmig.",
+      "Gleicher Griff wie beim KN-04 Goblet Squat. Beginne mit einem leichten Gewicht und prüfe, ob Handgelenke und Schultern die Haltung gut tragen. Plane eine freie, rutschfeste Strecke von etwa 10 bis 15 m ein. Zu schwer: TR-04 Koffertragen einarmig. Zu leicht: TR-06 Überkopf-Tragen einarmig.",
+    videoUrl: "https://www.youtube.com/watch?v=m1asi2vwlwA",
   },
   {
     id: "TR-06",
@@ -166,7 +171,7 @@ export const tr: ExerciseSeedRoh[] = [
     standardBereich: "20–40 s",
     steigerungsart: ["zeit", "gewicht"],
     ausfuehrung: [
-      "Führe das Gewicht in die Rackposition (siehe DV-06) und drücke es senkrecht nach oben, bis der Arm gestreckt neben dem Ohr ist.",
+      "Führe das Gewicht an die Schulter (Rackposition, siehe DV-06) und drücke es senkrecht nach oben, bis der Arm gestreckt neben dem Ohr ist.",
       "Stehe aufrecht, die Rippen bleiben unten und der Bauch ist angespannt.",
       "Halte Handgelenk, Ellbogen und Schulter in einer Linie über dem Körper.",
       "Gehe mit kleinen, ruhigen Schritten oder halte die Position im Stand.",
@@ -179,6 +184,38 @@ export const tr: ExerciseSeedRoh[] = [
       "Schulter wird hochgezogen",
     ],
     hinweise:
-      "Der Bereich gilt pro Seite. Setze das Gewicht bei nachlassender Haltung sofort kontrolliert ab; bei Schulterbeschwerden lässt du die Übung aus. Du brauchst Platz nach oben und seitlich sowie einen rutschfesten Boden. Zu schwer: TR-05 Front-Rack-Tragen.",
+      "Der Bereich gilt pro Seite. Setze das Gewicht bei nachlassender Haltung sofort kontrolliert ab; bei Schulterbeschwerden lässt du die Übung aus. Du brauchst Platz nach oben und seitlich sowie einen rutschfesten Boden. Zu schwer: TR-05 Goblet-Tragen.",
+    videoUrl: "https://www.youtube.com/watch?v=om6OSu4na-U",
+  },
+  {
+    id: "TR-07",
+    name: "Einseitiges Tragen mit Tasche",
+    muster: "TR",
+    stufe: 2,
+    einseitig: true,
+    equipment: [],
+    optionaleLast: [],
+    leichterId: "TR-01",
+    schwererId: null,
+    hauptmuskeln: ["Rumpf", "schräge Bauchmuskeln", "Unterarme", "Gesäß"],
+    belastungsart: "strecke",
+    standardBereich: "15–30 m",
+    steigerungsart: ["gewicht", "strecke"],
+    ausfuehrung: [
+      "Fülle eine stabile Tasche oder einen Wasserkanister (z. B. mit Wasserflaschen oder Büchern) und stelle ihn neben einen Fuß.",
+      "Gehe mit geradem Rücken in die Hocke, greife den Henkel und richte dich aus den Beinen auf.",
+      "Stehe gerade, das Becken bleibt waagerecht, die Schultern sind auf gleicher Höhe.",
+      "Gehe mit ruhigen Schritten und verhindere, dass dich die Last zur Seite zieht.",
+      "Setze die Last kontrolliert ab und wiederhole die Strecke mit der anderen Hand.",
+    ],
+    fehler: [
+      "Oberkörper neigt sich zur Last",
+      "Schulter der Lastseite wird hochgezogen oder hängt tief",
+      "Tasche schlägt gegen das Bein",
+      "Rundrücken beim Aufnehmen",
+    ],
+    hinweise:
+      "Der Bereich gilt pro Seite. Prüfe vorher Henkel und Boden der Tasche; ein Kanister mit Griff ist am sichersten. Gewicht über die Füllung steigern. Plane eine freie, rutschfeste Strecke von etwa 10 bis 15 m ein. Zu schwer: TR-01 Rucksack tragen. Mit Hanteln: TR-04 Koffertragen einarmig.",
+    videoUrl: "https://www.youtube.com/watch?v=oRyVoqbWoZs",
   },
 ];

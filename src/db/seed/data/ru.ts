@@ -24,6 +24,7 @@ export const ru: ExerciseSeedRoh[] = [
     fehler: ["Hohlkreuz beim Absenken", "Zu schnelle, schwungvolle Bewegung", "Luft anhalten"],
     hinweise:
       "Bewege Arm und Bein nur so weit, wie der untere Rücken am Boden bleibt. Zu leicht: RU-06 Hollow Hold.",
+    videoUrl: "https://www.youtube.com/watch?v=WVTYjIQAlow",
   },
   {
     id: "RU-02",
@@ -52,6 +53,7 @@ export const ru: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Hebe das Bein nur bis auf Hüfthöhe. Bei empfindlichen Handgelenken kannst du die Hände zu Fäusten ballen. Zu schwer: RU-01 Dead Bug.",
+    videoUrl: "https://www.youtube.com/watch?v=XOi5mVGVXW4",
   },
   {
     id: "RU-03",
@@ -81,6 +83,7 @@ export const ru: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Beende den Satz, sobald du die Körperspannung nicht mehr halten kannst. Zu schwer: Plank mit Knien am Boden oder RU-01 Dead Bug. Zu leicht: RU-04 Seitstütz.",
+    videoUrl: "https://www.youtube.com/watch?v=HUzDFJTnZL8",
   },
   {
     id: "RU-04",
@@ -109,6 +112,7 @@ export const ru: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Stelle bei Bedarf die Knie angewinkelt auf, um es leichter zu machen. Zu schwer: RU-03 Unterarmstütz (Plank).",
+    videoUrl: "https://www.youtube.com/watch?v=XI_H3EWgPfU",
   },
   {
     id: "RU-05",
@@ -116,7 +120,7 @@ export const ru: ExerciseSeedRoh[] = [
     muster: "RU",
     stufe: 2,
     einseitig: true,
-    equipment: [["maschinen", "band"]],
+    equipment: [["kabelzug", "band"]],
     optionaleLast: [],
     leichterId: null,
     schwererId: null,
@@ -136,7 +140,8 @@ export const ru: ExerciseSeedRoh[] = [
       "Zu viel Widerstand, sodass der Rumpf nachgibt",
     ],
     hinweise:
-      "Wähle den Widerstand so, dass der Oberkörper stabil bleibt. Zu schwer: RU-01 Dead Bug.",
+      "Wähle den Widerstand so, dass der Oberkörper stabil bleibt. Am Kabelzug steigerst du über das Gewicht, mit dem Band über ein stärkeres Band oder mehr Abstand zum Befestigungspunkt. Zu schwer: RU-01 Dead Bug.",
+    videoUrl: "https://www.youtube.com/watch?v=TyknsCFvJNQ",
   },
   {
     id: "RU-06",
@@ -165,6 +170,7 @@ export const ru: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Hebe die Beine höher oder beuge die Knie, wenn der Rücken abhebt. Zu schwer: RU-01 Dead Bug.",
+    videoUrl: "https://www.youtube.com/watch?v=HAfUt2Cco74",
   },
   {
     id: "RU-07",
@@ -193,6 +199,7 @@ export const ru: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Prüfe, dass die Stange fest montiert ist und dein Gewicht trägt. Stelle zum Beenden erst die Füße ab, dann lasse die Stange los. Bei Beschwerden an Schulter oder Handgelenk lieber eine andere Übung wählen. Zu schwer: RU-06 Hollow Hold oder RU-01 Dead Bug.",
+    videoUrl: "https://www.youtube.com/watch?v=cjKIpqOOkwo",
   },
   {
     id: "RU-08",
@@ -221,5 +228,6 @@ export const ru: ExerciseSeedRoh[] = [
     ],
     hinweise:
       "Übe die Abfolge langsam und Schritt für Schritt. Zu schwer: erst ohne Gewicht üben (Schuh auf der Faust).",
+    videoUrl: "https://www.youtube.com/watch?v=n4PSWvZr-J0",
   },
 ];
