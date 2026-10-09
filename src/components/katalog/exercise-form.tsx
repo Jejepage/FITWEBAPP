@@ -241,6 +241,7 @@ export function ExerciseForm({
         <div className="grid gap-x-5 md:grid-cols-2">
           <div className="md:pt-7">
             <Checkbox name="aktiv" label={f.aktiv} checked={w.aktiv} />
+            <Checkbox name="ersatz" label={f.ersatz} hilfe={f.ersatzHilfe} checked={w.ersatz} />
           </div>
           <Feld label={f.pruefstatus} fehler={fehler.pruefstatus}>
             <select name="pruefstatus" defaultValue={w.pruefstatus} className={eingabe}>

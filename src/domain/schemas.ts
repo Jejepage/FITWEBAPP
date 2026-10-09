@@ -35,6 +35,7 @@ export const exerciseSchema = z.object({
     .nullable(),
   aktiv: z.boolean(),
   pruefstatus: z.enum(PRUEFSTATI),
+  ersatz: z.boolean(),
 });
 
 export const exerciseSeedSchema = exerciseSchema.omit({

@@ -140,6 +140,8 @@ export const de = {
     zurueckZurListe: "Zurück zum Katalog",
     stufeBadge: (s: number) => `Stufe ${s}`,
     einseitigBadge: "einseitig",
+    ersatzBadge: "Ersatz",
+    ersatzFilter: "Ersatzübung",
     zuPruefen: "zu prüfen",
     geprueft: "geprüft",
     inaktiv: "inaktiv",
@@ -179,6 +181,7 @@ export const de = {
         stufe: "Stufe",
         equipment: "Equipment",
         einseitig: "Einseitig",
+        ersatz: "Ersatz",
         belastung: "Belastung",
         bereich: "Zielbereich",
         muskeln: "Hauptmuskeln",
@@ -233,6 +236,9 @@ export const de = {
       muster: "Bewegungsmuster",
       stufe: "Stufe (1–5)",
       einseitig: "Einbeinig/einarmig (einseitig)",
+      ersatz: "Ersatzübung",
+      ersatzHilfe:
+        "Ersatzübungen (Körpergewicht, Band) wählt der Plan-Generator nur, wenn es für das Muster mit dem Equipment sonst nichts gibt. Zum Tauschen im Plan und im Training sind sie immer wählbar.",
       belastungsart: "Belastungsart",
       standardBereich: "Standardbereich",
       standardBereichHilfe:

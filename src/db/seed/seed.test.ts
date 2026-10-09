@@ -75,6 +75,27 @@ describe("Seed-Daten", () => {
   });
 });
 
+describe("Ersatzübungen im Seed", () => {
+  it("kennzeichnet reines Körpergewicht und Band-Übungen, beladbare Übungen bleiben Planübungen", () => {
+    const ersatz = uebungenSeed.filter((u) => u.ersatz).map((u) => u.id);
+    expect(ersatz).toEqual([
+      "KN-01", "KN-03",
+      "HB-01", "HB-03",
+      "DH-02", "DH-04", "DH-07",
+      "DV-02", "DV-03", "DV-07", "DV-08",
+      "ZH-02", "ZH-07",
+      "TR-01", "TR-03",
+      "RU-01", "RU-02", "RU-03", "RU-04", "RU-06",
+    ]);
+  });
+
+  it("jedes Muster hat mindestens eine Planübung", () => {
+    for (const m of MUSTER) {
+      expect(uebungenSeed.some((u) => u.muster === m && !u.ersatz), m).toBe(true);
+    }
+  });
+});
+
 describe("Stufenleitern", () => {
   it("sind gegenseitig konsistent, im selben Muster und strikt aufsteigend", () => {
     for (const u of uebungenSeed) {

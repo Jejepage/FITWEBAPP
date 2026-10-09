@@ -1,6 +1,6 @@
-import type { ExerciseSeed } from "@/domain/types";
+import type { ExerciseSeedRoh } from "@/domain/types";
 
-export const zv: ExerciseSeed[] = [
+export const zv: ExerciseSeedRoh[] = [
   {
     id: "ZV-01",
     name: "Latzug",

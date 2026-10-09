@@ -21,6 +21,8 @@ export interface FilterAuswahl {
   muster?: Muster;
   stufe?: number;
   einseitig?: boolean;
+  /** true = nur Ersatzübungen, false = nur Planübungen */
+  ersatz?: boolean;
   profilId?: number;
   /** Inaktive Übungen mit anzeigen (aktiv=alle oder das ältere inaktive=1) */
   inaktive: boolean;
@@ -60,6 +62,7 @@ export function parseKatalogFilter(sp: SearchParams): FilterAuswahl {
   const muster = erster(sp.muster);
   const stufe = Number(erster(sp.stufe));
   const einseitig = erster(sp.einseitig);
+  const ersatz = erster(sp.ersatz);
   const profil = Number(erster(sp.profil));
   const aktiv = erster(sp.aktiv);
   const status = aus(PRUEFSTATI, erster(sp.status));
@@ -72,6 +75,7 @@ export function parseKatalogFilter(sp: SearchParams): FilterAuswahl {
       Number.isInteger(stufe) && stufe >= 1 && stufe <= 5 ? stufe : undefined,
     einseitig:
       einseitig === "ja" ? true : einseitig === "nein" ? false : undefined,
+    ersatz: ersatz === "ja" ? true : ersatz === "nein" ? false : undefined,
     profilId: Number.isInteger(profil) && profil > 0 ? profil : undefined,
     inaktive: erster(sp.inaktive) === "1" || aktiv === "alle",
     nurInaktive: aktiv === "inaktiv" ? true : undefined,
@@ -97,6 +101,7 @@ export function hatFilter(f: FilterAuswahl): boolean {
     f.muster !== undefined ||
     f.stufe !== undefined ||
     f.einseitig !== undefined ||
+    f.ersatz !== undefined ||
     f.profilId !== undefined ||
     f.inaktive ||
     f.nurInaktive === true ||
@@ -120,6 +125,7 @@ export function filterParameter(f: FilterAuswahl): URLSearchParams {
   if (f.stufe !== undefined) p.set("stufe", String(f.stufe));
   if (f.einseitig !== undefined)
     p.set("einseitig", f.einseitig ? "ja" : "nein");
+  if (f.ersatz !== undefined) p.set("ersatz", f.ersatz ? "ja" : "nein");
   if (f.profilId !== undefined) p.set("profil", String(f.profilId));
   if (f.nurInaktive) p.set("aktiv", "inaktiv");
   else if (f.inaktive) p.set("aktiv", "alle");

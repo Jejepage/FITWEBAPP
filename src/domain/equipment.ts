@@ -27,6 +27,18 @@ export function beschreibeBedingung(bedingung: EquipmentBedingung): string {
     .join(" + ");
 }
 
+/**
+ * Vorbelegung des Ersatz-Kennzeichens für Seed und Migration: reines Körpergewicht (kein Gerät,
+ * keine optionale Last) oder eine Übung, die nur mit dem Band geht. Übungen, die sich mit Hanteln
+ * beladen lassen (z. B. Split Squat), bleiben Planübungen.
+ */
+export function istErsatzStandard(
+  u: Pick<Exercise, "equipment" | "optionaleLast">,
+): boolean {
+  if (u.equipment.length === 0) return u.optionaleLast.length === 0;
+  return u.equipment.every((gruppe) => gruppe.every((art) => art === "band"));
+}
+
 /** Zahl aktiver Übungen je Muster, die mit dem Equipment machbar sind. */
 export function zaehleMachbar(
   uebungen: readonly Pick<Exercise, "muster" | "equipment" | "aktiv">[],

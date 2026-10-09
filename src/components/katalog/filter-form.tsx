@@ -88,6 +88,7 @@ export function FilterForm({
   versteckt?: readonly (readonly [string, string])[];
 }) {
   const einseitigWert = filter.einseitig === undefined ? "" : filter.einseitig ? "ja" : "nein";
+  const ersatzWert = filter.ersatz === undefined ? "" : filter.ersatz ? "ja" : "nein";
   const videoWert = filter.video === undefined ? "" : filter.video ? "mit" : "ohne";
   const alle = <option value="">{t.alle}</option>;
   return (
@@ -181,6 +182,16 @@ export function FilterForm({
           name="einseitig"
           label={t.einseitig}
           wert={einseitigWert}
+          optionen={[
+            { wert: "", text: t.alle },
+            { wert: "ja", text: t.ja },
+            { wert: "nein", text: t.nein },
+          ]}
+        />
+        <Segmente
+          name="ersatz"
+          label={t.ersatzFilter}
+          wert={ersatzWert}
           optionen={[
             { wert: "", text: t.alle },
             { wert: "ja", text: t.ja },

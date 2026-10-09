@@ -73,10 +73,18 @@ export interface Exercise {
   videoUrl: string | null;
   aktiv: boolean;
   pruefstatus: Pruefstatus;
+  /**
+   * Ersatzübung (Körpergewicht, Band o. Ä.): Der Plan-Generator wählt sie nur, wenn es für das
+   * Muster mit dem Equipment des Plans keine andere Übung gibt. Beim Tauschen bleibt sie wählbar.
+   */
+  ersatz: boolean;
 }
 
-/** Was in den Seed-Dateien steht; bild/videoUrl/aktiv/pruefstatus setzt der Seed-Runner. */
-export type ExerciseSeed = Omit<Exercise, "bild" | "videoUrl" | "aktiv" | "pruefstatus">;
+/** Was in den Seed-Dateien steht; `ersatz` leitet data/index.ts ab, der Rest kommt vom Seed-Runner. */
+export type ExerciseSeedRoh = Omit<Exercise, "bild" | "videoUrl" | "aktiv" | "pruefstatus" | "ersatz">;
+
+/** Eine Seed-Übung samt Ersatz-Kennzeichen (der Seed-Runner ergänzt bild/videoUrl/aktiv/pruefstatus). */
+export type ExerciseSeed = ExerciseSeedRoh & { ersatz: boolean };
 
 export type Einheit = "A" | "B";
 export type Block = "1" | "2" | "Z";

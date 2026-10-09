@@ -59,6 +59,21 @@ describe("listExercises", () => {
     ).toBe(true);
   });
 
+  it("filtert nach Ersatzübungen; der Seed kennzeichnet reines Körpergewicht und Band", () => {
+    const ersatz = ids(listExercises(db, { ersatz: true }).items);
+    expect(ersatz).toContain("DH-04"); // Liegestütz
+    expect(ersatz).toContain("ZH-02"); // Rudern mit Band
+    expect(ersatz).toContain("RU-03"); // Plank
+    // beladbar mit Kurzhanteln: bleibt Planübung
+    expect(ersatz).not.toContain("KN-05");
+    expect(ersatz).not.toContain("HB-09");
+    // braucht ein Gerät
+    expect(ersatz).not.toContain("KN-04");
+    const plan = ids(listExercises(db, { ersatz: false }).items);
+    expect(plan).toContain("KN-04");
+    expect(ersatz.length + plan.length).toBe(60);
+  });
+
   it("Profil 'Unterwegs' (nur Stange) liefert genau die machbaren Übungen", () => {
     const unterwegs = listProfiles(db).find((p) => p.seedKey === "unterwegs")!;
     const { items } = listExercises(db, {
@@ -222,6 +237,16 @@ describe("createExercise", () => {
     ausfuehrung: ["a", "b", "c"],
     fehler: ["x", "y"],
     hinweise: "Hinweis.",
+  });
+
+  it("übernimmt das Ersatz-Kennzeichen beim Anlegen und Bearbeiten", () => {
+    const r = createExercise(db, "KN", { ...gueltig(), ersatz: true });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(getExercise(db, r.id)!.ersatz).toBe(true);
+    const werte = exerciseZuFormWerte(getExercise(db, r.id)!);
+    expect(updateExercise(db, r.id, { ...werte, ersatz: false }).ok).toBe(true);
+    expect(getExercise(db, r.id)!.ersatz).toBe(false);
   });
 
   it("vergibt die nächste freie ID und speichert alles", () => {

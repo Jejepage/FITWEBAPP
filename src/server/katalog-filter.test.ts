@@ -39,6 +39,13 @@ describe("parseKatalogFilter", () => {
     expect(parseKatalogFilter({ einseitig: "nein" }).einseitig).toBe(false);
   });
 
+  it("ersatz: ja, nein oder ungültig", () => {
+    expect(parseKatalogFilter({ ersatz: "ja" }).ersatz).toBe(true);
+    expect(parseKatalogFilter({ ersatz: "nein" }).ersatz).toBe(false);
+    expect(parseKatalogFilter({ ersatz: "egal" }).ersatz).toBeUndefined();
+    expect(hatFilter(parseKatalogFilter({ ersatz: "ja" }))).toBe(true);
+  });
+
   it("hatFilter erkennt aktive Filter", () => {
     expect(hatFilter(parseKatalogFilter({}))).toBe(false);
     expect(hatFilter(parseKatalogFilter({ stufe: "2" }))).toBe(true);
@@ -112,6 +119,7 @@ describe("neue Filter der Tabelle", () => {
       muster: "ZV",
       stufe: "3",
       einseitig: "nein",
+      ersatz: "ja",
       profil: "2",
       aktiv: "alle",
       status: "zu_pruefen",

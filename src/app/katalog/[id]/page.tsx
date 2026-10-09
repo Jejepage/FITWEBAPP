@@ -85,6 +85,7 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
             {t.stufeBadge(e.stufe)}
           </Badge>
           {e.einseitig && <Badge>{t.einseitigBadge}</Badge>}
+          {e.ersatz && <Badge farbe="hinweis">{t.ersatzBadge}</Badge>}
           <Badge farbe={geprueft ? "gut" : "hinweis"}>{geprueft ? t.geprueft : t.zuPruefen}</Badge>
           {!e.aktiv && <Badge farbe="grau">{t.inaktiv}</Badge>}
         </div>

@@ -139,11 +139,15 @@ export function vorschlagFuerUebung(e: VorschlagEingabe): Vorschlag {
       const neu = naechsteStufeGewicht(ref, gewichtsArt, liste);
       if (neu !== null) return bauen("mehr_gewicht", neu, ziel.min, false);
     }
-    if (art === "wdh" && uebung.steigerungsart.includes("tempo") && !tempoSchonGenutzt) {
-      return bauen("tempo", ref, ziel.max, true);
-    }
-    if (uebung.steigerungsart.includes("stufe") && uebung.schwererId) {
-      return bauen("naechste_stufe", ref, ziel.max, mitTempo);
+    // Ersatzübungen steigern nur über Wiederholungen (und Gewicht): Tempo und nächste Stufe wählt
+    // man dort selbst.
+    if (!uebung.ersatz) {
+      if (art === "wdh" && uebung.steigerungsart.includes("tempo") && !tempoSchonGenutzt) {
+        return bauen("tempo", ref, ziel.max, true);
+      }
+      if (uebung.steigerungsart.includes("stufe") && uebung.schwererId) {
+        return bauen("naechste_stufe", ref, ziel.max, mitTempo);
+      }
     }
     return bauen("wiederholen", ref, ziel.max, mitTempo);
   }

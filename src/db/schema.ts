@@ -48,6 +48,8 @@ export const exercise = sqliteTable(
     videoUrl: text("video_url"),
     aktiv: bool("aktiv").notNull().default(true),
     pruefstatus: text("pruefstatus").$type<Pruefstatus>().notNull().default("zu_pruefen"),
+    /** Ersatzübung: wird vom Plan-Generator nur gewählt, wenn es sonst keine Übung gibt. */
+    ersatz: bool("ersatz").notNull().default(false),
   },
   (t) => [index("exercise_muster_idx").on(t.muster)],
 );

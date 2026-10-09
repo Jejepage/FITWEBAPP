@@ -42,6 +42,34 @@ describe("Migrationen", () => {
     db.close();
   });
 
+  it("0003 fügt exercise.ersatz hinzu und kennzeichnet vorhandenes Körpergewicht und Band", () => {
+    const db = new Database(":memory:");
+    for (const datei of migrationen.filter((n) => n < "0003")) anwenden(db, datei);
+    const einfuegen = (id: string, equipment: string, last: string) =>
+      db.exec(`insert into exercise (id, name, muster, stufe, einseitig, equipment, optionale_last,
+        hauptmuskeln, belastungsart, standard_bereich, steigerungsart, ausfuehrung, fehler,
+        hinweise, aktiv, pruefstatus)
+        values ('${id}', 'x', 'KN', 1, 0, '${equipment}', '${last}', '["Beine"]', 'wdh', '8–12',
+        '["wdh"]', '["a","b","c"]', '["x","y"]', 'h', 1, 'zu_pruefen')`);
+    einfuegen("KN-01", "[]", "[]");
+    einfuegen("KN-05", "[]", '["kurzhanteln"]');
+    einfuegen("KN-04", '[["kurzhanteln","kettlebell"]]', "[]");
+    einfuegen("KN-09", '[["band"]]', "[]");
+    einfuegen("KN-10", '[["maschinen","band"]]', "[]");
+
+    for (const datei of migrationen.filter((n) => n >= "0003")) anwenden(db, datei);
+
+    const zeilen = db.prepare("select id, ersatz from exercise order by id").all();
+    expect(zeilen).toEqual([
+      { id: "KN-01", ersatz: 1 },
+      { id: "KN-04", ersatz: 0 },
+      { id: "KN-05", ersatz: 0 },
+      { id: "KN-09", ersatz: 1 },
+      { id: "KN-10", ersatz: 0 },
+    ]);
+    db.close();
+  });
+
   it("das Journal kennt alle Migrationsdateien", () => {
     const journal = JSON.parse(readFileSync(join(ordner, "meta/_journal.json"), "utf8")) as {
       entries: { tag: string }[];

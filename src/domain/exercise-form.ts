@@ -31,6 +31,7 @@ export interface ExerciseFormWerte {
   /** Eingegebener YouTube-Link (leer = kein Link); beim Speichern in die Standardform gebracht. */
   videoUrl: string;
   aktiv: boolean;
+  ersatz: boolean;
   pruefstatus: Pruefstatus;
   leichterId: string | null;
   schwererId: string | null;
@@ -91,6 +92,7 @@ export function parseExerciseForm(fd: FormData): ExerciseFormWerte {
     hinweise: text(fd.get("hinweise")),
     videoUrl: text(fd.get("videoUrl")),
     aktiv: fd.get("aktiv") === "on",
+    ersatz: fd.get("ersatz") === "on",
     pruefstatus: text(fd.get("pruefstatus")) as Pruefstatus,
     leichterId: text(fd.get("leichterId")) || null,
     schwererId: text(fd.get("schwererId")) || null,
@@ -149,6 +151,7 @@ export function exerciseZuFormWerte(e: Exercise): ExerciseFormWerte {
     hinweise: e.hinweise,
     videoUrl: e.videoUrl ?? "",
     aktiv: e.aktiv,
+    ersatz: e.ersatz,
     pruefstatus: e.pruefstatus,
     leichterId: e.leichterId,
     schwererId: e.schwererId,
@@ -172,6 +175,7 @@ export function leereFormWerte(): ExerciseFormWerte {
     hinweise: "",
     videoUrl: "",
     aktiv: true,
+    ersatz: false,
     pruefstatus: "zu_pruefen",
     leichterId: null,
     schwererId: null,

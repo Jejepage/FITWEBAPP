@@ -136,6 +136,15 @@ function FilterZelle({
           optionen={[alle, { wert: "ja", text: t.ja }, { wert: "nein", text: t.nein }]}
         />
       );
+    case "ersatz":
+      return (
+        <Auswahl
+          name="ersatz"
+          label={`${t.ersatzFilter} filtern`}
+          wert={jaNein(filter.ersatz, "ja", "nein")}
+          optionen={[alle, { wert: "ja", text: t.ja }, { wert: "nein", text: t.nein }]}
+        />
+      );
     case "belastung":
       return (
         <Auswahl
@@ -262,6 +271,8 @@ function Zelle({
       );
     case "einseitig":
       return e.einseitig ? <Badge farbe="akzent">{tt.ja}</Badge> : <span>{tt.nein}</span>;
+    case "ersatz":
+      return e.ersatz ? <Badge farbe="hinweis">{tt.ja}</Badge> : <span>{tt.nein}</span>;
     case "belastung":
       return <span>{t.belastungsarten[e.belastungsart]}</span>;
     case "bereich":
