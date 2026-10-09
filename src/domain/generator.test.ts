@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { erfuellt } from "./equipment";
+import { erfuellt, gleicheBewegung } from "./equipment";
 import { generierePlan, kandidatenFuerSlot, pruefePlan } from "./generator";
 import {
   SLOT_VORLAGE,
@@ -76,7 +76,7 @@ function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
     expect(u, s.exerciseId).toBeDefined();
     expect(u?.muster).toBe(s.muster);
     expect(u?.aktiv).toBe(true);
-    expect(erfuellt(u?.equipment ?? [["keins"]], e.equipment)).toBe(true);
+    expect(erfuellt(u?.equipment ?? ["keins"], e.equipment)).toBe(true);
   }
 
   const einseitigKnHb = slots.filter(
@@ -88,7 +88,9 @@ function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
     const raenge = kand.map((u) => rang(u.stufe, e.stufen[muster]));
     expect(raenge).toEqual([...raenge].sort((x, y) => x - y));
     const beste = raenge[0] ?? -1;
-    const zweite = raenge[1] ?? beste;
+    // B nimmt die beste Übung, die keine Variante von A ist (sonst die zweitbeste).
+    const ohneVarianteVonA = kand.findIndex((k) => kand[0] && !gleicheBewegung(k, kand[0]));
+    const zweite = raenge[ohneVarianteVonA >= 0 ? ohneVarianteVonA : 1] ?? beste;
 
     const [idA, idB] = ids(slots, muster);
     if (kand.length >= 2) expect(idA, muster).not.toBe(idB);
@@ -108,14 +110,17 @@ function pruefeEigenschaften(e: GeneratorEingabe): SlotZuordnung[] {
       // gleichen Rangs (außer der Übung der anderen Einheit) bereitsteht.
       // Das Muster mit dem per Einseitig-Regel eingesetzten Slot (einziger einseitiger in
       // KN/HB) ist ausgenommen: der Austausch kann die unbenutzte Übung verdrängen.
+      // Eine Variante einer benutzten Übung zählt als benutzt.
       const eingesetzt = einseitigKnHb.length === 1 && einseitigKnHb[0]?.muster === muster;
-      if (e.vorherVerwendet?.has(u.id) && !eingesetzt) {
-        const andere = einheit === "A" ? idB : idA;
+      const vorher = e.uebungen.filter((v) => e.vorherVerwendet?.has(v.id));
+      const benutzt = (k: Exercise) => vorher.some((v) => gleicheBewegung(k, v));
+      if (benutzt(u) && !eingesetzt) {
+        const andere = nachId.get(einheit === "A" ? (idB ?? "") : (idA ?? ""))!;
         const besser = kand.find(
           (k) =>
             rang(k.stufe, e.stufen[muster]) === rang(u.stufe, e.stufen[muster]) &&
-            !e.vorherVerwendet?.has(k.id) &&
-            k.id !== andere,
+            !benutzt(k) &&
+            !gleicheBewegung(k, andere),
         );
         expect(besser?.id, `${einheit}-${muster}`).toBeUndefined();
       }
@@ -266,9 +271,9 @@ describe("generierePlan: konkrete Fälle", () => {
   it("Einseitig-Regel vergleicht den Stufenrang, nicht die Listenposition (KN 2, HB 3)", () => {
     // Beide einseitigen Kandidaten stehen in ihrer Liste an derselben Position (Index 4),
     // HB-03 hat aber Rang 1 (Stufe 2 bei Wunsch 3), KN-05 Rang 2 (Stufe 3 bei Wunsch 2).
-    // HB-10 (einseitig, Stufe 3, Rang 0) bleibt dafür außen vor.
+    // HB-10 und HB-13 (einseitig, Stufe 3, Rang 0) bleiben dafür außen vor.
     const stufen = { ...einheitlich(2), HB: 3 };
-    const uebungen = KATALOG.filter((u) => u.id !== "HB-10");
+    const uebungen = KATALOG.filter((u) => u.id !== "HB-10" && u.id !== "HB-13");
     const { slots } = plan({ ...eingabe("studio", stufen), uebungen });
     expect(ids(slots, "HB")).toEqual(["HB-06", "HB-03"]);
     expect(ids(slots, "KN")).toEqual(["KN-02", "KN-03"]);
@@ -379,29 +384,45 @@ describe("kandidatenFuerSlot", () => {
     expect(kand("zuhause", 2, "KN")).toEqual([
       "KN-03",
       "KN-04",
+      "KN-09",
       "KN-01",
       "KN-05",
       "KN-06",
+      "KN-10",
+      "KN-11",
       "KN-07",
+      "KN-12",
     ]);
   });
 
   it("Unterwegs KN Stufe 4 und Zuhause ZV Stufe 5", () => {
-    expect(kand("unterwegs", 4, "KN")).toEqual(["KN-07", "KN-05", "KN-06", "KN-03", "KN-01"]);
+    expect(kand("unterwegs", 4, "KN")).toEqual(["KN-07", "KN-05", "KN-11", "KN-03", "KN-01"]);
     expect(kand("zuhause", 5, "ZV")).toEqual(["ZV-07", "ZV-06", "ZV-05", "ZV-04", "ZV-02"]);
   });
 
   it("Studio KN Stufe 2 mit vorherVerwendet: unbenutzte zuerst, aber nur innerhalb der Stufe", () => {
+    // KN-10 ist eine Variante von KN-05 (mit Kurzhanteln) und zählt daher auch als benutzt.
     expect(kand("studio", 2, "KN", { vorherVerwendet: new Set(["KN-02", "KN-05"]) })).toEqual([
       "KN-03",
       "KN-04",
+      "KN-09",
       "KN-02",
       "KN-01",
       "KN-06",
+      "KN-11",
       "KN-05",
+      "KN-10",
       "KN-07",
       "KN-08",
+      "KN-12",
     ]);
+  });
+
+  it("B wählt keine Variante der Übung aus A", () => {
+    // Zuhause KN Stufe 2: KN-03, KN-04 (Goblet Squat mit Kurzhantel), KN-09 (mit Kettlebell).
+    const ohneKn03 = KATALOG.filter((u) => u.id !== "KN-03");
+    const { slots } = plan({ ...eingabe("zuhause", einheitlich(2)), uebungen: ohneKn03 });
+    expect(ids(slots, "KN")).toEqual(["KN-04", "KN-01"]);
   });
 
   it("schließt inaktive Übungen aus", () => {

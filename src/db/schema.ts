@@ -33,7 +33,6 @@ export const exercise = sqliteTable(
     stufe: integer("stufe").notNull(),
     einseitig: bool("einseitig").notNull().default(false),
     equipment: json<EquipmentBedingung>("equipment").notNull(),
-    optionaleLast: json<EquipmentArt[]>("optionale_last").notNull(),
     // Bewusst ohne Fremdschlüssel: Nachbarn werden beim Seed in beliebiger Reihenfolge angelegt.
     leichterId: text("leichter_id"),
     schwererId: text("schwerer_id"),

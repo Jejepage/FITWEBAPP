@@ -93,17 +93,17 @@ async function ablauf(browser, name, viewport) {
   // 3. Profilliste mit Machbarkeit (von Hand aus der Spec nachgezählt)
   await page.goto(`${BASE}/einstellungen`);
   await profilKarte("Studio").getByText("Standard", { exact: true }).waitFor();
-  await profilKarte("Studio").getByText("63 von 63 Übungen machbar").waitFor();
-  await profilKarte("Zuhause").getByText("50 von 63 Übungen machbar").waitFor();
+  await profilKarte("Studio").getByText("76 von 76 Übungen machbar").waitFor();
+  await profilKarte("Zuhause").getByText("61 von 76 Übungen machbar").waitFor();
   await profilKarte("Zuhause")
     .getByText("Kurzhanteln: 2–20/2 kg · Kettlebell: 12, 16 kg")
     .waitFor();
   await profilKarte("Unterwegs")
-    .getByText("31 von 63 Übungen machbar")
+    .getByText("31 von 76 Übungen machbar")
     .waitFor();
   await shot("3-profile");
   schritt(
-    `[${name}] Profilliste: Studio 63, Zuhause 50, Unterwegs 31 Übungen machbar`,
+    `[${name}] Profilliste: Studio 76, Zuhause 61, Unterwegs 31 Übungen machbar`,
   );
 
   // 4. Profil "Unterwegs": Vorschau je Muster
@@ -146,9 +146,9 @@ async function ablauf(browser, name, viewport) {
   await page.getByRole("button", { name: "Speichern" }).click();
   await page.getByRole("heading", { name: "Equipment-Profile" }).waitFor();
   await profilKarte("Garage").getByText("Kurzhanteln: 2,5–10/2,5 kg").waitFor();
-  await profilKarte("Garage").getByText("39 von 63 Übungen machbar").waitFor();
+  await profilKarte("Garage").getByText("44 von 76 Übungen machbar").waitFor();
   schritt(
-    `[${name}] Garage angelegt (Gewichte 2,5–10/2,5, 39 Übungen machbar)`,
+    `[${name}] Garage angelegt (Gewichte 2,5–10/2,5, 44 Übungen machbar)`,
   );
 
   // Garage hat keine Stange: für Ziehen vertikal gibt es nichts → Warnung
@@ -173,8 +173,8 @@ async function ablauf(browser, name, viewport) {
   await page.locator("summary", { hasText: "Filter" }).click();
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Garage" });
   await page.getByRole("button", { name: "Filtern" }).click();
-  await page.getByText("39 von 63 Übungen").waitFor();
-  schritt(`[${name}] Katalogfilter „Garage“ zeigt 39 Übungen`);
+  await page.getByText("44 von 76 Übungen").waitFor();
+  schritt(`[${name}] Katalogfilter „Garage“ zeigt 44 Übungen`);
 
   // Doppelter Name wird abgelehnt
   await page.goto(`${BASE}/einstellungen/profile/neu`);

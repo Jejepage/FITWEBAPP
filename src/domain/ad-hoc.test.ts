@@ -20,7 +20,12 @@ const u = (
   id: string,
   muster: Muster,
   stufe: number,
-  o: { einseitig?: boolean; equipment?: EquipmentBedingung; aktiv?: boolean } = {},
+  o: {
+    einseitig?: boolean;
+    equipment?: EquipmentBedingung;
+    aktiv?: boolean;
+    videoUrl?: string;
+  } = {},
 ): Exercise => ({
   ...basis,
   id,
@@ -29,6 +34,7 @@ const u = (
   einseitig: o.einseitig ?? false,
   equipment: o.equipment ?? [],
   aktiv: o.aktiv ?? true,
+  videoUrl: o.videoUrl ?? null,
 });
 
 const slot = (
@@ -87,7 +93,7 @@ describe("ersetzungenFuerProfil mit dem Seed-Katalog", () => {
 });
 
 describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
-  const maschine: EquipmentBedingung = [["maschinen"]];
+  const maschine: EquipmentBedingung = ["maschinen"];
 
   it("kleinster Stufenabstand zur Planübung", () => {
     const r = ersetzungenFuerProfil({
@@ -98,6 +104,20 @@ describe("ersetzungenFuerProfil: Auswahl des Ersatzes", () => {
         u("KN-92", "KN", 3),
       ],
       equipment: [],
+    });
+    expect(r.ersetzungen["1"]).toBe("KN-92");
+  });
+
+  it("eine Variante der Planübung (gleiches Video) geht vor, auch bei größerem Stufenabstand", () => {
+    const video = "https://www.youtube.com/watch?v=FQiMMHcWLLM";
+    const r = ersetzungenFuerProfil({
+      slots: [slot(1, "KN", "KN-90")],
+      uebungen: [
+        u("KN-90", "KN", 2, { equipment: ["kurzhanteln"], videoUrl: video }),
+        u("KN-91", "KN", 2),
+        u("KN-92", "KN", 3, { equipment: ["kettlebell"], videoUrl: video }),
+      ],
+      equipment: ["kettlebell"],
     });
     expect(r.ersetzungen["1"]).toBe("KN-92");
   });
@@ -182,9 +202,9 @@ describe("ersetzungenFuerEinheit", () => {
   const eingabe = {
     slots: [slot(1, "KN", "KN-90", "1"), slot(2, "TR", "TR-90", "Z")],
     uebungen: [
-      u("KN-90", "KN", 3, { equipment: [["maschinen"]] }),
+      u("KN-90", "KN", 3, { equipment: ["maschinen"] }),
       u("KN-91", "KN", 2),
-      u("TR-90", "TR", 2, { equipment: [["maschinen"]] }),
+      u("TR-90", "TR", 2, { equipment: ["maschinen"] }),
     ],
     equipment: [] as const,
   };

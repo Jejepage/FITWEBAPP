@@ -33,10 +33,11 @@ export const EQUIPMENT_AUSWAHL = EQUIPMENT_ARTEN.filter(
 );
 
 /**
- * Liste von Gruppen: innerhalb einer Gruppe reicht ein Eintrag (ODER),
- * alle Gruppen müssen erfüllt sein (UND). `[]` = Körpergewicht/Alltagsgegenstand.
+ * Geräte, die eine Übung braucht – alle zusammen (UND). `[]` = Körpergewicht/Alltagsgegenstand.
+ * Geht eine Übung mit verschiedenen Geräten (oder mit und ohne Gewicht), steht sie mehrfach im
+ * Katalog, z. B. „Goblet Squat mit Kurzhantel“ und „Goblet Squat mit Kettlebell“.
  */
-export type EquipmentBedingung = EquipmentArt[][];
+export type EquipmentBedingung = EquipmentArt[];
 
 export const BELASTUNGSARTEN = ["wdh", "zeit", "strecke"] as const;
 export type Belastungsart = (typeof BELASTUNGSARTEN)[number];
@@ -56,8 +57,6 @@ export interface Exercise {
   stufe: Stufe;
   einseitig: boolean;
   equipment: EquipmentBedingung;
-  /** Womit die Übung zusätzlich beladen werden kann (z. B. Split Squat mit Kurzhanteln). */
-  optionaleLast: EquipmentArt[];
   leichterId: string | null;
   schwererId: string | null;
   hauptmuskeln: string[];

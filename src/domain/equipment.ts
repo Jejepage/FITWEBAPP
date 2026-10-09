@@ -8,24 +8,31 @@ import {
 } from "./types";
 
 /**
- * Erfüllt das verfügbare Equipment die Bedingung einer Übung?
- * Gruppen sind UND-verknüpft, innerhalb einer Gruppe reicht ein Eintrag (ODER).
+ * Erfüllt das verfügbare Equipment die Bedingung einer Übung? Alle Geräte müssen vorhanden sein.
  * `[]` (Körpergewicht, Alltagsgegenstände) ist immer erfüllt.
  */
 export function erfuellt(
   bedingung: EquipmentBedingung,
   verfuegbar: readonly EquipmentArt[],
 ): boolean {
-  return bedingung.every((gruppe) => gruppe.some((art) => verfuegbar.includes(art)));
+  return bedingung.every((art) => verfuegbar.includes(art));
 }
 
-/** Lesbare Darstellung, z. B. "Kurzhanteln oder Kettlebell + Bank". */
+/** Lesbare Darstellung, z. B. "Kurzhanteln + Bank". */
 export function beschreibeBedingung(bedingung: EquipmentBedingung): string {
   if (bedingung.length === 0) return EQUIPMENT_NAMEN.keins;
-  return bedingung
-    .map((gruppe) => gruppe.map((art) => EQUIPMENT_NAMEN[art]).join(" oder "))
-    .join(" + ");
+  return bedingung.map((art) => EQUIPMENT_NAMEN[art]).join(" + ");
 }
+
+/**
+ * Gleiche Übung oder eine Variante davon (anderes Gerät, mit/ohne Gewicht). Varianten stehen als
+ * eigene Übungen im Katalog und teilen sich das Video (Spec 3.3); Übungen ohne Video sind nur
+ * mit sich selbst gleich.
+ */
+export const gleicheBewegung = (
+  a: Pick<Exercise, "id" | "videoUrl">,
+  b: Pick<Exercise, "id" | "videoUrl">,
+): boolean => a.id === b.id || (a.videoUrl !== null && a.videoUrl === b.videoUrl);
 
 /** Zahl aktiver Übungen je Muster, die mit dem Equipment machbar sind. */
 export function zaehleMachbar(

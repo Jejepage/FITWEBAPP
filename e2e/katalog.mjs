@@ -37,9 +37,9 @@ async function ablauf(name, viewport) {
 
   // 1. Liste
   await page.goto(`${BASE}/katalog`);
-  await page.getByText("63 von 63 Übungen").waitFor();
+  await page.getByText("76 von 76 Übungen").waitFor();
   await keinHorizontalScroll("Liste");
-  schritt("Liste zeigt 63 Übungen");
+  schritt("Liste zeigt 76 Übungen");
   await shot("1-liste");
 
   // 2. Filter: Muster ZV + Profil Unterwegs
@@ -50,7 +50,7 @@ async function ablauf(name, viewport) {
     .selectOption({ label: "Unterwegs" });
   await shot("2-filter-offen");
   await page.getByRole("button", { name: "Filtern" }).click();
-  await page.getByText("5 von 63 Übungen").waitFor();
+  await page.getByText("5 von 76 Übungen").waitFor();
   const namen = await page
     .locator("main a[href^='/katalog/ZV-']")
     .allInnerTexts();
@@ -60,14 +60,14 @@ async function ablauf(name, viewport) {
 
   // Filter zurücksetzen (Bereich bleibt nach dem Filtern offen), dann Stufe+einseitig
   await page.getByRole("link", { name: "Zurücksetzen" }).first().click();
-  await page.getByText("63 von 63 Übungen").waitFor();
+  await page.getByText("76 von 76 Übungen").waitFor();
   await page.goto(`${BASE}/katalog?muster=RU&einseitig=ja`);
-  await page.getByText("4 von 63 Übungen").waitFor();
-  schritt("Filter einseitig (RU → 4)");
+  await page.getByText("5 von 76 Übungen").waitFor();
+  schritt("Filter einseitig (RU → 5)");
 
   // Unbekanntes Profil im Link: Filter wird ignoriert und nicht als aktiv angezeigt
   await page.goto(`${BASE}/katalog?profil=999`);
-  await page.getByText("63 von 63 Übungen").waitFor();
+  await page.getByText("76 von 76 Übungen").waitFor();
   assert.equal(await page.locator("summary", { hasText: "●" }).count(), 0);
   schritt("Unbekanntes Profil wird ignoriert");
 
@@ -159,7 +159,7 @@ async function ablauf(name, viewport) {
     .getByLabel("Hinweise (Gelenke, Alternativen)")
     .fill("Tür muss fest geschlossen und belastbar sein.");
   await page
-    .getByRole("group", { name: "Gruppe 1" })
+    .getByRole("group", { name: "Geräte" })
     .getByLabel("Band")
     .check();
   await page.getByRole("button", { name: "Speichern" }).click();
@@ -175,10 +175,10 @@ async function ablauf(name, viewport) {
   await page.getByRole("button", { name: "Deaktivieren" }).click();
   await page.getByText("inaktiv", { exact: true }).first().waitFor();
   await page.goto(`${BASE}/katalog?muster=ZH`);
-  await page.getByText("8 von 63 Übungen").waitFor();
+  await page.getByText("8 von 76 Übungen").waitFor();
   assert.equal(await page.locator("a[href='/katalog/ZH-09']").count(), 0);
   await page.goto(`${BASE}/katalog?muster=ZH&inaktive=1`);
-  await page.getByText("9 von 64 Übungen").waitFor();
+  await page.getByText("9 von 77 Übungen").waitFor();
   await page.locator("a[href='/katalog/ZH-09']").waitFor();
   schritt(
     "Deaktivierte Übung verschwindet aus der Liste und erscheint mit 'inaktive anzeigen'",

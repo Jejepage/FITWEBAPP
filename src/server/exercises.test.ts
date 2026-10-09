@@ -26,12 +26,19 @@ beforeEach(() => {
 const ids = (l: { id: string }[]) => l.map((e) => e.id);
 
 describe("listExercises", () => {
-  it("liefert alle 63 sortiert nach Muster, Stufe, ID", () => {
+  it("liefert alle 76 sortiert nach Muster, Stufe, ID", () => {
     const { items, gesamt } = listExercises(db);
-    expect(items).toHaveLength(63);
-    expect(gesamt).toBe(63);
+    expect(items).toHaveLength(76);
+    expect(gesamt).toBe(76);
     expect(ids(items).slice(0, 3)).toEqual(["KN-01", "KN-02", "KN-03"]);
     expect(items.at(-1)!.id).toBe("RU-08");
+    // Varianten stehen bei ihrer Stufe, nicht am Ende des Musters.
+    expect(ids(items.filter((e) => e.muster === "KN" && e.stufe === 2))).toEqual([
+      "KN-02",
+      "KN-03",
+      "KN-04",
+      "KN-09",
+    ]);
   });
 
   it("filtert nach Muster, Stufe und einseitig", () => {
@@ -47,12 +54,14 @@ describe("listExercises", () => {
     expect(ids(listExercises(db, { muster: "KN", stufe: 3 }).items)).toEqual([
       "KN-05",
       "KN-06",
+      "KN-10",
+      "KN-11",
     ]);
     const einseitig = listExercises(db, {
       muster: "RU",
       einseitig: true,
     }).items;
-    expect(ids(einseitig)).toEqual(["RU-02", "RU-04", "RU-05", "RU-08"]);
+    expect(ids(einseitig)).toEqual(["RU-02", "RU-04", "RU-05", "RU-09", "RU-08"]);
     expect(
       listExercises(db, { muster: "RU", einseitig: false }).items.every(
         (e) => !e.einseitig,
@@ -67,12 +76,12 @@ describe("listExercises", () => {
     });
     const nach = (m: string) => ids(items.filter((e) => e.muster === m));
     expect(nach("ZH")).toEqual(["ZH-08", "ZH-07"]);
-    expect(nach("KN")).toEqual(["KN-01", "KN-03", "KN-05", "KN-06", "KN-07"]);
+    expect(nach("KN")).toEqual(["KN-01", "KN-03", "KN-05", "KN-11", "KN-07"]);
     // ZV-07: Zusatzgewicht kommt in den Rucksack (Alltagsgegenstand)
     expect(nach("ZV")).toEqual(["ZV-02", "ZV-04", "ZV-05", "ZV-06", "ZV-07"]);
     expect(nach("TR")).toEqual(["TR-01", "TR-03", "TR-07"]);
     expect(
-      items.every((e) => e.equipment.flat().every((a) => a === "stange")),
+      items.every((e) => e.equipment.every((a) => a === "stange")),
     ).toBe(true);
   });
 
@@ -80,7 +89,7 @@ describe("listExercises", () => {
     const studio = listProfiles(db).find((p) => p.seedKey === "studio")!;
     expect(
       listExercises(db, { profilEquipment: studio.equipment }).items,
-    ).toHaveLength(63);
+    ).toHaveLength(76);
   });
 
   it("blendet inaktive Übungen standardmäßig aus", () => {
@@ -88,16 +97,16 @@ describe("listExercises", () => {
     expect(ids(listExercises(db, { muster: "KN" }).items)).not.toContain(
       "KN-03",
     );
-    expect(listExercises(db).gesamt).toBe(62);
+    expect(listExercises(db).gesamt).toBe(75);
     const mit = listExercises(db, { muster: "KN", inaktive: true });
     expect(ids(mit.items)).toContain("KN-03");
-    expect(mit.gesamt).toBe(63);
+    expect(mit.gesamt).toBe(76);
   });
 
   it("filtert nach Prüfstatus", () => {
     setPruefstatus(db, "KN-01", "geprueft");
     const offen = listExercises(db, { nurZuPruefen: true }).items;
-    expect(offen).toHaveLength(62);
+    expect(offen).toHaveLength(75);
     expect(ids(offen)).not.toContain("KN-01");
   });
 
@@ -148,9 +157,9 @@ describe("listExercises: Filter der Tabelle", () => {
       "KN-02",
     ]);
     expect(listExercises(db, { pruefstatus: "zu_pruefen" }).items).toHaveLength(
-      62,
+      75,
     );
-    expect(listExercises(db, { nurZuPruefen: true }).items).toHaveLength(62);
+    expect(listExercises(db, { nurZuPruefen: true }).items).toHaveLength(75);
   });
 
   it("nur inaktive und alle", () => {
@@ -158,8 +167,8 @@ describe("listExercises: Filter der Tabelle", () => {
     expect(ids(listExercises(db, { nurInaktive: true }).items)).toEqual([
       "KN-02",
     ]);
-    expect(listExercises(db, { inaktive: true }).items).toHaveLength(63);
-    expect(listExercises(db, {}).items).toHaveLength(62);
+    expect(listExercises(db, { inaktive: true }).items).toHaveLength(76);
+    expect(listExercises(db, {}).items).toHaveLength(75);
   });
 
   it("Video: mit und ohne", () => {
@@ -170,7 +179,7 @@ describe("listExercises: Filter der Tabelle", () => {
       .where(eq(exercise.id, "KN-02"))
       .run();
     expect(ids(listExercises(db, { video: true }).items)).toEqual(["KN-02"]);
-    expect(listExercises(db, { video: false }).items).toHaveLength(62);
+    expect(listExercises(db, { video: false }).items).toHaveLength(75);
   });
 
   it("Muskel: Teilstring in den Hauptmuskeln", () => {
@@ -230,8 +239,8 @@ describe("createExercise", () => {
 
   it("vergibt die nächste freie ID und speichert alles", () => {
     const r = createExercise(db, "KN", gueltig());
-    expect(r).toEqual({ ok: true, id: "KN-09" });
-    const e = getExercise(db, "KN-09")!;
+    expect(r).toEqual({ ok: true, id: "KN-13" });
+    const e = getExercise(db, "KN-13")!;
     expect(e).toMatchObject({
       name: "Neue Kniebeuge",
       muster: "KN",
@@ -240,7 +249,7 @@ describe("createExercise", () => {
       bild: null,
     });
     expect(e.leichterId).toBeNull();
-    expect(alleUebungen(db)).toHaveLength(64);
+    expect(alleUebungen(db)).toHaveLength(77);
   });
 
   it("ignoriert Leiter-Angaben beim Anlegen", () => {
@@ -255,7 +264,7 @@ describe("createExercise", () => {
   it("meldet Validierungsfehler und legt nichts an", () => {
     const r = createExercise(db, "KN", { ...gueltig(), name: "" });
     expect(r.ok).toBe(false);
-    expect(alleUebungen(db)).toHaveLength(63);
+    expect(alleUebungen(db)).toHaveLength(76);
   });
 });
 
@@ -266,7 +275,7 @@ describe("updateExercise", () => {
       ...exerciseZuFormWerte(e),
       name: "Kniebeuge (geändert)",
       pruefstatus: "geprueft",
-      equipment: [["kurzhanteln"], ["bank"]],
+      equipment: ["kurzhanteln", "bank"],
     });
     expect(r).toEqual({ ok: true, id: "KN-03" });
     const neu = getExercise(db, "KN-03")!;
@@ -276,7 +285,7 @@ describe("updateExercise", () => {
       muster: "KN",
       bild: null,
     });
-    expect(neu.equipment).toEqual([["kurzhanteln"], ["bank"]]);
+    expect(neu.equipment).toEqual(["kurzhanteln", "bank"]);
   });
 
   it("meldet unbekannte Übung", () => {
@@ -434,12 +443,12 @@ describe("YouTube-Link", () => {
       neueWerte("https://youtu.be/dQw4w9WgXcQ?si=abc"),
     );
     expect(r.ok).toBe(true);
-    expect(getExercise(db, "KN-09")!.videoUrl).toBe(LINK);
+    expect(getExercise(db, "KN-13")!.videoUrl).toBe(LINK);
   });
 
   it("Anlegen ohne Link: null", () => {
     createExercise(db, "KN", neueWerte(""));
-    expect(getExercise(db, "KN-09")!.videoUrl).toBeNull();
+    expect(getExercise(db, "KN-13")!.videoUrl).toBeNull();
   });
 
   it("Ändern setzt, ersetzt und entfernt den Link", () => {

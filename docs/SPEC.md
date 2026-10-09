@@ -96,8 +96,10 @@ Zusätzlich speicherbar: verfügbare Hantelgewichte zuhause (z. B. Kurzhanteln 2
 
 ### 3.3 Equipment-Bedingung einer Übung
 
-Als Liste von Gruppen: innerhalb einer Gruppe reicht eines, alle Gruppen müssen erfüllt sein.
-Beispiel Goblet Squat: `[["kurzhanteln","kettlebell"]]`. Beispiel Kurzhantel-Bankdrücken: `[["kurzhanteln"],["bank"]]`. Körpergewicht: `[]`.
+Als einfache Liste: Alle genannten Geräte werden gebraucht (UND).
+Beispiel Goblet Squat mit Kurzhantel: `["kurzhanteln"]`. Beispiel Kurzhantel-Bankdrücken: `["kurzhanteln","bank"]`. Körpergewicht: `[]`.
+
+**Änderung nach Abschnitt C (Equipment vereinfacht):** Früher war die Bedingung eine Liste von Gruppen (ODER innerhalb, UND zwischen den Gruppen), dazu gab es das Feld „optionale Last“. Beides ist entfallen: Geht eine Übung mit verschiedenen Geräten oder mit und ohne Gewicht, steht sie je Variante als eigene Übung im Katalog und heißt entsprechend (z. B. „Goblet Squat mit Kurzhantel“ und „Goblet Squat mit Kettlebell“, „Split Squat“ und „Split Squat mit Kurzhanteln“).
 
 ## 4. Übungskatalog
 
@@ -110,7 +112,7 @@ Beispiel Goblet Squat: `[["kurzhanteln","kettlebell"]]`. Beispiel Kurzhantel-Ban
 | muster | enum | KN, HB, DH, DV, ZH, ZV, TR, RU |
 | stufe | 1–5 | Schwierigkeit |
 | einseitig | bool | einbeinig/einarmig |
-| equipment | Gruppenliste | siehe 3.3 |
+| equipment | Liste | benötigte Geräte, siehe 3.3 |
 | leichter_id / schwerer_id | string? | Nachbarn in der Stufenleiter |
 | hauptmuskeln | string[] | |
 | belastungsart | enum | `wdh`, `zeit`, `strecke` |
@@ -135,11 +137,15 @@ Abkürzungen Equipment: M = maschinen, KZ = kabelzug, LH = langhantel, KH = kurz
 | KN-01 | Kniebeuge auf Stuhl/Box | – | 1 | |
 | KN-02 | Beinpresse | M | 2 | |
 | KN-03 | Kniebeuge mit Körpergewicht | – | 2 | |
-| KN-04 | Goblet Squat | KH oder KB | 2 | |
-| KN-05 | Split Squat (stationärer Ausfallschritt) | – / KH | 3 | ja |
-| KN-06 | Ausfallschritt rückwärts | – / KH / KB | 3 | ja |
-| KN-07 | Bulgarian Split Squat | Stuhl/BK, optional KH | 4 | ja |
+| KN-04 | Goblet Squat mit Kurzhantel | KH | 2 | |
+| KN-05 | Split Squat (stationärer Ausfallschritt) | – | 3 | ja |
+| KN-06 | Ausfallschritt rückwärts mit Kurzhanteln | KH | 3 | ja |
+| KN-07 | Bulgarian Split Squat | – | 4 | ja |
 | KN-08 | Langhantel-Kniebeuge | LH | 4 | |
+| KN-09 | Goblet Squat mit Kettlebell | KB | 2 | |
+| KN-10 | Split Squat mit Kurzhanteln | KH | 3 | ja |
+| KN-11 | Ausfallschritt rückwärts | – | 3 | ja |
+| KN-12 | Bulgarian Split Squat mit Kurzhanteln | KH | 4 | ja |
 
 **Hüftbeuge (HB)**
 | ID | Name | Equipment | Stufe | einseitig |
@@ -150,10 +156,14 @@ Abkürzungen Equipment: M = maschinen, KZ = kabelzug, LH = langhantel, KH = kurz
 | HB-04 | Rumänisches Kreuzheben mit Kurzhanteln | KH | 2 | |
 | HB-05 | Kettlebell-Kreuzheben | KB | 2 | |
 | HB-06 | Kettlebell-Swing | KB | 3 | |
-| HB-07 | Hip Thrust auf der Bank | BK + KH oder KB oder LH | 3 | |
+| HB-07 | Hip Thrust auf der Bank mit Kurzhantel | KH + BK | 3 | |
 | HB-08 | Rumänisches Kreuzheben mit Langhantel | LH | 3 | |
-| HB-09 | Einbeiniges rumänisches Kreuzheben | – / KH / KB | 4 | ja |
-| HB-10 | Einbeiniger Hip Thrust | – / KH / KB | 3 | ja |
+| HB-09 | Einbeiniges rumänisches Kreuzheben | – | 4 | ja |
+| HB-10 | Einbeiniger Hip Thrust | – | 3 | ja |
+| HB-11 | Hip Thrust auf der Bank mit Kettlebell | KB + BK | 3 | |
+| HB-12 | Hip Thrust auf der Bank mit Langhantel | LH + BK | 3 | |
+| HB-13 | Einbeiniger Hip Thrust mit Kurzhantel | KH | 3 | ja |
+| HB-14 | Einbeiniges rumänisches Kreuzheben mit Kurzhantel | KH | 4 | ja |
 
 **Drücken horizontal (DH)**
 | ID | Name | Equipment | Stufe | einseitig |
@@ -199,18 +209,22 @@ Abkürzungen Equipment: M = maschinen, KZ = kabelzug, LH = langhantel, KH = kurz
 | ZV-04 | Klimmzug mit Fußhilfe | ST | 2 | |
 | ZV-05 | Negativer Klimmzug | ST | 3 | |
 | ZV-06 | Klimmzug | ST | 4 | |
-| ZV-07 | Klimmzug mit Zusatzgewicht | ST, Last im Rucksack: KH / KB | 5 | |
+| ZV-07 | Klimmzug mit Zusatzgewicht | ST | 5 | |
 
 **Tragen (TR)**
 | ID | Name | Equipment | Stufe | einseitig |
 |---|---|---|---|---|
 | TR-01 | Rucksack tragen | – | 1 | |
-| TR-02 | Farmer's Walk | KH oder KB | 1 | |
+| TR-02 | Farmer's Walk mit Kurzhanteln | KH | 1 | |
 | TR-03 | Bärengang | – | 2 | |
-| TR-04 | Koffertragen einarmig | KH oder KB | 2 | ja |
-| TR-05 | Goblet-Tragen | KH oder KB | 3 | |
-| TR-06 | Überkopf-Tragen einarmig | KH oder KB | 4 | ja |
+| TR-04 | Koffertragen einarmig mit Kurzhantel | KH | 2 | ja |
+| TR-05 | Goblet-Tragen mit Kurzhantel | KH | 3 | |
+| TR-06 | Überkopf-Tragen einarmig mit Kurzhantel | KH | 4 | ja |
 | TR-07 | Einseitiges Tragen mit Tasche | – | 2 | ja |
+| TR-08 | Farmer's Walk mit Kettlebells | KB | 1 | |
+| TR-09 | Koffertragen einarmig mit Kettlebell | KB | 2 | ja |
+| TR-10 | Goblet-Tragen mit Kettlebell | KB | 3 | |
+| TR-11 | Überkopf-Tragen einarmig mit Kettlebell | KB | 4 | ja |
 
 **Rumpf (RU)**
 | ID | Name | Equipment | Stufe | einseitig |
@@ -219,10 +233,11 @@ Abkürzungen Equipment: M = maschinen, KZ = kabelzug, LH = langhantel, KH = kurz
 | RU-02 | Bird Dog | – | 1 | ja |
 | RU-03 | Unterarmstütz (Plank) | – | 1 | |
 | RU-04 | Seitstütz | – | 2 | ja |
-| RU-05 | Pallof Press | KZ oder BD | 2 | ja |
+| RU-05 | Pallof Press am Kabelzug | KZ | 2 | ja |
 | RU-06 | Hollow Hold | – | 3 | |
 | RU-07 | Hängendes Knieheben | ST | 3 | |
 | RU-08 | Turkish Get-up | KB | 4 | ja |
+| RU-09 | Pallof Press mit Band | BD | 2 | ja |
 
 Stufenleitern (leichter/schwerer) verknüpfen vorrangig Übungen **mit gleichem Equipment-Typ** (z. B. ZV-02 → ZV-04 → ZV-05 → ZV-06 → ZV-07; DH-02 → DH-04 → DH-07).
 
@@ -233,6 +248,13 @@ Stufenleitern (leichter/schwerer) verknüpfen vorrangig Übungen **mit gleichem 
 - TR-05 heißt Goblet-Tragen (so war die Ausführung beschrieben) und geht auch mit Kurzhantel.
 - DH-04 Liegestütz ist Stufe 3 (Einstieg über DH-02), DH-05 Schrägbankdrücken Stufe 2 als Variante von DH-03 ohne Leiter.
 - KN-06 geht auch ohne Gewicht, HB-07 auch mit Kettlebell.
+
+**Änderung nach Abschnitt C (Varianten statt ODER und optionaler Last, siehe 3.3):** Der Katalog umfasst 76 Übungen. Die bisherige ID bleibt bei der ersten Variante, die weiteren Varianten bekommen neue IDs am Ende des Musters.
+- Kurzhantel und Kettlebell getrennt: KN-04/KN-09 Goblet Squat, TR-02/TR-08 Farmer's Walk, TR-04/TR-09 Koffertragen, TR-05/TR-10 Goblet-Tragen, TR-06/TR-11 Überkopf-Tragen. Die Kettlebell-Varianten bilden eine eigene Leiter TR-08 → TR-09 → TR-10 → TR-11.
+- HB-07 Hip Thrust auf der Bank je mit Kurzhantel (HB-07), Kettlebell (HB-11) und Langhantel (HB-12). RU-05 Pallof Press am Kabelzug, RU-09 mit Band.
+- Mit und ohne Gewicht getrennt: KN-05/KN-10 Split Squat, KN-11/KN-06 Ausfallschritt rückwärts (KN-06 ist jetzt die Variante mit Kurzhanteln, Leiter KN-04 → KN-06), KN-07/KN-12 Bulgarian Split Squat (Leiter KN-10 → KN-12), HB-10/HB-13 Einbeiniger Hip Thrust, HB-09/HB-14 Einbeiniges rumänisches Kreuzheben (Leiter HB-13 → HB-14). Die Varianten ohne Gewicht steigern ohne „Gewicht“.
+- ZV-07 braucht nur die Stange; die Last kommt in den Rucksack (Alltagsgegenstand).
+- Varianten derselben Übung teilen sich den YouTube-Link.
 - Jede Seed-Übung bringt einen YouTube-Link mit (`video_url`). Da der Seed nur fehlende Zeilen anlegt, kommen Änderungen an vorhandenen Übungen über den Katalogimport (F8) in eine bestehende Datenbank (`npm run katalog:seed-export`).
 
 ## 5. Funktionen
@@ -254,9 +276,11 @@ Eingabe: Profil, Stufen pro Muster, Einheiten/Woche, Zusatzblock, Startdatum.
 Auswahllogik pro Slot:
 1. Kandidaten = aktive Übungen des Musters, deren Equipment das Profil erfüllt
 2. Bevorzugt Stufe = Nutzerstufe, sonst nächstniedrigere, sonst nächsthöhere
-3. A und B erhalten verschiedene Übungen, falls möglich
+3. A und B erhalten verschiedene Übungen, falls möglich; B möglichst auch keine Variante der A-Übung (z. B. nicht Goblet Squat mit Kurzhantel in A und mit Kettlebell in B)
 4. Regel „mindestens eine einseitige KN/HB-Übung pro Woche" einhalten
-5. Bei Folgeblöcken: bevorzugt Übungen, die im letzten Block nicht verwendet wurden
+5. Bei Folgeblöcken: bevorzugt Übungen, die im letzten Block nicht verwendet wurden; eine Variante einer verwendeten Übung zählt als verwendet
+
+Varianten erkennt die App am gemeinsamen Video-Link (siehe 3.3).
 
 Ergebnis: Vorschau beider Einheiten. Jeder Slot lässt sich manuell tauschen (Auswahl nur aus passenden Kandidaten). Danach Plan speichern und aktivieren. Ein aktiver Plan zur Zeit.
 

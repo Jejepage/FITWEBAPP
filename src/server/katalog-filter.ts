@@ -31,7 +31,7 @@ export interface FilterAuswahl {
   pruefstatus?: Pruefstatus;
   /** Suche in Name und ID */
   q?: string;
-  /** Benötigt dieses Gerät (in irgendeiner Gruppe der Equipment-Bedingung) */
+  /** Benötigt dieses Gerät  */
   geraet?: EquipmentArt;
   belastungsart?: Belastungsart;
   /** mit = nur Übungen mit Video, ohne = nur ohne */

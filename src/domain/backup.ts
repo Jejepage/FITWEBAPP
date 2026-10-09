@@ -20,7 +20,7 @@ import { MAX_ANZAHL_GEWICHTE, MAX_GEWICHT_KG } from "./gewichte";
 import { slotKey, slotVorlageVonKey } from "./plan-types";
 import { equipmentArtSchema, exerciseSchema, musterSchema } from "./schemas";
 import { MAX_AUFWAERMEN_ZEICHEN } from "./settings-form";
-import { MUSTER, type EquipmentBedingung, type Muster } from "./types";
+import { MUSTER, type Muster } from "./types";
 import { parseVideoEingabe } from "./youtube";
 
 /** Obergrenzen der Zeilenzahlen je Tabelle (Schutz vor absurd großen Dateien). */
@@ -570,7 +570,8 @@ const fehlschlag = (fehler: string[]): ParseErgebnis => ({ ok: false, fehler });
 // Version 1 kannte keinen eigenen Kabelzug ("maschinen" schloss ihn ein). Wie Migration
 // 0003_kabelzug: Profile mit Maschinen bekommen den Kabelzug dazu, die Kabelübungen des
 // Startkatalogs wechseln auf den Kabelzug, sofern ihre Bedingung noch der alten Vorgabe entspricht.
-const KABEL_UEBUNGEN: Record<string, readonly [alt: string, neu: EquipmentBedingung]> = {
+// Die Bedingungen sind hier noch Gruppenlisten (Format bis Version 2).
+const KABEL_UEBUNGEN: Record<string, readonly [alt: string, neu: string[][]]> = {
   "ZH-01": ['[["maschinen"]]', [["kabelzug"]]],
   "ZV-01": ['[["maschinen"]]', [["kabelzug"]]],
   "RU-05": ['[["maschinen","band"]]', [["kabelzug", "band"]]],
@@ -600,16 +601,34 @@ function hebeVersion1An(daten: Record<string, unknown>): Record<string, unknown>
   return neu;
 }
 
+// Bis Version 2 war die Equipment-Bedingung eine Gruppenliste (ODER innerhalb einer Gruppe) und
+// es gab die optionale Last. Wie Migration 0004_equipment_flach: Aus jeder Gruppe bleibt das erste
+// Gerät, die optionale Last entfällt.
+function hebeVersion2An(daten: Record<string, unknown>): Record<string, unknown> {
+  if (!Array.isArray(daten.uebungen)) return daten;
+  return {
+    ...daten,
+    uebungen: daten.uebungen.map((u: unknown) => {
+      if (!istObjekt(u)) return u;
+      const rest = { ...u };
+      delete rest.optionaleLast;
+      const eq = u.equipment;
+      if (!Array.isArray(eq) || !eq.every(Array.isArray)) return rest;
+      return { ...rest, equipment: eq.filter((g) => g.length > 0).map((g) => g[0]) };
+    }),
+  };
+}
+
 function pruefeKopf(roh: Record<string, unknown>, erwartet?: BackupArt): string[] {
   const fehler: string[] = [];
   if (roh.format !== BACKUP_FORMAT) {
     fehler.push(`Die Datei ist kein FIT-Backup (Feld format ist nicht „${BACKUP_FORMAT}“).`);
   }
   if (roh.version === undefined) fehler.push("Die Backup-Version fehlt.");
-  else if (roh.version !== 1 && roh.version !== BACKUP_VERSION) {
+  else if (roh.version !== 1 && roh.version !== 2 && roh.version !== BACKUP_VERSION) {
     fehler.push(
       `Backup-Version ${anzeige(roh.version)} wird nicht unterstützt ` +
-        `(diese App liest die Versionen 1 und ${BACKUP_VERSION}).`,
+        `(diese App liest die Versionen 1 bis ${BACKUP_VERSION}).`,
     );
   }
   const art = roh.art;
@@ -662,7 +681,12 @@ function parseIntern(roh: unknown, erwartet?: BackupArt): ParseErgebnis {
   // und eine kleine Datei mit sehr vielen kaputten Zeilen würde Speicher und Zeit sprengen.
   const zuViele = pruefeZeilenzahlen(roh.daten, art);
   if (zuViele.length > 0) return fehlschlag(zuViele);
-  const rohDaten = roh.version === 1 ? hebeVersion1An(roh.daten) : roh.daten;
+  const rohDaten =
+    roh.version === 1
+      ? hebeVersion2An(hebeVersion1An(roh.daten))
+      : roh.version === 2
+        ? hebeVersion2An(roh.daten)
+        : roh.daten;
   const schema = art === "alles" ? allesDatenSchema : katalogDatenSchema;
   const geprueft = schema.safeParse(rohDaten);
   const m = new Meldungen();

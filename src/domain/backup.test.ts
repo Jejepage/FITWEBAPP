@@ -270,11 +270,11 @@ describe("parseBackup: Kopf", () => {
   });
 
   it("lehnt eine andere Version mit klarer Meldung ab", () => {
-    expect(fehlerVon({ ...gueltigeDatei(), version: 3 })).toEqual([
-      "Backup-Version 3 wird nicht unterstützt (diese App liest die Versionen 1 und 2).",
+    expect(fehlerVon({ ...gueltigeDatei(), version: 4 })).toEqual([
+      "Backup-Version 4 wird nicht unterstützt (diese App liest die Versionen 1 bis 3).",
     ]);
-    expect(fehlerVon({ ...gueltigeDatei(), version: "2" })[0]).toContain(
-      "Backup-Version 2 wird nicht unterstützt",
+    expect(fehlerVon({ ...gueltigeDatei(), version: "3" })[0]).toContain(
+      "Backup-Version 3 wird nicht unterstützt",
     );
     expect(fehlerVon({ ...gueltigeDatei(), version: 0 })[0]).toContain("Backup-Version 0");
   });
@@ -305,8 +305,8 @@ describe("parseBackup: Kopf", () => {
 
   it("hebt Version 1 an: Profile mit Maschinen bekommen den Kabelzug, Kabelübungen wechseln", () => {
     const roh = gueltigeDatei();
-    const alt = { ...roh, version: 1, daten: { ...roh.daten } };
-    alt.daten.uebungen = alt.daten.uebungen.map((u) =>
+    // Übungen im alten Format (Gruppenlisten), daher ohne die heutigen Typen.
+    const uebungen: Record<string, unknown>[] = roh.daten.uebungen.map((u) =>
       u.id === "ZH-01"
         ? { ...u, equipment: [["maschinen"]] }
         : u.id === "RU-05"
@@ -315,6 +315,7 @@ describe("parseBackup: Kopf", () => {
             ? { ...u, equipment: [["maschinen"], ["bank"]] } // vom Nutzer geändert: bleibt
             : u,
     );
+    const alt = { ...roh, version: 1, daten: { ...roh.daten, uebungen } };
     const vorher = JSON.parse(JSON.stringify(alt)) as unknown;
     const ergebnis = parseBackup(alt);
     expect(alt).toEqual(vorher);
@@ -327,10 +328,30 @@ describe("parseBackup: Kopf", () => {
       roh.daten.profile[1]!.equipment,
     ]);
     const bedingung = (id: string) => d.uebungen.find((u) => u.id === id)!.equipment;
-    expect(bedingung("ZH-01")).toEqual([["kabelzug"]]);
-    expect(bedingung("RU-05")).toEqual([["kabelzug", "band"]]);
-    expect(bedingung("ZV-01")).toEqual([["maschinen"], ["bank"]]);
-    expect(bedingung("KN-02")).toEqual([["maschinen"]]);
+    // Danach wie Version 2 flach gemacht: aus jeder Gruppe das erste Gerät.
+    expect(bedingung("ZH-01")).toEqual(["kabelzug"]);
+    expect(bedingung("RU-05")).toEqual(["kabelzug"]);
+    expect(bedingung("ZV-01")).toEqual(["maschinen", "bank"]);
+    expect(bedingung("KN-02")).toEqual(["maschinen"]);
+  });
+
+  it("hebt Version 2 an: Gruppen werden flach, die optionale Last entfällt", () => {
+    const roh = gueltigeDatei();
+    const uebungen: Record<string, unknown>[] = roh.daten.uebungen.map((u, i) =>
+      i === 0
+        ? { ...u, equipment: [["bank"], ["kurzhanteln", "kettlebell"]], optionaleLast: ["kurzhanteln"] }
+        : { ...u, equipment: u.equipment.map((a) => [a]), optionaleLast: [] },
+    );
+    const alt = { ...roh, version: 2, daten: { ...roh.daten, uebungen } };
+    const ergebnis = parseBackup(alt);
+    if (!ergebnis.ok) throw new Error(ergebnis.fehler.join("\n"));
+    expect(ergebnis.datei.version).toBe(BACKUP_VERSION);
+    const neu = ergebnis.datei.daten.uebungen;
+    expect(neu[0]!.equipment).toEqual(["bank", "kurzhanteln"]);
+    expect(neu.map((u) => u.equipment).slice(1)).toEqual(
+      roh.daten.uebungen.map((u) => u.equipment).slice(1),
+    );
+    expect(neu.every((u) => !("optionaleLast" in u))).toBe(true);
   });
 
   it("verlangt einen ISO-Zeitstempel in erstelltAm", () => {

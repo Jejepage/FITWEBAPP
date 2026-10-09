@@ -296,12 +296,6 @@ function Zelle({
         <span>{tt.keineLeiter}</span>
       );
     }
-    case "last":
-      return (
-        <span>
-          {e.optionaleLast.length ? e.optionaleLast.map((a) => EQUIPMENT_NAMEN[a]).join(", ") : "–"}
-        </span>
-      );
     case "status":
       return e.pruefstatus === "zu_pruefen" ? (
         <Badge farbe="hinweis">{t.zuPruefen}</Badge>

@@ -47,7 +47,7 @@ export interface KatalogFilter {
   pruefstatus?: Pruefstatus;
   /** Teilstring in Name oder ID (Groß-/Kleinschreibung egal). */
   q?: string;
-  /** Benötigt dieses Gerät (in irgendeiner Gruppe der Equipment-Bedingung). */
+  /** Benötigt dieses Gerät . */
   geraet?: EquipmentArt;
   belastungsart?: Belastungsart;
   /** true = nur mit Video, false = nur ohne. */
@@ -90,9 +90,7 @@ export function listExercises(
       (!filter.pruefstatus || e.pruefstatus === filter.pruefstatus) &&
       (!q || klein(e.name).includes(q) || klein(e.id).includes(q)) &&
       (!filter.geraet ||
-        e.equipment.some((gruppe) =>
-          gruppe.includes(filter.geraet as never),
-        )) &&
+        e.equipment.includes(filter.geraet as never)) &&
       (!filter.belastungsart || e.belastungsart === filter.belastungsart) &&
       (filter.video === undefined ||
         (videoLink(e.videoUrl) !== null) === filter.video) &&

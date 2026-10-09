@@ -1,6 +1,6 @@
 // Ad-hoc-Profilwechsel (Spec F6): Welche Übungen ersetzen die Planübungen einer Einheit, wenn mit
 // einem anderen Equipment-Profil trainiert wird? Rein, ohne DB und UI.
-import { erfuellt } from "./equipment";
+import { erfuellt, gleicheBewegung } from "./equipment";
 import type { Block, EquipmentArt, Exercise, Muster } from "./types";
 
 export interface AdHocSlot {
@@ -31,7 +31,8 @@ const nachId = (a: Exercise, b: Exercise): number => (a.id < b.id ? -1 : a.id > 
 
 /**
  * Passt die Planübung zum Profil, bleibt sie. Sonst die ähnlichste Übung desselben Musters:
- * kleinster Stufenabstand, bei Gleichstand die niedrigere Stufe, dann gleiche Einseitigkeit,
+ * zuerst eine Variante der Planübung (z. B. mit Kettlebell statt Kurzhantel), dann kleinster
+ * Stufenabstand, bei Gleichstand die niedrigere Stufe, dann gleiche Einseitigkeit,
  * dann nach ID.
  */
 export function ersetzungenFuerProfil(e: AdHocEingabe): AdHocErgebnis {
@@ -51,10 +52,17 @@ export function ersetzungenFuerProfil(e: AdHocEingabe): AdHocErgebnis {
     const beste = kandidaten
       .map((u) => ({
         u,
+        variante: original && gleicheBewegung(u, original) ? 0 : 1,
         abstand: Math.abs(u.stufe - stufe),
         anderer: u.einseitig === einseitig ? 0 : 1,
       }))
-      .sort((a, b) => a.abstand - b.abstand || a.u.stufe - b.u.stufe || a.anderer - b.anderer)[0];
+      .sort(
+        (a, b) =>
+          a.variante - b.variante ||
+          a.abstand - b.abstand ||
+          a.u.stufe - b.u.stufe ||
+          a.anderer - b.anderer,
+      )[0];
     if (beste) ersetzungen[String(slot.slotId)] = beste.u.id;
     else fehlend.add(slot.muster);
   }

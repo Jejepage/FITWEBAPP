@@ -76,7 +76,6 @@ export interface VorschlagEingabe {
     | "standardBereich"
     | "steigerungsart"
     | "equipment"
-    | "optionaleLast"
     | "schwererId"
   >;
   /** Woche der Einheit, für die der Vorschlag gilt (1 bis 6); in Woche 6 wird nicht gesteigert */

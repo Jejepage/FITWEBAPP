@@ -139,7 +139,7 @@ describe("ladeUebungInfo", () => {
   it("liefert Infos mit Vorschlag für eine Ersatzübung", () => {
     const id = start();
     const info = ladeUebungInfo(db, id, "KN-04")!;
-    expect(info).toMatchObject({ id: "KN-04", name: "Goblet Squat" });
+    expect(info).toMatchObject({ id: "KN-04", name: "Goblet Squat mit Kurzhantel" });
     expect(info.vorschlag.grund).toBe("start");
     expect(ladeUebungInfo(db, id, "XX-00")).toBeNull();
     expect(ladeUebungInfo(db, 9999, "KN-04")).toBeNull();

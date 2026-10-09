@@ -34,9 +34,9 @@ describe("Standardprofile (Machbarkeit)", () => {
   const uebungen = () => alleUebungen(db);
   const equipment = (key: string) => listProfiles(db).find((p) => p.seedKey === key)!.equipment;
 
-  it("Studio: jedes Muster voll besetzt (63 Übungen)", () => {
+  it("Studio: jedes Muster voll besetzt (76 Übungen)", () => {
     const z = zaehleMachbar(uebungen(), equipment("studio"));
-    expect(Object.values(z).reduce((a, b) => a + b, 0)).toBe(63);
+    expect(Object.values(z).reduce((a, b) => a + b, 0)).toBe(76);
   });
 
   it("Unterwegs: genau die Körpergewichts- und Stangenübungen, jedes Muster hat mindestens eine", () => {
@@ -47,10 +47,10 @@ describe("Standardprofile (Machbarkeit)", () => {
 
   it("Zuhause: ohne Maschinen, Langhantel und Band", () => {
     // Von Hand aus der Spec nachgerechnet (Kurzhanteln, Kettlebell, Bank, Stange):
-    // KN ohne KN-02/08, HB ohne HB-02/08, DH ohne DH-01/06, DV ohne DV-01/02, ZH ohne ZH-01/02,
-    // ZV ohne ZV-01/03, TR vollständig, RU ohne RU-05.
+    // KN ohne KN-02/08, HB ohne HB-02/08/12, DH ohne DH-01/06, DV ohne DV-01/02, ZH ohne ZH-01/02,
+    // ZV ohne ZV-01/03, TR vollständig, RU ohne RU-05/09.
     const z = zaehleMachbar(uebungen(), equipment("zuhause"));
-    expect(z).toEqual({ KN: 6, HB: 8, DH: 5, DV: 6, ZH: 6, ZV: 5, TR: 7, RU: 7 });
+    expect(z).toEqual({ KN: 10, HB: 11, DH: 5, DV: 6, ZH: 6, ZV: 5, TR: 11, RU: 7 });
   });
 });
 

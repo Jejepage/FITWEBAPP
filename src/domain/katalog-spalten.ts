@@ -15,7 +15,6 @@ export const SPALTEN = [
   "muskeln",
   "steigerung",
   "leiter",
-  "last",
   "status",
   "aktiv",
   "video",
@@ -115,8 +114,6 @@ export function sortWert(e: Exercise, spalte: Spalte): string | number {
       return e.steigerungsart.join(" ");
     case "leiter":
       return `${e.leichterId ?? ""}|${e.schwererId ?? ""}`;
-    case "last":
-      return e.optionaleLast.join(" ");
     case "status":
       return e.pruefstatus;
     case "aktiv":

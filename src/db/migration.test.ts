@@ -61,7 +61,7 @@ describe("Migrationen", () => {
     uebung.run("RU-05", "Pallof Press", '[["maschinen","band"]]');
     uebung.run("KN-02", "Beinpresse", '[["maschinen"]]');
 
-    for (const datei of migrationen.filter((n) => n >= "0003")) anwenden(db, datei);
+    for (const datei of migrationen.filter((n) => n >= "0003" && n < "0004")) anwenden(db, datei);
 
     expect(db.prepare("select name, equipment from equipment_profile order by id").all()).toEqual([
       { name: "Studio", equipment: '["maschinen","kabelzug","langhantel","kurzhanteln"]' },
@@ -73,6 +73,32 @@ describe("Migrationen", () => {
       { id: "RU-05", equipment: '[["kabelzug","band"]]' },
       { id: "ZH-01", equipment: '[["kabelzug"]]' },
       { id: "ZV-01", equipment: '[["maschinen"],["bank"]]' },
+    ]);
+    db.close();
+  });
+
+  it("0004 macht die Equipment-Bedingung flach und entfernt die optionale Last", () => {
+    const db = new Database(":memory:");
+    for (const datei of migrationen.filter((n) => n < "0004")) anwenden(db, datei);
+    const uebung = db.prepare(`insert into exercise (id, name, muster, stufe, einseitig, equipment,
+      optionale_last, hauptmuskeln, belastungsart, standard_bereich, steigerungsart, ausfuehrung,
+      fehler, hinweise, aktiv, pruefstatus)
+      values (?, 'Alt', 'KN', 1, 0, ?, ?, '["Beine"]', 'wdh', '8–12', '["wdh"]', '["a","b","c"]',
+      '["x","y"]', 'h', 1, 'zu_pruefen')`);
+    uebung.run("KN-01", "[]", '["kurzhanteln"]');
+    uebung.run("KN-02", '[["maschinen"]]', "[]");
+    uebung.run("KN-03", '[["kurzhanteln","kettlebell"]]', "[]");
+    uebung.run("KN-04", '[["bank"],["kurzhanteln","langhantel"]]', "[]");
+
+    for (const datei of migrationen.filter((n) => n >= "0004")) anwenden(db, datei);
+
+    const spalten = db.prepare("pragma table_info(exercise)").all() as { name: string }[];
+    expect(spalten.map((s) => s.name)).not.toContain("optionale_last");
+    expect(db.prepare("select id, equipment from exercise order by id").all()).toEqual([
+      { id: "KN-01", equipment: "[]" },
+      { id: "KN-02", equipment: '["maschinen"]' },
+      { id: "KN-03", equipment: '["kurzhanteln"]' },
+      { id: "KN-04", equipment: '["bank","kurzhanteln"]' },
     ]);
     db.close();
   });
