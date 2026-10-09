@@ -137,7 +137,7 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 | KN-03 | Kniebeuge mit Körpergewicht | – | 2 | |
 | KN-04 | Goblet Squat | KH oder KB | 2 | |
 | KN-05 | Split Squat (stationärer Ausfallschritt) | – / KH | 3 | ja |
-| KN-06 | Ausfallschritt rückwärts | KH oder KB | 3 | ja |
+| KN-06 | Ausfallschritt rückwärts | – / KH / KB | 3 | ja |
 | KN-07 | Bulgarian Split Squat | Stuhl/BK, optional KH | 4 | ja |
 | KN-08 | Langhantel-Kniebeuge | LH | 4 | |
 
@@ -150,9 +150,10 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 | HB-04 | Rumänisches Kreuzheben mit Kurzhanteln | KH | 2 | |
 | HB-05 | Kettlebell-Kreuzheben | KB | 2 | |
 | HB-06 | Kettlebell-Swing | KB | 3 | |
-| HB-07 | Hip Thrust auf der Bank | BK + KH oder LH | 3 | |
+| HB-07 | Hip Thrust auf der Bank | BK + KH oder KB oder LH | 3 | |
 | HB-08 | Rumänisches Kreuzheben mit Langhantel | LH | 3 | |
 | HB-09 | Einbeiniges rumänisches Kreuzheben | – / KH / KB | 4 | ja |
+| HB-10 | Einbeiniger Hip Thrust | – / KH / KB | 3 | ja |
 
 **Drücken horizontal (DH)**
 | ID | Name | Equipment | Stufe | einseitig |
@@ -160,8 +161,8 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 | DH-01 | Brustpresse | M | 1 | |
 | DH-02 | Liegestütz mit erhöhten Händen | – | 1 | |
 | DH-03 | Kurzhantel-Bankdrücken | KH + BK | 2 | |
-| DH-04 | Liegestütz | – | 2 | |
-| DH-05 | Kurzhantel-Schrägbankdrücken | KH + BK | 3 | |
+| DH-04 | Liegestütz | – | 3 | |
+| DH-05 | Kurzhantel-Schrägbankdrücken | KH + BK | 2 | |
 | DH-06 | Langhantel-Bankdrücken | LH + BK | 3 | |
 | DH-07 | Liegestütz mit erhöhten Füßen | – | 4 | |
 
@@ -187,17 +188,18 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 | ZH-05 | Brustgestütztes Kurzhantelrudern | KH + BK | 2 | |
 | ZH-06 | Vorgebeugtes Kurzhantelrudern | KH | 3 | |
 | ZH-07 | Rudern unter dem Tisch | – | 3 | |
+| ZH-08 | Einarmiges Rudern am Türrahmen | – | 1 | ja |
 
 **Ziehen vertikal (ZV)**
 | ID | Name | Equipment | Stufe | einseitig |
 |---|---|---|---|---|
 | ZV-01 | Latzug | M | 1 | |
-| ZV-02 | Hängen an der Stange | ST | 1 | |
+| ZV-02 | Schulterblatt-Klimmzug | ST | 1 | |
 | ZV-03 | Unterstützter Klimmzug (Maschine) | M | 2 | |
 | ZV-04 | Klimmzug mit Fußhilfe | ST | 2 | |
 | ZV-05 | Negativer Klimmzug | ST | 3 | |
 | ZV-06 | Klimmzug | ST | 4 | |
-| ZV-07 | Klimmzug mit Zusatzgewicht | ST + KH oder KB | 5 | |
+| ZV-07 | Klimmzug mit Zusatzgewicht | ST, Last im Rucksack: KH / KB | 5 | |
 
 **Tragen (TR)**
 | ID | Name | Equipment | Stufe | einseitig |
@@ -206,8 +208,9 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 | TR-02 | Farmer's Walk | KH oder KB | 1 | |
 | TR-03 | Bärengang | – | 2 | |
 | TR-04 | Koffertragen einarmig | KH oder KB | 2 | ja |
-| TR-05 | Front-Rack-Tragen | KB | 3 | |
+| TR-05 | Goblet-Tragen | KH oder KB | 3 | |
 | TR-06 | Überkopf-Tragen einarmig | KH oder KB | 4 | ja |
+| TR-07 | Einseitiges Tragen mit Tasche | – | 2 | ja |
 
 **Rumpf (RU)**
 | ID | Name | Equipment | Stufe | einseitig |
@@ -222,6 +225,15 @@ Abkürzungen Equipment: M = maschinen, LH = langhantel, KH = kurzhanteln, KB = k
 | RU-08 | Turkish Get-up | KB | 4 | ja |
 
 Stufenleitern (leichter/schwerer) verknüpfen vorrangig Übungen **mit gleichem Equipment-Typ** (z. B. ZV-02 → ZV-04 → ZV-05 → ZV-06 → ZV-07; DH-02 → DH-04 → DH-07).
+
+**Änderung nach Abschnitt C (fachliche Durchsicht des Katalogs):** Der Katalog umfasst 63 Übungen.
+- Neu: HB-10 Einbeiniger Hip Thrust (Stufe 3, Leiter HB-03 → HB-10 → HB-09), ZH-08 Einarmiges Rudern am Türrahmen (Stufe 1, Leiter ZH-08 → ZH-07; sichere Ziehübung ohne Gerät), TR-07 Einseitiges Tragen mit Tasche (Stufe 2, Leiter TR-01 → TR-07; TR-03 Bärengang steht ohne Leiter).
+- ZV-02 ist statt „Hängen an der Stange" der Schulterblatt-Klimmzug (6–10 Wdh) als Brücke zum Klimmzug; das reine Hängen steht als leichtere Variante im Hinweis.
+- ZV-07: Zusatzgewicht im Rucksack oder Dip-Gürtel statt zwischen den Füßen.
+- TR-05 heißt Goblet-Tragen (so war die Ausführung beschrieben) und geht auch mit Kurzhantel.
+- DH-04 Liegestütz ist Stufe 3 (Einstieg über DH-02), DH-05 Schrägbankdrücken Stufe 2 als Variante von DH-03 ohne Leiter.
+- KN-06 geht auch ohne Gewicht, HB-07 auch mit Kettlebell.
+- Jede Seed-Übung bringt einen YouTube-Link mit (`video_url`). Da der Seed nur fehlende Zeilen anlegt, kommen Änderungen an vorhandenen Übungen über den Katalogimport (F8) in eine bestehende Datenbank (`npm run katalog:seed-export`).
 
 ## 5. Funktionen
 

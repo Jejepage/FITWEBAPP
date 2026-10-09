@@ -76,19 +76,22 @@ async function ablauf(browser, dbPfad) {
   await shot("2-vorschau");
   schritt("Vorschau mit 16 Auswahllisten, Studio, Zusatzblock aus");
 
-  // 3. Profil Unterwegs: ZH nur eine Übung → in A und B gleich, mit Hinweis
+  // 3. Profil Unterwegs: ZH hat Türrahmen-Rudern (Stufe 1) und Tisch-Rudern (Stufe 3) → A und B verschieden
   await page
     .getByLabel("Equipment-Profil")
     .selectOption({ label: "Unterwegs" });
   await aktualisieren();
-  await page
-    .getByText(
-      "Ziehen horizontal: Mit diesem Profil gibt es nur eine Übung, sie steht in A und B.",
-    )
-    .waitFor();
+  await page.waitForURL(/profil=/);
+  await page.waitForFunction(
+    () => document.querySelector("select[name='slot_A-1-3']")?.value === "ZH-08",
+  );
   let werte = await slotWerte(page);
-  assert.equal(werte["A-1-3"], "ZH-07");
+  assert.equal(werte["A-1-3"], "ZH-08");
   assert.equal(werte["B-2-3"], "ZH-07");
+  assert.equal(
+    await page.getByText(/Mit diesem Profil gibt es nur eine Übung/).count(),
+    0,
+  );
   assert.ok(page.url().includes("profil="));
   // Keine Mischpläne: Die Studio-Wahl aus der vorigen Vorschau darf nicht in den neuen Vorschlag wandern.
   assert.equal(await page.getByText(/obwohl es Alternativen gibt/).count(), 0);
@@ -98,6 +101,7 @@ async function ablauf(browser, dbPfad) {
     ["A-2-1", "B-1-1"], // HB
     ["A-1-2", "B-1-2"], // DH
     ["A-2-2", "B-2-2"], // DV
+    ["A-1-3", "B-2-3"], // ZH
     ["A-2-3", "B-1-3"], // ZV
     ["A-Z-1", "B-Z-1"], // TR
     ["A-Z-2", "B-Z-2"], // RU
@@ -109,7 +113,7 @@ async function ablauf(browser, dbPfad) {
     );
   }
   await shot("3-unterwegs");
-  schritt("Unterwegs: ZH-07 in A und B mit Hinweis");
+  schritt("Unterwegs: ZH-08 in A, ZH-07 in B, kein Hinweis auf zu wenig Auswahl");
 
   // Profil wechseln und OHNE Aktualisieren speichern: abgelehnt, weil die Vorschau nicht mehr passt
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Studio" });

@@ -28,6 +28,7 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Der Druck soll in den Schultern, nicht im Nacken spürbar sein; wähle dann ein leichteres Gewicht. Ohne Maschine: DV-04 Kurzhantel-Schulterdrücken sitzend oder DV-02 Schulterdrücken mit Band.",
+    videoUrl: "https://www.youtube.com/watch?v=FrIoCMz96tk",
   },
   {
     id: "DV-02",
@@ -56,6 +57,7 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Das Band wird gegen Ende der Bewegung schwerer; ein breiterer Stand oder ein kürzer gegriffenes Band erhöht den Widerstand. Prüfe das Band auf Risse und steige fest darauf, damit es nicht hochschnellt. Zu leicht: DV-04 Kurzhantel-Schulterdrücken sitzend.",
+    videoUrl: "https://www.youtube.com/watch?v=AmOgqII8vcM",
   },
   {
     id: "DV-03",
@@ -84,6 +86,7 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Die Erhöhung muss rutschsicher und stabil sein. Bei Handgelenksbeschwerden die Hände leicht nach außen drehen oder auf Fäuste stützen. Zu schwer: DV-02 Schulterdrücken mit Band. Zu leicht: DV-07 Pike-Liegestütz.",
+    videoUrl: "https://www.youtube.com/watch?v=EmIF_03Hi00",
   },
   {
     id: "DV-04",
@@ -113,6 +116,7 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Bei eingeschränkter Schulterbeweglichkeit lässt sich die Bewegung etwas vor der Körperebene (Hände leicht nach vorn) angenehmer ausführen. Zu schwer: DV-02 Schulterdrücken mit Band. Zu leicht: DV-05 Kurzhantel-Schulterdrücken stehend.",
+    videoUrl: "https://www.youtube.com/watch?v=htxKipkJLL8",
   },
   {
     id: "DV-05",
@@ -141,6 +145,7 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Wenn du im Stehen ins Hohlkreuz fällst, nimm weniger Gewicht. Zu schwer: DV-04 Kurzhantel-Schulterdrücken sitzend. Bei Schulterschmerzen über dem Kopf abbrechen.",
+    videoUrl: "https://www.youtube.com/watch?v=bmy7tIopNt4",
   },
   {
     id: "DV-06",
@@ -170,6 +175,7 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Beginne mit einem leichten Gewicht; die Kettlebell soll am Unterarm ruhen, ohne das Handgelenk zu überstrecken. Wenn die Kraft nachlässt, führe sie vor dem Körper zur Schulter zurück und lasse sie nicht fallen. Halte den Platz um dich frei. Ohne Kettlebell: DV-05 Kurzhantel-Schulterdrücken stehend.",
+    videoUrl: "https://www.youtube.com/watch?v=P8bnT8x95pI",
   },
   {
     id: "DV-07",
@@ -198,6 +204,7 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Der Kopf geht leicht nach vorn zwischen die Arme, ohne den Nacken zu überstrecken. Zu schwer: DV-03 Pike-Liegestütz mit erhöhten Händen. Zu leicht: DV-08 Pike-Liegestütz mit erhöhten Füßen.",
+    videoUrl: "https://www.youtube.com/watch?v=Gyy_Gm0XsSI",
   },
   {
     id: "DV-08",
@@ -226,5 +233,6 @@ export const dv: ExerciseSeed[] = [
     ],
     hinweise:
       "Die Erhöhung muss rutschsicher stehen; je höher die Füße, desto mehr Last liegt auf den Schultern. Zu schwer: DV-07 Pike-Liegestütz.",
+    videoUrl: "https://www.youtube.com/watch?v=whTTE5e0fNo",
   },
 ];

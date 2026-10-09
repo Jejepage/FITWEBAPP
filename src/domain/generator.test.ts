@@ -171,7 +171,7 @@ describe("generierePlan: Eigenschaften über den echten Katalog", () => {
     const { slots, hinweise } = plan(eingabe("studio", stufen));
     expect(ids(slots, "KN")).toEqual(["KN-01", "KN-02"]);
     expect(ids(slots, "HB")).toEqual(["HB-09", "HB-06"]);
-    expect(ids(slots, "DH")).toEqual(["DH-03", "DH-04"]);
+    expect(ids(slots, "DH")).toEqual(["DH-03", "DH-05"]);
     expect(ids(slots, "DV")).toEqual(["DV-05", "DV-06"]);
     expect(ids(slots, "ZH")).toEqual(["ZH-06", "ZH-07"]);
     expect(ids(slots, "ZV")).toEqual(["ZV-03", "ZV-04"]);
@@ -204,8 +204,16 @@ describe("generierePlan: Eigenschaften über den echten Katalog", () => {
 });
 
 describe("generierePlan: konkrete Fälle", () => {
-  it("Unterwegs/ZH: nur ZH-07, beide Einheiten gleich, Hinweis wenig_auswahl", () => {
+  it("Unterwegs/ZH: Türrahmen-Rudern (A) und Tisch-Rudern (B), keine Wiederholung", () => {
     const { slots, hinweise } = plan(eingabe("unterwegs", einheitlich(2)));
+    expect(ids(slots, "ZH")).toEqual(["ZH-08", "ZH-07"]);
+    expect(hinweise).not.toContainEqual({ code: "wenig_auswahl", muster: "ZH" });
+    expect(hinweise.filter((h) => h.code === "gleiche_uebung_ab")).toEqual([]);
+  });
+
+  it("nur ein Kandidat: beide Einheiten gleich, Hinweis wenig_auswahl", () => {
+    const uebungen = KATALOG.filter((u) => u.id !== "ZH-08");
+    const { slots, hinweise } = plan({ ...eingabe("unterwegs", einheitlich(2)), uebungen });
     expect(ids(slots, "ZH")).toEqual(["ZH-07", "ZH-07"]);
     expect(hinweise).toContainEqual({ code: "wenig_auswahl", muster: "ZH" });
     expect(hinweise.filter((h) => h.code === "gleiche_uebung_ab")).toEqual([]);
@@ -258,8 +266,10 @@ describe("generierePlan: konkrete Fälle", () => {
   it("Einseitig-Regel vergleicht den Stufenrang, nicht die Listenposition (KN 2, HB 3)", () => {
     // Beide einseitigen Kandidaten stehen in ihrer Liste an derselben Position (Index 4),
     // HB-03 hat aber Rang 1 (Stufe 2 bei Wunsch 3), KN-05 Rang 2 (Stufe 3 bei Wunsch 2).
+    // HB-10 (einseitig, Stufe 3, Rang 0) bleibt dafür außen vor.
     const stufen = { ...einheitlich(2), HB: 3 };
-    const { slots } = plan(eingabe("studio", stufen));
+    const uebungen = KATALOG.filter((u) => u.id !== "HB-10");
+    const { slots } = plan({ ...eingabe("studio", stufen), uebungen });
     expect(ids(slots, "HB")).toEqual(["HB-06", "HB-03"]);
     expect(ids(slots, "KN")).toEqual(["KN-02", "KN-03"]);
   });
@@ -297,7 +307,7 @@ describe("generierePlan: konkrete Fälle", () => {
 describe("generierePlan: Folgeblock", () => {
   it("weicht bei gleichem Rang auf unbenutzte Übungen aus", () => {
     const erster = plan(eingabe("studio", einheitlich(2)));
-    expect(ids(erster.slots, "DH")).toEqual(["DH-03", "DH-04"]);
+    expect(ids(erster.slots, "DH")).toEqual(["DH-03", "DH-05"]);
     const zweiter = plan(
       eingabe("studio", einheitlich(2), {
         vorherVerwendet: new Set(erster.slots.map((s) => s.exerciseId)),
@@ -309,9 +319,9 @@ describe("generierePlan: Folgeblock", () => {
   });
 
   it("wählt nie eine schlechtere Stufe nur der Abwechslung wegen", () => {
-    const vorher = new Set(["DH-03", "DH-04"]); // alle Stufe-2-Kandidaten benutzt
+    const vorher = new Set(["DH-03", "DH-05"]); // alle Stufe-2-Kandidaten benutzt
     const { slots } = plan(eingabe("studio", einheitlich(2), { vorherVerwendet: vorher }));
-    expect(ids(slots, "DH")).toEqual(["DH-03", "DH-04"]);
+    expect(ids(slots, "DH")).toEqual(["DH-03", "DH-05"]);
   });
 });
 
@@ -377,7 +387,7 @@ describe("kandidatenFuerSlot", () => {
   });
 
   it("Unterwegs KN Stufe 4 und Zuhause ZV Stufe 5", () => {
-    expect(kand("unterwegs", 4, "KN")).toEqual(["KN-07", "KN-05", "KN-03", "KN-01"]);
+    expect(kand("unterwegs", 4, "KN")).toEqual(["KN-07", "KN-05", "KN-06", "KN-03", "KN-01"]);
     expect(kand("zuhause", 5, "ZV")).toEqual(["ZV-07", "ZV-06", "ZV-05", "ZV-04", "ZV-02"]);
   });
 
@@ -418,7 +428,10 @@ describe("pruefePlan", () => {
   });
 
   it("erkennt A = B bei nur einem Kandidaten als wenig_auswahl", () => {
-    const u = eingabe("unterwegs", einheitlich(3));
+    const u = {
+      ...eingabe("unterwegs", einheitlich(3)),
+      uebungen: KATALOG.filter((x) => x.id !== "ZH-08"),
+    };
     const slots = plan(u).slots;
     expect(pruefePlan(slots, u)).toContainEqual({ code: "wenig_auswahl", muster: "ZH" });
   });
@@ -440,7 +453,7 @@ describe("pruefePlan", () => {
     expect(pruefePlan(mit({ "A-1-2": "DH-02", "B-1-2": "DH-01" }), e)).toEqual([
       { code: "stufe_weicht_ab", muster: "DH", gewuenscht: 2, tatsaechlich: 1 },
     ]);
-    expect(pruefePlan(mit({ "A-1-2": "DH-01", "B-1-2": "DH-05" }), e)).toEqual([
+    expect(pruefePlan(mit({ "A-1-2": "DH-01", "B-1-2": "DH-04" }), e)).toEqual([
       { code: "stufe_weicht_ab", muster: "DH", gewuenscht: 2, tatsaechlich: 1 },
       { code: "stufe_weicht_ab", muster: "DH", gewuenscht: 2, tatsaechlich: 3 },
     ]);

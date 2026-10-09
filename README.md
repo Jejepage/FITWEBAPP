@@ -45,6 +45,15 @@ Zu `npm run e2e` (siehe `e2e/harness.mjs`):
 - Gestaltungsprüfung (nicht in `npm run e2e`): `node e2e/design.mjs` macht Screenshots aller Hauptseiten in Hell und Dunkel bei 390, 820, 1440 und 1920 px (`<SHOTS_DIR>/design/`) und prüft automatisch Überlauf, Tippflächen, Eingabeschrift und Textkontrast; `node e2e/design-lose.mjs` deckt Hinweis- und Anmeldeseite ab. Einschränkung per `DESIGN_SEITEN`, `DESIGN_BREITEN`, `DESIGN_SCHEMA`.
 - Paralleles Arbeiten: `NEXT_DIST_DIR=.next-a` baut in einen eigenen Ordner (zusammen mit `E2E_PORT`).
 
+## Katalog aktualisieren
+
+Der Seed legt beim Start nur fehlende Übungen an und ändert vorhandene nie. Kommen neue Übungen dazu, erscheinen sie von selbst; Änderungen an bestehenden Seed-Übungen (Texte, Stufen, Video-Links) übernimmst du so:
+
+1. `npm run katalog:seed-export` schreibt den Startkatalog nach `katalog-seed.json` (anderer Pfad als Argument: `npm run katalog:seed-export -- pfad.json`).
+2. In der App unter **Einstellungen → Daten** „Katalog importieren“ mit dieser Datei.
+
+Der Import überschreibt Übungen gleicher ID vollständig, auch eigene Änderungen, Prüfstatus und „aktiv“. Pläne und Trainingsdaten bleiben unberührt. Vorher am besten den Katalog exportieren.
+
 ## Betrieb
 
 Installation auf einem Proxmox-Server mit Docker Compose, Updates, Datensicherung, Zugriff per FritzBox-VPN und optionales HTTPS: siehe **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
@@ -62,7 +71,7 @@ src/lib/         kleine Hilfsfunktionen
 drizzle/         erzeugte SQL-Migrationen
 e2e/             Browsertests (Playwright) und gemeinsame Steuerung (harness.mjs)
 docs/            SPEC.md (Anforderungen), PLAN.md (Umsetzung), DEPLOYMENT.md (Betrieb)
-scripts/         Hilfsskripte für den Betrieb (Datenbank-Backup)
+scripts/         Hilfsskripte für den Betrieb (Datenbank-Backup, Katalog aus dem Seed exportieren)
 ```
 
 ## Hinweis

@@ -75,8 +75,8 @@ export interface Exercise {
   pruefstatus: Pruefstatus;
 }
 
-/** Was in den Seed-Dateien steht; bild/videoUrl/aktiv/pruefstatus setzt der Seed-Runner. */
-export type ExerciseSeed = Omit<Exercise, "bild" | "videoUrl" | "aktiv" | "pruefstatus">;
+/** Was in den Seed-Dateien steht; bild/aktiv/pruefstatus setzt der Seed-Runner. */
+export type ExerciseSeed = Omit<Exercise, "bild" | "aktiv" | "pruefstatus">;
 
 export type Einheit = "A" | "B";
 export type Block = "1" | "2" | "Z";

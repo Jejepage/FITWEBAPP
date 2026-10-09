@@ -34,14 +34,14 @@ describe("Standardprofile (Machbarkeit)", () => {
   const uebungen = () => alleUebungen(db);
   const equipment = (key: string) => listProfiles(db).find((p) => p.seedKey === key)!.equipment;
 
-  it("Studio: jedes Muster voll besetzt (60 Übungen)", () => {
+  it("Studio: jedes Muster voll besetzt (63 Übungen)", () => {
     const z = zaehleMachbar(uebungen(), equipment("studio"));
-    expect(Object.values(z).reduce((a, b) => a + b, 0)).toBe(60);
+    expect(Object.values(z).reduce((a, b) => a + b, 0)).toBe(63);
   });
 
   it("Unterwegs: genau die Körpergewichts- und Stangenübungen, jedes Muster hat mindestens eine", () => {
     const z = zaehleMachbar(uebungen(), equipment("unterwegs"));
-    expect(z).toEqual({ KN: 4, HB: 3, DH: 3, DV: 3, ZH: 1, ZV: 4, TR: 2, RU: 6 });
+    expect(z).toEqual({ KN: 5, HB: 4, DH: 3, DV: 3, ZH: 2, ZV: 5, TR: 3, RU: 6 });
     expect(MUSTER.every((m) => z[m] > 0)).toBe(true);
   });
 
@@ -50,7 +50,7 @@ describe("Standardprofile (Machbarkeit)", () => {
     // KN ohne KN-02/08, HB ohne HB-02/08, DH ohne DH-01/06, DV ohne DV-01/02, ZH ohne ZH-01/02,
     // ZV ohne ZV-01/03, TR vollständig, RU ohne RU-05.
     const z = zaehleMachbar(uebungen(), equipment("zuhause"));
-    expect(z).toEqual({ KN: 6, HB: 7, DH: 5, DV: 6, ZH: 5, ZV: 5, TR: 6, RU: 7 });
+    expect(z).toEqual({ KN: 6, HB: 8, DH: 5, DV: 6, ZH: 6, ZV: 5, TR: 7, RU: 7 });
   });
 });
 
