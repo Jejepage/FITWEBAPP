@@ -29,6 +29,7 @@ export const dh: ExerciseSeed[] = [
     ],
     hinweise:
       "Die Maschine führt die Bewegung und eignet sich zum Einstieg. Wenn keine Maschine verfügbar ist: DH-02 Liegestütz mit erhöhten Händen oder DH-04 Liegestütz.",
+    videoUrl: "https://www.youtube.com/watch?v=uY1OZ7PmL9I",
   },
   {
     id: "DH-02",
@@ -58,6 +59,7 @@ export const dh: ExerciseSeed[] = [
     ],
     hinweise:
       "Je höher die Erhöhung, desto leichter die Übung. Die Erhöhung muss rutschfest und stabil stehen. Bei Handgelenkbeschwerden können die Hände leicht nach außen gedreht oder die Fäuste aufgesetzt werden. Zu leicht: DH-04 Liegestütz.",
+    videoUrl: "https://www.youtube.com/watch?v=Gvm5Q29UHbk",
   },
   {
     id: "DH-03",
@@ -68,11 +70,11 @@ export const dh: ExerciseSeed[] = [
     equipment: [["kurzhanteln"], ["bank"]],
     optionaleLast: [],
     leichterId: null,
-    schwererId: "DH-05",
+    schwererId: null,
     hauptmuskeln: ["Brust", "Schultern", "Trizeps"],
     belastungsart: "wdh",
     standardBereich: "8–12",
-    steigerungsart: ["gewicht", "wdh", "tempo", "stufe"],
+    steigerungsart: ["gewicht", "wdh", "tempo"],
     ausfuehrung: [
       "Setze dich mit den Kurzhanteln auf den Oberschenkeln auf die Bank und lege dich zurück, die Füße stehen fest auf dem Boden.",
       "Nimm die Kurzhanteln über die Oberschenkel hoch und halte sie über der Brust, die Arme sind fast gestreckt, die Schulterblätter zusammengezogen.",
@@ -87,13 +89,14 @@ export const dh: ExerciseSeed[] = [
       "Hanteln werden unkontrolliert fallen gelassen",
     ],
     hinweise:
-      "Beginne mit leichten Hanteln, da jede Seite einzeln stabilisiert werden muss. Zu schwer: DH-02 Liegestütz mit erhöhten Händen oder DH-04 Liegestütz. Zu leicht: DH-05 Kurzhantel-Schrägbankdrücken.",
+      "Beginne mit leichten Hanteln, da jede Seite einzeln stabilisiert werden muss. Zu schwer: DH-02 Liegestütz mit erhöhten Händen. Als Abwechslung auf gleicher Stufe: DH-05 Kurzhantel-Schrägbankdrücken. Zu leicht oder Hanteln am Limit: DH-06 Langhantel-Bankdrücken.",
+    videoUrl: "https://www.youtube.com/watch?v=NbxKwffSyhw",
   },
   {
     id: "DH-04",
     name: "Liegestütz",
     muster: "DH",
-    stufe: 2,
+    stufe: 3,
     einseitig: false,
     equipment: [],
     optionaleLast: [],
@@ -116,17 +119,18 @@ export const dh: ExerciseSeed[] = [
       "Bewegungsumfang ist zu klein",
     ],
     hinweise:
-      "Zu schwer: DH-02 Liegestütz mit erhöhten Händen. Zu leicht: DH-07 Liegestütz mit erhöhten Füßen. Bei Handgelenkbeschwerden kannst du auf Fäusten oder Griffen stützen.",
+      "Wechsle erst hierher, wenn DH-02 mit den Händen auf niedriger Höhe (etwa Treppenstufe) für 12 saubere Wiederholungen klappt. Zu schwer: DH-02 Liegestütz mit erhöhten Händen. Zu leicht: DH-07 Liegestütz mit erhöhten Füßen. Bei Handgelenkbeschwerden kannst du auf Fäusten oder Griffen stützen.",
+    videoUrl: "https://www.youtube.com/watch?v=gMhF8v6E5yQ",
   },
   {
     id: "DH-05",
     name: "Kurzhantel-Schrägbankdrücken",
     muster: "DH",
-    stufe: 3,
+    stufe: 2,
     einseitig: false,
     equipment: [["kurzhanteln"], ["bank"]],
     optionaleLast: [],
-    leichterId: "DH-03",
+    leichterId: null,
     schwererId: null,
     hauptmuskeln: ["obere Brust", "Schultern", "Trizeps"],
     belastungsart: "wdh",
@@ -146,7 +150,8 @@ export const dh: ExerciseSeed[] = [
       "Rücken wölbt sich stark vom Polster ab",
     ],
     hinweise:
-      "Starte mit weniger Gewicht als beim flachen Drücken. Bei Schulterbeschwerden eine flachere Bank nutzen. Zu schwer: DH-03 Kurzhantel-Bankdrücken.",
+      "Die Schrägbank ist eine Variante, keine Steigerung: Starte mit weniger Gewicht als beim flachen Drücken. Bei Schulterbeschwerden eine flachere Bank nutzen. Flache Variante: DH-03 Kurzhantel-Bankdrücken.",
+    videoUrl: "https://www.youtube.com/watch?v=ADlmJAE8EV4",
   },
   {
     id: "DH-06",
@@ -176,6 +181,7 @@ export const dh: ExerciseSeed[] = [
     ],
     hinweise:
       "Trainiere immer mit Sicherheitsarmen oder Spotter. Umschließe die Stange mit dem Daumen. Zu schwer: DH-03 Kurzhantel-Bankdrücken (freiere Bewegung).",
+    videoUrl: "https://www.youtube.com/watch?v=MlWrpIE26Rg",
   },
   {
     id: "DH-07",
@@ -205,5 +211,6 @@ export const dh: ExerciseSeed[] = [
     ],
     hinweise:
       "Die Schultern tragen hier mehr Last als beim normalen Liegestütz; achte auf eine stabile Erhöhung. Zu schwer: DH-04 Liegestütz. Steigere über Wiederholungen und langsames Absenken.",
+    videoUrl: "https://www.youtube.com/watch?v=QBlYp-EwHlo",
   },
 ];

@@ -29,6 +29,7 @@ export const zh: ExerciseSeed[] = [
     ],
     hinweise:
       "Der Rücken bleibt gerade und lang, auch wenn die Arme ganz gestreckt sind. Ohne Studio-Gerät: ZH-02 Rudern mit Band.",
+    videoUrl: "https://www.youtube.com/watch?v=7VvbhoJtj24",
   },
   {
     id: "ZH-02",
@@ -58,6 +59,7 @@ export const zh: ExerciseSeed[] = [
     ],
     hinweise:
       "Prüfe Band und Befestigung vor jedem Satz auf Risse und festen Halt. Zu leicht: ZH-05 Brustgestütztes Kurzhantelrudern.",
+    videoUrl: "https://www.youtube.com/watch?v=NL5EbYSEe5k",
   },
   {
     id: "ZH-03",
@@ -86,7 +88,8 @@ export const zh: ExerciseSeed[] = [
       "Schulter hängt unten nach vorn",
     ],
     hinweise:
-      "Ziehe die Hantel eher zur Hüfte als zur Brust, das schont die Schulter. Ohne Bank: ZH-04 Einarmiges Kettlebell-Rudern. Zu schwer: ZH-05 Brustgestütztes Kurzhantelrudern (mehr Stütze).",
+      "Ziehe die Hantel eher zur Hüfte als zur Brust, das schont die Schulter. Ohne Bank: ZH-04 Einarmiges Kettlebell-Rudern. Zu schwer: leichtere Hantel oder ZH-02 Rudern mit Band.",
+    videoUrl: "https://www.youtube.com/watch?v=Ccs4xNjkxdA",
   },
   {
     id: "ZH-04",
@@ -104,7 +107,7 @@ export const zh: ExerciseSeed[] = [
     steigerungsart: ["gewicht", "wdh", "tempo"],
     ausfuehrung: [
       "Stelle dich schulterbreit hin, beuge die Hüfte nach hinten und stütze die freie Hand auf dem Oberschenkel oder einem Stuhl ab.",
-      "Halte den Rücken gerade, die Kettlebell hängt mit gestrecktem Arm vor dir.",
+      "Halte den Rücken gerade, die Kettlebell hängt mit gestrecktem Arm unter der Schulter neben dem vorderen Bein.",
       "Ziehe die Kettlebell zur Hüfte, der Ellbogen führt eng am Körper nach hinten.",
       "Senke sie kontrolliert wieder ab, ohne den Oberkörper aufzurichten.",
     ],
@@ -115,7 +118,8 @@ export const zh: ExerciseSeed[] = [
       "Becken dreht mit",
     ],
     hinweise:
-      "Die Kettlebell hängt neben dem Bein, der Griff bleibt dabei fest. Mit Bank: ZH-03 Einarmiges Kurzhantelrudern auf der Bank.",
+      "Ziehe die Kettlebell nah am Bein entlang zur Hüfte, der Griff bleibt dabei fest. Mit Bank: ZH-03 Einarmiges Kurzhantelrudern auf der Bank.",
+    videoUrl: "https://www.youtube.com/watch?v=__c5mGzuZRI",
   },
   {
     id: "ZH-05",
@@ -144,6 +148,7 @@ export const zh: ExerciseSeed[] = [
       "Schultern hochgezogen",
     ],
     hinweise: "Die Bank stützt den Oberkörper. Zu leicht: ZH-06 Vorgebeugtes Kurzhantelrudern.",
+    videoUrl: "https://www.youtube.com/watch?v=CAn7Ad3mJag",
   },
   {
     id: "ZH-06",
@@ -173,6 +178,7 @@ export const zh: ExerciseSeed[] = [
     ],
     hinweise:
       "Der untere Rücken hält die Position, nimm daher zuerst nur leichte Gewichte. Zu schwer oder wenn du die Position nicht halten kannst: ZH-05 Brustgestütztes Kurzhantelrudern; ohne Hanteln: ZH-07 Rudern unter dem Tisch.",
+    videoUrl: "https://www.youtube.com/watch?v=Sl-raBKLgPU",
   },
   {
     id: "ZH-07",
@@ -182,7 +188,7 @@ export const zh: ExerciseSeed[] = [
     einseitig: false,
     equipment: [],
     optionaleLast: [],
-    leichterId: null,
+    leichterId: "ZH-08",
     schwererId: null,
     hauptmuskeln: ["oberer Rücken", "Latissimus", "Schultern", "Bizeps"],
     belastungsart: "wdh",
@@ -201,6 +207,37 @@ export const zh: ExerciseSeed[] = [
       "Der Körper schwingt mit Schwung nach oben",
     ],
     hinweise:
-      "Sicherheit: Nutze nur einen sehr stabilen Tisch, der dein Körpergewicht trägt und nicht rutscht oder kippt; teste ihn vorher mit Zug. Die Tischplatte muss fest verbunden sein. Zu schwer: Beuge die Knie und stelle die Füße auf, oder wähle ZH-02 Rudern mit Band.",
+      "Sicherheit: Nutze nur einen sehr stabilen, schweren Tisch, der dein Körpergewicht trägt und nicht rutscht oder kippt; teste ihn vorher mit Zug. Leichte Tische, Klapp- und Hoteltische sind ungeeignet, nimm dann ZH-08. Die Tischplatte muss fest verbunden sein. Zu schwer: Beuge die Knie und stelle die Füße auf, oder wähle ZH-08 Einarmiges Rudern am Türrahmen.",
+    videoUrl: "https://www.youtube.com/watch?v=mcRwOlbsISw",
+  },
+  {
+    id: "ZH-08",
+    name: "Einarmiges Rudern am Türrahmen",
+    muster: "ZH",
+    stufe: 1,
+    einseitig: true,
+    equipment: [],
+    optionaleLast: [],
+    leichterId: null,
+    schwererId: "ZH-07",
+    hauptmuskeln: ["oberer Rücken", "Latissimus", "Bizeps", "Rumpf"],
+    belastungsart: "wdh",
+    standardBereich: "8–12",
+    steigerungsart: ["wdh", "tempo", "stufe"],
+    ausfuehrung: [
+      "Stelle dich seitlich in eine offene Tür und greife mit einer Hand die Kante des Türrahmens auf Brusthöhe.",
+      "Stelle die Füße dicht an den Rahmen und lehne dich mit gestrecktem Arm zurück, der Körper bildet eine gerade Linie.",
+      "Ziehe dich mit dem Ellbogen eng am Körper zum Rahmen heran und führe das Schulterblatt nach hinten.",
+      "Lasse dich kontrolliert zurück, bis der Arm gestreckt ist; nach dem Satz wechselst du die Seite.",
+    ],
+    fehler: [
+      "Hüfte knickt ein, der Körper ist nicht gerade",
+      "Oberkörper dreht sich beim Ziehen auf",
+      "Schulter wird zum Ohr hochgezogen",
+      "Zurückfallen lassen statt kontrolliert absenken",
+    ],
+    hinweise:
+      "Greife fest und mit trockenen Händen. Je näher die Füße am Rahmen stehen und je weiter du dich zurücklehnst, desto schwerer wird es. Die Füße stehen rutschfest, am besten auf Teppich oder in Schuhen. Zu leicht: ZH-07 Rudern unter dem Tisch.",
+    videoUrl: "https://www.youtube.com/watch?v=0hzpE-OBjGc",
   },
 ];

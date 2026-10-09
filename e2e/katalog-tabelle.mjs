@@ -53,7 +53,7 @@ async function ablauf(browser, BASE) {
     "Tragen",
     "Rumpf",
   ]);
-  assert.equal(await zeilen().count(), 60);
+  assert.equal(await zeilen().count(), 63);
   assert.equal(
     await page.getByRole("heading", { level: 2 }).count(),
     0,
@@ -61,15 +61,15 @@ async function ablauf(browser, BASE) {
   );
   await shot("1-standard");
   schritt(
-    "PC: Tabelle mit Name/Stufe/Equipment, 8 Gruppen in Spec-Reihenfolge, 60 Zeilen",
+    "PC: Tabelle mit Name/Stufe/Equipment, 8 Gruppen in Spec-Reihenfolge, 63 Zeilen",
   );
 
   // --- Kopfzeilenfilter wirken sofort, ohne die Seite neu zu laden ---------------------------
   await page.evaluate(() => (window.__marke = "bleibt"));
   await page.locator("thead").getByLabel("Stufe filtern").selectOption("2");
   await warteUrl(/stufe=2/);
-  await page.getByText("20 von 60 Übungen").waitFor();
-  assert.equal(await zeilen().count(), 20);
+  await page.getByText("21 von 63 Übungen").waitFor();
+  assert.equal(await zeilen().count(), 21);
   assert.equal(
     await page.evaluate(() => window.__marke),
     "bleibt",
@@ -80,7 +80,7 @@ async function ablauf(browser, BASE) {
   await page.keyboard.type("kniebeuge");
   await warteUrl(/q=kniebeuge/);
   const treffer = await zeilen().count();
-  assert.ok(treffer >= 1 && treffer < 20);
+  assert.ok(treffer >= 1 && treffer < 21);
   for (const n of await page
     .locator("tbody tr:not(:has(th[scope=rowgroup])) :is(td,th):first-child")
     .allInnerTexts()) {
@@ -99,11 +99,11 @@ async function ablauf(browser, BASE) {
   );
   await shot("2-gefiltert");
   schritt(
-    `Filter in der Kopfzeile: Stufe 2 → 20, Suche "kniebeuge" → ${treffer}; Fokus bleibt`,
+    `Filter in der Kopfzeile: Stufe 2 → 21, Suche "kniebeuge" → ${treffer}; Fokus bleibt`,
   );
 
   await page.getByRole("link", { name: "Zurücksetzen" }).first().click();
-  await page.getByText("60 von 60 Übungen").waitFor();
+  await page.getByText("63 von 63 Übungen").waitFor();
   await page
     .locator("thead")
     .getByLabel("Equipment-Profil")
@@ -112,11 +112,11 @@ async function ablauf(browser, BASE) {
   await page.waitForFunction(
     () =>
       document.querySelectorAll("tbody tr:not(:has(th[scope=rowgroup]))")
-        .length < 60,
+        .length < 63,
   );
   const unterwegs = await zeilen().count();
-  assert.ok(unterwegs > 0 && unterwegs < 60, "Unterwegs engt ein");
-  await page.getByText(`${unterwegs} von 60 Übungen`).first().waitFor();
+  assert.ok(unterwegs > 0 && unterwegs < 63, "Unterwegs engt ein");
+  await page.getByText(`${unterwegs} von 63 Übungen`).first().waitFor();
   await page.locator("thead").getByLabel("Equipment-Profil").selectOption("");
   await page
     .locator("thead")
@@ -129,21 +129,23 @@ async function ablauf(browser, BASE) {
   await page.waitForFunction(
     () =>
       document.querySelectorAll("tbody tr:not(:has(th[scope=rowgroup]))")
-        .length !== 60,
+        .length !== 63,
   );
   const stange = await zeilen().count();
-  await page.getByText(`${stange} von 60 Übungen`).first().waitFor();
+  await page.getByText(`${stange} von 63 Übungen`).first().waitFor();
   assert.ok(
-    stange > 0 && stange < 60,
+    stange > 0 && stange < 63,
     `Gerät Stange: ${stange} Zeilen, URL ${page.url()}`,
   );
   schritt(
     `Equipment-Filter: Profil Unterwegs → ${unterwegs}, Gerät Stange → ${stange}`,
   );
 
-  // Weitere Spaltenfilter
+  // Weitere Spaltenfilter (erst nach dem Laden der Skripte bedienen, sonst geht die Auswahl
+  // vor der Hydrierung verloren; die Videospalte macht die Seite spürbar größer)
   await page.goto(
     `${BASE}/katalog?spalten=name,stufe,einseitig,belastung,status,aktiv,video`,
+    { waitUntil: "networkidle" },
   );
   await page
     .locator("thead")
@@ -272,7 +274,7 @@ async function ablauf(browser, BASE) {
 
   // --- Zeile führt zur Übung ---------------------------------------------------------------------------
   await page.goto(`${BASE}/katalog`);
-  await page.getByRole("link", { name: "Beinpresse" }).click();
+  await page.getByRole("link", { name: "Beinpresse", exact: true }).click();
   await page.getByRole("heading", { name: "Beinpresse", level: 1 }).waitFor();
   assert.deepEqual(fehler, [], "Browser-Fehler");
   await pc.close();
@@ -300,7 +302,7 @@ async function ablauf(browser, BASE) {
   await m.getByLabel("Suche (Name oder ID)").fill("klimmzug");
   await m.getByRole("button", { name: "Filtern" }).click();
   await m.waitForURL(/q=klimmzug/);
-  await m.getByText(/von 60 Übungen/).waitFor();
+  await m.getByText(/von 63 Übungen/).waitFor();
   // Erzwungene Tabelle am Handy: scrollt nur der Tabellenbereich
   await m.goto(
     `${BASE}/katalog?ansicht=tabelle&spalten=name,stufe,equipment,muskeln,steigerung,leiter,video`,

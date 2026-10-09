@@ -93,17 +93,17 @@ async function ablauf(browser, name, viewport) {
   // 3. Profilliste mit Machbarkeit (von Hand aus der Spec nachgezählt)
   await page.goto(`${BASE}/einstellungen`);
   await profilKarte("Studio").getByText("Standard", { exact: true }).waitFor();
-  await profilKarte("Studio").getByText("60 von 60 Übungen machbar").waitFor();
-  await profilKarte("Zuhause").getByText("47 von 60 Übungen machbar").waitFor();
+  await profilKarte("Studio").getByText("63 von 63 Übungen machbar").waitFor();
+  await profilKarte("Zuhause").getByText("50 von 63 Übungen machbar").waitFor();
   await profilKarte("Zuhause")
     .getByText("Kurzhanteln: 2–20/2 kg · Kettlebell: 12, 16 kg")
     .waitFor();
   await profilKarte("Unterwegs")
-    .getByText("26 von 60 Übungen machbar")
+    .getByText("31 von 63 Übungen machbar")
     .waitFor();
   await shot("3-profile");
   schritt(
-    `[${name}] Profilliste: Studio 60, Zuhause 47, Unterwegs 26 Übungen machbar`,
+    `[${name}] Profilliste: Studio 63, Zuhause 50, Unterwegs 31 Übungen machbar`,
   );
 
   // 4. Profil "Unterwegs": Vorschau je Muster
@@ -113,9 +113,9 @@ async function ablauf(browser, name, viewport) {
     page
       .locator("dt", { hasText: new RegExp(`^${muster}$`) })
       .locator("xpath=following-sibling::dd[1]");
-  assert.equal(await zeile("Ziehen horizontal").innerText(), "1");
-  assert.equal(await zeile("Ziehen vertikal").innerText(), "4");
-  assert.equal(await zeile("Kniebeuge").innerText(), "4");
+  assert.equal(await zeile("Ziehen horizontal").innerText(), "2");
+  assert.equal(await zeile("Ziehen vertikal").innerText(), "5");
+  assert.equal(await zeile("Kniebeuge").innerText(), "5");
   assert.equal(
     await page.getByRole("alert").filter({ hasText: "keine Übung" }).count(),
     0,
@@ -123,7 +123,7 @@ async function ablauf(browser, name, viewport) {
   );
   await keinHorizontalScroll("Profil");
   await shot("4-profil-unterwegs");
-  schritt(`[${name}] Vorschau Unterwegs: ZH 1, ZV 4, KN 4, keine Warnung`);
+  schritt(`[${name}] Vorschau Unterwegs: ZH 2, ZV 5, KN 5, keine Warnung`);
 
   // 5. Neues Profil "Garage" (Kurzhanteln + Bank), Validierung zuerst
   await page.goto(`${BASE}/einstellungen/profile/neu`);
@@ -146,9 +146,9 @@ async function ablauf(browser, name, viewport) {
   await page.getByRole("button", { name: "Speichern" }).click();
   await page.getByRole("heading", { name: "Equipment-Profile" }).waitFor();
   await profilKarte("Garage").getByText("Kurzhanteln: 2,5–10/2,5 kg").waitFor();
-  await profilKarte("Garage").getByText("35 von 60 Übungen machbar").waitFor();
+  await profilKarte("Garage").getByText("39 von 63 Übungen machbar").waitFor();
   schritt(
-    `[${name}] Garage angelegt (Gewichte 2,5–10/2,5, 35 Übungen machbar)`,
+    `[${name}] Garage angelegt (Gewichte 2,5–10/2,5, 39 Übungen machbar)`,
   );
 
   // Garage hat keine Stange: für Ziehen vertikal gibt es nichts → Warnung
@@ -173,8 +173,8 @@ async function ablauf(browser, name, viewport) {
   await page.locator("summary", { hasText: "Filter" }).click();
   await page.getByLabel("Equipment-Profil").selectOption({ label: "Garage" });
   await page.getByRole("button", { name: "Filtern" }).click();
-  await page.getByText("35 von 60 Übungen").waitFor();
-  schritt(`[${name}] Katalogfilter „Garage“ zeigt 35 Übungen`);
+  await page.getByText("39 von 63 Übungen").waitFor();
+  schritt(`[${name}] Katalogfilter „Garage“ zeigt 39 Übungen`);
 
   // Doppelter Name wird abgelehnt
   await page.goto(`${BASE}/einstellungen/profile/neu`);

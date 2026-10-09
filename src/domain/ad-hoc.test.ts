@@ -76,13 +76,13 @@ describe("ersetzungenFuerProfil mit dem Seed-Katalog", () => {
     }
   });
 
-  it("Unterwegs: Ziehen horizontal hat nur ZH-07", () => {
+  it("Unterwegs: Kabelrudern wird zum Türrahmen-Rudern (gleiche Stufe 1)", () => {
     const r = ersetzungenFuerProfil({
       slots: [slot(1, "ZH", "ZH-01")],
       uebungen: katalog,
       equipment: profil("unterwegs"),
     });
-    expect(r.ersetzungen["1"]).toBe("ZH-07");
+    expect(r.ersetzungen["1"]).toBe("ZH-08");
   });
 });
 

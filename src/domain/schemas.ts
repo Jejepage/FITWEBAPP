@@ -39,7 +39,6 @@ export const exerciseSchema = z.object({
 
 export const exerciseSeedSchema = exerciseSchema.omit({
   bild: true,
-  videoUrl: true,
   aktiv: true,
   pruefstatus: true,
 });
