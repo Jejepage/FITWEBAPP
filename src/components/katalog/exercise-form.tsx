@@ -5,7 +5,7 @@ import { useActionState, useEffect } from "react";
 import type { FormState } from "@/app/katalog/form-state";
 import { Checkbox, FehlerBanner, Feld, Gruppe } from "@/components/form-felder";
 import { eingabe, karte, knopfNeutral, knopfPrimaer, kopfzeileKlein } from "@/components/ui";
-import { GRUPPEN_ANZAHL, type ExerciseFormWerte } from "@/domain/exercise-form";
+import type { ExerciseFormWerte } from "@/domain/exercise-form";
 import {
   BELASTUNGSARTEN,
   EQUIPMENT_AUSWAHL,
@@ -172,40 +172,19 @@ export function ExerciseForm({
       </Abschnitt>
 
       <Abschnitt titel={f.equipment} hilfe={f.equipmentHilfe}>
-        <div className="grid gap-x-5 md:grid-cols-2">
-          {Array.from({ length: GRUPPEN_ANZAHL }, (_, i) => (
-            <Gruppe
-              key={i}
-              legende={f.gruppe(i + 1)}
-              fehler={i === 0 ? fehler.equipment : undefined}
-            >
-              <div className="grid sm:grid-cols-2">
-                {EQUIPMENT_AUSWAHL.map((art) => (
-                  <Checkbox
-                    key={art}
-                    name={`gruppe${i}`}
-                    value={art}
-                    label={EQUIPMENT_NAMEN[art]}
-                    checked={w.equipment[i]?.includes(art) ?? false}
-                  />
-                ))}
-              </div>
-            </Gruppe>
-          ))}
-          <Gruppe legende={f.optionaleLast} fehler={fehler.optionaleLast}>
-            <div className="grid sm:grid-cols-2">
-              {EQUIPMENT_AUSWAHL.map((art) => (
-                <Checkbox
-                  key={art}
-                  name="optionaleLast"
-                  value={art}
-                  label={EQUIPMENT_NAMEN[art]}
-                  checked={w.optionaleLast.includes(art)}
-                />
-              ))}
-            </div>
-          </Gruppe>
-        </div>
+        <Gruppe legende={f.geraete} fehler={fehler.equipment}>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+            {EQUIPMENT_AUSWAHL.map((art) => (
+              <Checkbox
+                key={art}
+                name="equipment"
+                value={art}
+                label={EQUIPMENT_NAMEN[art]}
+                checked={w.equipment.includes(art)}
+              />
+            ))}
+          </div>
+        </Gruppe>
       </Abschnitt>
 
       <Abschnitt titel={t.stufenleiter}>
@@ -241,6 +220,7 @@ export function ExerciseForm({
         <div className="grid gap-x-5 md:grid-cols-2">
           <div className="md:pt-7">
             <Checkbox name="aktiv" label={f.aktiv} checked={w.aktiv} />
+            <Checkbox name="ersatz" label={f.ersatz} hilfe={f.ersatzHilfe} checked={w.ersatz} />
           </div>
           <Feld label={f.pruefstatus} fehler={fehler.pruefstatus}>
             <select name="pruefstatus" defaultValue={w.pruefstatus} className={eingabe}>

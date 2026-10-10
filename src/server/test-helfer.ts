@@ -1,25 +1,40 @@
 // Nur für Tests: legt einen aktiven Plan an (erste passende Übung je Slot, kein Generator).
-import { eq } from "drizzle-orm";
-import { plan, setLog, workout } from "@/db/schema";
+import { setLog, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
 import { erfuellt } from "@/domain/equipment";
 import { SLOT_VORLAGE } from "@/domain/plan-types";
+import { testProfile } from "@/domain/test-katalog";
 import type { SatzWerte } from "@/domain/training-types";
-import { MUSTER, type Block, type Einheit, type Muster } from "@/domain/types";
+import {
+  MUSTER,
+  type Block,
+  type Einheit,
+  type EquipmentArt,
+  type Gewichte,
+  type Muster,
+} from "@/domain/types";
 import { einheitNachFortschritt, rundenFuerBlock } from "@/domain/weeks";
 import { alleUebungen } from "./exercises";
 import { createPlan, getPlanSlotsMitId } from "./plans";
-import { listProfiles } from "./profiles";
 
+/** Equipment eines Test-Plans: `equipment` direkt oder eine der Auswahlen "studio", "zuhause", "unterwegs". */
 export function legePlanAn(
   db: Db,
-  opts: { profil?: string; einheitenProWoche?: 2 | 3; zusatzblock?: boolean } = {},
+  opts: {
+    profil?: string;
+    equipment?: EquipmentArt[];
+    gewichte?: Gewichte;
+    einheitenProWoche?: 2 | 3;
+    zusatzblock?: boolean;
+  } = {},
 ): { planId: number; slotIds: Record<string, number> } {
-  const profil = listProfiles(db).find((p) => p.seedKey === (opts.profil ?? "studio"))!;
+  const equipment =
+    opts.equipment ?? testProfile.find((p) => p.seedKey === (opts.profil ?? "studio"))!.equipment;
   const katalog = alleUebungen(db);
   const stufen = Object.fromEntries(MUSTER.map((m) => [m, 2])) as Record<Muster, number>;
   const r = createPlan(db, {
-    profilId: profil.id,
+    equipment,
+    gewichte: opts.gewichte ?? {},
     startDatum: "2026-10-07",
     einheitenProWoche: opts.einheitenProWoche ?? 2,
     zusatzblock: opts.zusatzblock ?? false,
@@ -27,7 +42,7 @@ export function legePlanAn(
     vorgaengerId: null,
     slots: SLOT_VORLAGE.map((v) => {
       const kandidaten = katalog.filter(
-        (u) => u.muster === v.muster && erfuellt(u.equipment, profil.equipment),
+        (u) => u.muster === v.muster && erfuellt(u.equipment, equipment),
       );
       // A und B bekommen verschiedene Übungen, soweit vorhanden
       return { ...v, exerciseId: kandidaten[(v.einheit === "A" ? 0 : 1) % kandidaten.length]!.id };
@@ -72,7 +87,6 @@ export function legeBlockAn(
     einheitenProWoche?: 2 | 3;
     zusatzblock?: boolean;
     satz?: (k: TestSatzKontext) => Partial<SatzWerte> | null;
-    adHoc?: (nummer: number) => boolean;
   },
 ): { planId: number; workoutIds: number[]; slotIds: Record<string, number> } {
   const proWoche = opts.einheitenProWoche ?? 2;
@@ -81,7 +95,6 @@ export function legeBlockAn(
     zusatzblock: opts.zusatzblock ?? false,
   });
   const slots = getPlanSlotsMitId(db, planId);
-  const planZeile = db.select().from(plan).where(eq(plan.id, planId)).get();
   const workoutIds: number[] = [];
   for (let n = 0; n < opts.einheiten; n++) {
     const f = einheitNachFortschritt(n, proWoche);
@@ -93,8 +106,6 @@ export function legeBlockAn(
         datum: `2026-${n < 25 ? "10" : "11"}-${n < 25 ? tag : String(n - 24).padStart(2, "0")}`,
         einheit: f.einheit,
         woche: f.woche,
-        profilId: planZeile!.profilId,
-        adHoc: opts.adHoc?.(n) ?? false,
         zusatzblock: opts.zusatzblock ?? false,
         status: "abgeschlossen",
         beendetAm: "2026-10-07T10:00:00.000Z",

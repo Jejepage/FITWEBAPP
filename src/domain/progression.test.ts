@@ -156,6 +156,22 @@ describe("Wiederholungsübungen mit Hanteln (KN-04 Goblet Squat)", () => {
     expect(v).toMatchObject({ grund: "naechste_stufe", gewicht: 20, wdh: 12, tempo: false });
   });
 
+  it("Ersatzübung am Ende der Wiederholungen: weder Tempo noch nächste Stufe, nur wiederholen", () => {
+    const ersatz = { ...goblet, ersatz: true };
+    const v = vorschlagFuerUebung(eingabe(ersatz, 3, wdhSaetze([12, 12, 12], 20, 8)));
+    expect(v).toMatchObject({ grund: "wiederholen", gewicht: 20, wdh: 12, tempo: false });
+    const mitTempo = vorschlagFuerUebung(eingabe(ersatz, 4, wdhSaetze([12, 12, 12], 20, 8, true)));
+    expect(mitTempo).toMatchObject({ grund: "wiederholen", wdh: 12, tempo: true });
+  });
+
+  it("Ersatzübung ohne Gewicht: Wiederholungen steigen weiter bis zur Obergrenze", () => {
+    const liegestuetz = { ...uebung("DH-04"), ersatz: true };
+    const v = vorschlagFuerUebung(eingabe(liegestuetz, 3, wdhSaetze([9, 9, 8], null, 7)));
+    expect(v).toMatchObject({ grund: "mehr_wdh", wdh: 9 });
+    const oben = vorschlagFuerUebung(eingabe(liegestuetz, 4, wdhSaetze([12, 12, 12], null, 7)));
+    expect(oben).toMatchObject({ grund: "wiederholen", wdh: 12 });
+  });
+
   it("RPE 9 verhindert die Erhöhung", () => {
     const saetze = [...wdhSaetze([12, 12], 10, 8), ...wdhSaetze([12], 10, 9)];
     const v = vorschlagFuerUebung(eingabe(goblet, 3, saetze));

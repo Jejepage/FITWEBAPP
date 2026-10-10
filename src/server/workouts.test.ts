@@ -1,12 +1,11 @@
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
-import { equipmentProfile, exercise, plan, workout } from "@/db/schema";
+import { exercise, plan, workout } from "@/db/schema";
 import { neueSeedDb } from "@/db/test-utils";
 import type { Db } from "@/db/types";
 import { erfuellt } from "@/domain/equipment";
 import { alleUebungen } from "./exercises";
-import { getPlan, getPlanSlotsMitId } from "./plans";
-import { listProfiles } from "./profiles";
+import { getPlan, getPlanSlotsMitId, setzePlanEquipment } from "./plans";
 import { legePlanAn } from "./test-helfer";
 import {
   beendeWorkout,
@@ -72,7 +71,6 @@ describe("startWorkout", () => {
       einheit: "A",
       woche: 1,
       datum: "2026-10-08",
-      adHoc: false,
       zusatzblock: false,
       status: "laufend",
       ersetzungen: {},
@@ -146,48 +144,43 @@ describe("startWorkout", () => {
   });
 });
 
-describe("startWorkout mit anderem Profil (Ad-hoc)", () => {
-  const profilId = (key: string) => listProfiles(db).find((p) => p.seedKey === key)!.id;
-
-  it("Planprofil gewählt: normale Einheit ohne Ersetzungen", () => {
-    const r = startWorkout(db, { heute: "2026-10-08", profilId: profilId("studio") });
-    if (!r.ok) throw new Error(r.code);
-    expect(getWorkout(db, r.id)).toMatchObject({ adHoc: false, ersetzungen: {} });
+describe("startWorkout: Equipment des Plans", () => {
+  it("passendes Equipment: normale Einheit ohne Ersetzungen", () => {
+    const id = start();
+    expect(getWorkout(db, id)!.ersetzungen).toEqual({});
   });
 
-  it("Unterwegs: Ad-hoc mit Profil der Einheit und passenden Ersatzübungen, Plan unverändert", () => {
+  it("geändertes Equipment: Übungen ohne passendes Equipment werden ersetzt, Plan unverändert", () => {
     const vorher = getPlanSlotsMitId(db, planId);
-    const r = startWorkout(db, { heute: "2026-10-08", profilId: profilId("unterwegs") });
-    if (!r.ok) throw new Error(r.code);
-    const w = getWorkout(db, r.id)!;
-    expect(w).toMatchObject({
-      adHoc: true,
-      profilId: profilId("unterwegs"),
-      einheit: "A",
-      woche: 1,
-    });
+    expect(setzePlanEquipment(db, planId, ["stange"], {})).toEqual({ ok: true });
+    const id = start();
+    const w = getWorkout(db, id)!;
+    expect(w).toMatchObject({ einheit: "A", woche: 1 });
     const katalog = new Map(alleUebungen(db).map((u) => [u.id, u]));
     const stange = ["stange"] as const;
     expect(Object.keys(w.ersetzungen).length).toBeGreaterThan(0);
-    for (const [slotId, id] of Object.entries(w.ersetzungen)) {
+    for (const [slotId, ersatz] of Object.entries(w.ersetzungen)) {
       const slot = vorher.find((s) => s.id === Number(slotId))!;
-      expect(katalog.get(id)!.muster).toBe(slot.muster);
-      expect(erfuellt(katalog.get(id)!.equipment, stange)).toBe(true);
+      expect(katalog.get(ersatz)!.muster).toBe(slot.muster);
+      expect(erfuellt(katalog.get(ersatz)!.equipment, stange)).toBe(true);
     }
     expect(getPlanSlotsMitId(db, planId)).toEqual(vorher);
   });
 
+  it("nach dem Kauf eines Geräts bleiben die Planübungen, wie sie sind", () => {
+    ({ planId } = legePlanAn(db, { profil: "zuhause" }));
+    expect(setzePlanEquipment(db, planId, ["kurzhanteln", "kettlebell", "bank", "stange", "maschinen"], {})).toEqual({ ok: true });
+    expect(getWorkout(db, start())!.ersetzungen).toEqual({});
+  });
+
   it("zählt für den Wochenfortschritt", () => {
-    const id = (() => {
-      const r = startWorkout(db, { heute: "2026-10-08", profilId: profilId("unterwegs") });
-      if (!r.ok) throw new Error(r.code);
-      return r.id;
-    })();
+    setzePlanEquipment(db, planId, ["stange"], {});
+    const id = start();
     const slot = getPlanSlotsMitId(db, planId).find((s) => s.einheit === "A" && s.block === "1")!;
     const ersatz = getWorkout(db, id)!.ersetzungen[String(slot.id)] ?? slot.exerciseId;
     expect(
       speichereSatz(db, {
-        id: "adhoc-0001",
+        id: "ersatz-0001",
         workoutId: id,
         planSlotId: slot.id,
         exerciseId: ersatz,
@@ -205,39 +198,27 @@ describe("startWorkout mit anderem Profil (Ad-hoc)", () => {
     expect(getWorkout(db, start())).toMatchObject({ einheit: "B", woche: 1 });
   });
 
-  it("unbekanntes Profil: Fehler, keine Einheit angelegt", () => {
-    expect(startWorkout(db, { heute: "2026-10-08", profilId: 9999 })).toEqual({
-      ok: false,
-      code: "profil_unbekannt",
-    });
-    expect(getLaufendesWorkout(db)).toBeNull();
-  });
-
-  it("Profil ohne passende Übung für ein Muster: Fehler mit fehlenden Mustern", () => {
-    const leer = db
-      .insert(equipmentProfile)
-      .values({ name: "Leer", equipment: [], gewichte: {}, istStandard: false })
-      .returning({ id: equipmentProfile.id })
-      .get();
-    const r = startWorkout(db, { heute: "2026-10-08", profilId: leer.id });
-    expect(r).toMatchObject({ ok: false, code: "profil_unmoeglich" });
-    if (!r.ok && r.code === "profil_unmoeglich") expect(r.fehlendeMuster).toContain("ZV");
+  it("Equipment ohne passende Übung für ein Muster: Fehler mit fehlenden Mustern, keine Einheit", () => {
+    setzePlanEquipment(db, planId, [], {});
+    const r = startWorkout(db, { heute: "2026-10-08" });
+    expect(r).toMatchObject({ ok: false, code: "equipment_unmoeglich" });
+    if (!r.ok && r.code === "equipment_unmoeglich") expect(r.fehlendeMuster).toContain("ZV");
     expect(getLaufendesWorkout(db)).toBeNull();
   });
 
   it("Muster nur im Zusatzblock: ohne Zusatzblock geht der Start, mit Zusatzblock nicht", () => {
+    ({ planId } = legePlanAn(db, { profil: "unterwegs", zusatzblock: true }));
     db.update(exercise).set({ aktiv: false }).where(eq(exercise.muster, "TR")).run();
-    const unterwegs = profilId("unterwegs");
-    const mit = startWorkout(db, { heute: "2026-10-08", profilId: unterwegs, zusatzblock: true });
-    expect(mit).toMatchObject({ ok: false, code: "profil_unmoeglich", fehlendeMuster: ["TR"] });
-    const ohne = startWorkout(db, { heute: "2026-10-08", profilId: unterwegs, zusatzblock: false });
+    const mit = startWorkout(db, { heute: "2026-10-08", zusatzblock: true });
+    expect(mit).toMatchObject({ ok: false, code: "equipment_unmoeglich", fehlendeMuster: ["TR"] });
+    const ohne = startWorkout(db, { heute: "2026-10-08", zusatzblock: false });
     expect(ohne.ok).toBe(true);
   });
 
-  it("läuft schon eine Einheit, wird sie zurückgegeben (Profil wird ignoriert)", () => {
+  it("läuft schon eine Einheit, wird sie zurückgegeben", () => {
     const erste = start();
-    const r = startWorkout(db, { heute: "2026-10-09", profilId: profilId("unterwegs") });
-    expect(r).toEqual({ ok: true, id: erste, neu: false });
+    setzePlanEquipment(db, planId, [], {});
+    expect(startWorkout(db, { heute: "2026-10-09" })).toEqual({ ok: true, id: erste, neu: false });
   });
 });
 
@@ -428,7 +409,7 @@ describe("ersetzeUebung", () => {
     expect(getWorkout(db, id)!.ersetzungen).toEqual({});
   });
 
-  it("Equipment des Profils wird beachtet", () => {
+  it("Equipment des Plans wird beachtet", () => {
     db = neueSeedDb();
     ({ planId } = legePlanAn(db, { profil: "unterwegs" }));
     const id = start();
@@ -440,6 +421,28 @@ describe("ersetzeUebung", () => {
       code: "uebung_ungueltig",
     }); // Langhantel
     expect(ersetzeUebung(db, id, slot.id, "KN-05")).toEqual({ ok: true, exerciseId: "KN-05" });
+  });
+
+  it("Ersatzübungen gehen immer, auch wenn ihr Equipment im Plan fehlt (z. B. Band unterwegs)", () => {
+    db = neueSeedDb();
+    ({ planId } = legePlanAn(db, { profil: "unterwegs" }));
+    const id = start();
+    const zh = getPlanSlotsMitId(db, planId).find((s) => s.einheit === "A" && s.muster === "ZH")!;
+    // ZH-02 Rudern mit Band: nur mit Band machbar, aber Ersatzübung
+    expect(ersetzeUebung(db, id, zh.id, "ZH-02")).toEqual({ ok: true, exerciseId: "ZH-02" });
+    // ZH-03 ist keine Ersatzübung und braucht ein Gerät, das der Plan nicht hat
+    expect(ersetzeUebung(db, id, zh.id, "ZH-03")).toEqual({ ok: false, code: "uebung_ungueltig" });
+    // auch dann nicht, wenn die Ersatzübung zu einem anderen Muster gehört
+    expect(ersetzeUebung(db, id, zh.id, "DV-02")).toEqual({ ok: false, code: "uebung_ungueltig" });
+  });
+
+  it("eine inaktive Ersatzübung wird abgelehnt", () => {
+    db = neueSeedDb();
+    ({ planId } = legePlanAn(db, { profil: "unterwegs" }));
+    db.update(exercise).set({ aktiv: false }).where(eq(exercise.id, "ZH-02")).run();
+    const id = start();
+    const zh = getPlanSlotsMitId(db, planId).find((s) => s.einheit === "A" && s.muster === "ZH")!;
+    expect(ersetzeUebung(db, id, zh.id, "ZH-02")).toEqual({ ok: false, code: "uebung_ungueltig" });
   });
 
   it("nicht in beendeten Einheiten und nicht für fremde Slots", () => {
@@ -518,7 +521,7 @@ describe("letzteWerte", () => {
     beendeWorkout(db, id, null);
     const h = letzteWerte(db, [slot.exerciseId]).get(slot.exerciseId)!;
     expect(h.anzeige?.saetze.map((s) => s.wdh)).toEqual([10, 9]);
-    expect(h.anzeige).toMatchObject({ woche: 1, datum: "2026-10-08", adHoc: false });
+    expect(h.anzeige).toMatchObject({ woche: 1, datum: "2026-10-08" });
     expect(h.vorschlagBasis).toEqual(h.anzeige);
   });
 
@@ -540,39 +543,29 @@ describe("letzteWerte", () => {
     expect(letzteWerte(db, [slot.exerciseId]).get(slot.exerciseId)!.anzeige).not.toBeNull();
   });
 
-  it("Vorschlagsbasis überspringt Ad-hoc-Einheiten und Woche 6, die Anzeige nicht", () => {
+  it("Vorschlagsbasis überspringt Woche 6, die Anzeige nicht", () => {
     const slot = ersterSlot();
     const gut = start();
     speichereSatz(db, satz(gut, "A-1-1", { wdh: 10 }));
     beendeWorkout(db, gut, null);
 
-    // Einheit B trainiert dieselbe Übung über eine Ersetzung und wird als Ad-hoc markiert
-    // (der echte Ad-hoc-Start folgt in Abschnitt 8).
-    const adHoc = start();
+    // Woche 6 ist Entlastung und zählt nicht als Basis
+    // (Einheit B trainiert dieselbe Übung über eine Ersetzung.)
+    const woche6 = start();
+    db.update(workout).set({ woche: 6 }).where(eq(workout.id, woche6)).run();
     const bSlot = getPlanSlotsMitId(db, planId).find(
       (s) => s.einheit === "B" && s.block === "2" && s.position === 1,
     )!;
-    expect(ersetzeUebung(db, adHoc, bSlot.id, slot.exerciseId).ok).toBe(true);
+    expect(ersetzeUebung(db, woche6, bSlot.id, slot.exerciseId).ok).toBe(true);
     expect(
-      speichereSatz(db, satz(adHoc, "B-2-1", { exerciseId: slot.exerciseId, wdh: 6 })).ok,
+      speichereSatz(db, satz(woche6, "B-2-1", { exerciseId: slot.exerciseId, wdh: 5 })).ok,
     ).toBe(true);
-    db.update(workout).set({ adHoc: true }).where(eq(workout.id, adHoc)).run();
-    beendeWorkout(db, adHoc, null);
-
-    const h = letzteWerte(db, [slot.exerciseId]).get(slot.exerciseId)!;
-    expect(h.anzeige).toMatchObject({ adHoc: true });
-    expect(h.anzeige!.saetze[0]!.wdh).toBe(6);
-    expect(h.vorschlagBasis).toMatchObject({ adHoc: false });
-    expect(h.vorschlagBasis!.saetze[0]!.wdh).toBe(10);
-
-    // Woche 6 zählt ebenfalls nicht als Basis
-    const woche6 = start();
-    db.update(workout).set({ woche: 6 }).where(eq(workout.id, woche6)).run();
-    speichereSatz(db, satz(woche6, "A-1-1", { wdh: 5 }));
     beendeWorkout(db, woche6, null);
-    const h2 = letzteWerte(db, [slot.exerciseId]).get(slot.exerciseId)!;
-    expect(h2.anzeige!.saetze[0]!.wdh).toBe(5);
-    expect(h2.vorschlagBasis!.saetze[0]!.wdh).toBe(10);
+    const h = letzteWerte(db, [slot.exerciseId]).get(slot.exerciseId)!;
+    expect(h.anzeige).toMatchObject({ woche: 6 });
+    expect(h.anzeige!.saetze[0]!.wdh).toBe(5);
+    expect(h.vorschlagBasis).toMatchObject({ woche: 1 });
+    expect(h.vorschlagBasis!.saetze[0]!.wdh).toBe(10);
   });
 
   it("fragt mehrere Übungen auf einmal ab", () => {

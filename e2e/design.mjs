@@ -48,8 +48,8 @@ function legeVerlaufAn(dbPfad) {
     .prepare("select * from plan_slot where plan_id = ?")
     .all(plan.id);
   const insertWorkout = d.prepare(
-    `insert into workout (plan_id, datum, einheit, woche, profil_id, ad_hoc, zusatzblock, status, ersetzungen, beendet_am)
-     values (?, ?, ?, ?, ?, 0, 0, 'abgeschlossen', '{}', '2026-10-07T10:00:00.000Z')`,
+    `insert into workout (plan_id, datum, einheit, woche, zusatzblock, status, ersetzungen, beendet_am)
+     values (?, ?, ?, ?, 0, 'abgeschlossen', '{}', '2026-10-07T10:00:00.000Z')`,
   );
   const insertSatz = d.prepare(
     `insert into set_log (id, workout_id, plan_slot_id, exercise_id, runde, gewicht, wdh, sekunden, meter, rpe, tempo, erledigt)
@@ -64,7 +64,6 @@ function legeVerlaufAn(dbPfad) {
       `2026-09-${String(n * 3 + 2).padStart(2, "0")}`,
       einheit,
       woche,
-      plan.profil_id,
     ).lastInsertRowid;
     letzte = Number(w);
     for (const slot of slots.filter(
@@ -108,7 +107,7 @@ async function ablauf(browser, BASE0, dbPfad) {
   await sp
     .getByRole("heading", { name: "Plan", level: 1, exact: true })
     .waitFor();
-  const { plan, letzteEinheit } = legeVerlaufAn(dbPfad);
+  const { letzteEinheit } = legeVerlaufAn(dbPfad);
   await setup.close();
 
   const SEITEN = {
@@ -127,12 +126,8 @@ async function ablauf(browser, BASE0, dbPfad) {
     "verlauf-einheit": { pfad: `/verlauf/einheit/${letzteEinheit}` },
     "verlauf-uebung": { pfad: "/verlauf/uebung/ZV-04" },
     einstellungen: { pfad: "/einstellungen" },
-    "einstellungen-profil": {
-      pfad: `/einstellungen/profile/${plan.profil_id}`,
-    },
-    "einstellungen-profil-neu": { pfad: "/einstellungen/profile/neu" },
+    "plan-equipment": { pfad: "/plan/equipment" },
     "einstellungen-daten": { pfad: "/einstellungen/daten" },
-    "training-start": { pfad: "/training/start" },
     offline: { pfad: "/offline.html", ohneNav: true },
   };
 

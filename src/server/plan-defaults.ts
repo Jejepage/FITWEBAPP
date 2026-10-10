@@ -1,35 +1,33 @@
+import { desc } from "drizzle-orm";
+import { plan } from "@/db/schema";
+import { standardEquipment, standardGewichte } from "@/db/seed/defaults";
 import type { Db } from "@/db/types";
 import type { PlanStandardwerte } from "@/domain/plan-form";
 import { heuteIso } from "./datum";
 import { getPlan } from "./plans";
-import { getProfile, getStandardProfil } from "./profiles";
 import { getSettings } from "./settings";
 
 /**
- * Voreinstellungen für einen neuen Plan: Standardprofil und Einstellungen. Null ohne Profil.
- * Bei einem Folgeblock (`vorgaengerId`) gelten Profil, Einheiten pro Woche und Zusatzblock des
- * Vorgängers; die Stufen kommen weiter aus den Einstellungen bzw. dem Stufen-Check.
+ * Voreinstellungen für einen neuen Plan: Einstellungen und das Equipment des Vorgängers, sonst des
+ * zuletzt angelegten Plans, sonst die Voreinstellung für den ersten Plan. Bei einem Folgeblock
+ * (`vorgaengerId`) gelten außerdem Einheiten pro Woche und Zusatzblock des Vorgängers; die Stufen
+ * kommen weiter aus den Einstellungen bzw. dem Stufen-Check.
  */
-export function ladePlanStandard(
-  db: Db,
-  jetzt?: Date,
-  vorgaengerId?: number,
-): PlanStandardwerte | null {
-  const profil = getStandardProfil(db);
-  if (!profil) return null;
+export function ladePlanStandard(db: Db, jetzt?: Date, vorgaengerId?: number): PlanStandardwerte {
   const s = getSettings(db);
+  const vorgaenger = vorgaengerId ? getPlan(db, vorgaengerId) : null;
+  const zuletzt = vorgaenger ?? db.select().from(plan).orderBy(desc(plan.id)).limit(1).get();
   const standard: PlanStandardwerte = {
-    profilId: profil.id,
+    equipment: zuletzt ? [...zuletzt.equipment] : [...standardEquipment],
+    gewichte: zuletzt ? zuletzt.gewichte : standardGewichte,
     stufen: s.stufen,
     einheitenProWoche: s.einheitenProWoche === 3 ? 3 : 2,
     zusatzblock: s.zusatzblock,
     heute: heuteIso(jetzt),
   };
-  const vorgaenger = vorgaengerId ? getPlan(db, vorgaengerId) : null;
-  if (!vorgaenger || !getProfile(db, vorgaenger.profilId)) return standard;
+  if (!vorgaenger) return standard;
   return {
     ...standard,
-    profilId: vorgaenger.profilId,
     einheitenProWoche: vorgaenger.einheitenProWoche === 3 ? 3 : 2,
     zusatzblock: vorgaenger.zusatzblock,
   };

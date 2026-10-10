@@ -27,7 +27,7 @@ import {
   parseKatalogFilter,
   type SearchParams,
 } from "@/server/katalog-filter";
-import { getProfile, listProfiles } from "@/server/profiles";
+import { getActivePlan } from "@/server/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -43,15 +43,15 @@ export default async function KatalogPage({
 }) {
   const sp = await searchParams;
   const parsed = parseKatalogFilter(sp);
-  const profile = listProfiles(db);
-  const profil = parsed.profilId ? getProfile(db, parsed.profilId) : null;
-  // Unbekanntes Profil (z. B. alter Link): Filter ignorieren und nicht als aktiv anzeigen.
-  const auswahl = { ...parsed, profilId: profil?.id };
+  // "Machbar" bezieht sich auf das Equipment des aktiven Plans; ohne Plan gibt es den Filter nicht.
+  const planEquipment = getActivePlan(db)?.equipment ?? null;
+  const auswahl = { ...parsed, machbar: planEquipment ? parsed.machbar : undefined };
   const { items, gesamt } = listExercises(db, {
     muster: auswahl.muster,
     stufe: auswahl.stufe,
     einseitig: auswahl.einseitig,
-    profilEquipment: profil?.equipment,
+    ersatz: auswahl.ersatz,
+    machbarMit: auswahl.machbar ? (planEquipment ?? undefined) : undefined,
     inaktive: auswahl.inaktive,
     nurInaktive: auswahl.nurInaktive,
     nurZuPruefen: auswahl.nurZuPruefen,
@@ -98,14 +98,14 @@ export default async function KatalogPage({
   const felderDerSpalten: Record<Spalte, string[]> = {
     name: ["q"],
     stufe: ["stufe"],
-    equipment: ["profil", "geraet"],
+    equipment: ["machbar", "geraet"],
     einseitig: ["einseitig"],
+    ersatz: ["ersatz"],
     belastung: ["belastungsart"],
     bereich: [],
     muskeln: ["muskel"],
     steigerung: [],
     leiter: [],
-    last: [],
     status: ["status"],
     aktiv: ["aktiv"],
     video: ["video"],
@@ -161,7 +161,7 @@ export default async function KatalogPage({
         <div className={kartenKlasse}>
           <FilterForm
             filter={auswahl}
-            profile={profile}
+            planEquipment={planEquipment}
             aktiv={hatFilterAktiv}
             versteckt={kartenVersteckt}
           />
@@ -221,7 +221,7 @@ export default async function KatalogPage({
               alle={katalog}
               spalten={spalten}
               filter={auswahl}
-              profile={profile}
+              planEquipment={planEquipment}
               sortSpalte={auswahl.sort}
               richtung={auswahl.dir ?? "auf"}
               sortLink={sortLink}

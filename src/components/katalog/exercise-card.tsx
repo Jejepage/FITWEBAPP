@@ -31,6 +31,7 @@ export function ExerciseCard({ e }: { e: Exercise }) {
           {de.katalog.stufeBadge(e.stufe)}
         </span>
         {e.einseitig && <Badge>{de.katalog.einseitigBadge}</Badge>}
+        {e.ersatz && <Badge farbe="hinweis">{de.katalog.ersatzBadge}</Badge>}
         {e.pruefstatus === "zu_pruefen" && <Badge farbe="hinweis">{de.katalog.zuPruefen}</Badge>}
         {videoLink(e.videoUrl) && <Badge farbe="gut">{de.katalog.videoBadge}</Badge>}
         {!e.aktiv && <Badge farbe="grau">{de.katalog.inaktiv}</Badge>}

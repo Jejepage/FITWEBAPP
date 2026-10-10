@@ -41,11 +41,6 @@ describe("ladeNaechstesMal", () => {
     if (r.art === "ok") expect(r.eintraege.every((e) => e.woche === 2)).toBe(true);
   });
 
-  it("keine Vorschläge bei Ad-hoc-Einheiten", () => {
-    const { workoutIds } = legeBlockAn(db, { einheiten: 2, adHoc: (n) => n === 0 });
-    expect(ladeNaechstesMal(db, workoutIds[0]!)).toEqual({ art: "keine", grund: "ad_hoc" });
-  });
-
   it("keine Vorschläge nach der Entlastungswoche", () => {
     const { workoutIds } = legeBlockAn(db, { einheiten: 12 });
     expect(ladeNaechstesMal(db, workoutIds[11]!)).toEqual({ art: "keine", grund: "entlastung" });

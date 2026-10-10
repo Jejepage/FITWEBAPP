@@ -49,7 +49,7 @@ export function BlockUebersicht({ bloecke }: { bloecke: BlockZeile[] }) {
           <div className="min-w-0">
             <p className="text-lg font-semibold">{t.blockTitel(datumKurz(aktuell.startDatum))}</p>
             <p className="text-[15px] text-ink-2">
-              {t.blockStand(aktuell.absolviert, aktuell.geplant)} · {aktuell.profilName}
+              {t.blockStand(aktuell.absolviert, aktuell.geplant)}
             </p>
           </div>
           <Badge farbe={aktuell.status === "aktiv" ? "akzent" : "gut"}>

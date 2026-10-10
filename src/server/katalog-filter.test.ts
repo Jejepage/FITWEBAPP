@@ -12,7 +12,7 @@ describe("parseKatalogFilter", () => {
         muster: "ZV",
         stufe: "3",
         einseitig: "ja",
-        profil: "2",
+        machbar: "ja",
         inaktive: "1",
         offen: "1",
       }),
@@ -20,7 +20,7 @@ describe("parseKatalogFilter", () => {
       muster: "ZV",
       stufe: 3,
       einseitig: true,
-      profilId: 2,
+      machbar: true,
       inaktive: true,
       nurZuPruefen: true,
       pruefstatus: "zu_pruefen",
@@ -32,11 +32,18 @@ describe("parseKatalogFilter", () => {
       muster: "XX",
       stufe: "9",
       einseitig: "vielleicht",
-      profil: "abc",
+      machbar: "vielleicht",
     });
     expect(f).toEqual({ inaktive: false, nurZuPruefen: false });
     expect(parseKatalogFilter({ muster: ["KN", "HB"] }).muster).toBe("KN");
     expect(parseKatalogFilter({ einseitig: "nein" }).einseitig).toBe(false);
+  });
+
+  it("ersatz: ja, nein oder ungültig", () => {
+    expect(parseKatalogFilter({ ersatz: "ja" }).ersatz).toBe(true);
+    expect(parseKatalogFilter({ ersatz: "nein" }).ersatz).toBe(false);
+    expect(parseKatalogFilter({ ersatz: "egal" }).ersatz).toBeUndefined();
+    expect(hatFilter(parseKatalogFilter({ ersatz: "ja" }))).toBe(true);
   });
 
   it("hatFilter erkennt aktive Filter", () => {
@@ -112,7 +119,8 @@ describe("neue Filter der Tabelle", () => {
       muster: "ZV",
       stufe: "3",
       einseitig: "nein",
-      profil: "2",
+      ersatz: "ja",
+      machbar: "ja",
       aktiv: "alle",
       status: "zu_pruefen",
       q: "klimm",

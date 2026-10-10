@@ -1,8 +1,16 @@
+import {
+  GEWICHT_ARTEN,
+  gewichteZuText,
+  liesEquipment,
+  liesGewichteText,
+  loeseEquipmentAuf,
+  type GewichtArt,
+} from "./equipment-form";
 import { SLOT_KEYS, type SlotKey } from "./plan-types";
-import { MUSTER, type Muster } from "./types";
+import type { Quelle } from "./quelle";
+import { MUSTER, type EquipmentArt, type Gewichte, type Muster } from "./types";
 
-/** Quelle für Formularwerte: URL-Parameter (Vorschau) oder FormData (Speichern). */
-export type Quelle = (name: string) => string | undefined;
+export { quelleAusFormData, quelleAusSearchParams, type Quelle } from "./quelle";
 
 export const AKTIONEN = ["aktualisieren", "neu", "mischen"] as const;
 export type Aktion = (typeof AKTIONEN)[number];
@@ -13,7 +21,10 @@ export const MAX_SEED = 999_999;
 export interface PlanRohwerte {
   /** Das Formular wurde abgeschickt (unterscheidet "Haken fehlt" von "noch nie gesendet"). */
   gesendet: boolean;
-  profilId?: number;
+  /** Angekreuztes Equipment; undefined, wenn das Feld fehlt (dann gilt die Voreinstellung) */
+  equipment?: EquipmentArt[];
+  /** Eingegebene Hantelgewichte als Text (nur, was im Formular vorkommt) */
+  gewichteText: Partial<Record<GewichtArt, string>>;
   stufen: Partial<Record<Muster, number>>;
   einheitenProWoche?: 2 | 3;
   zusatzblock?: boolean;
@@ -52,9 +63,12 @@ export function parsePlanRohwerte(q: Quelle): PlanRohwerte {
   }
   const aktion = AKTIONEN.find((a) => a === q("aktion")) ?? "aktualisieren";
   const seed = ganzzahl(q("seed"));
+  const gesendet = q("gesendet") === "1";
   return {
-    gesendet: q("gesendet") === "1",
-    profilId: ganzzahl(q("profil")),
+    gesendet,
+    // Ein abgeschicktes Formular ohne Haken heißt "kein Equipment", ein nie gesendetes nimmt den Standard.
+    equipment: gesendet ? (liesEquipment(q) ?? []) : liesEquipment(q),
+    gewichteText: liesGewichteText(q),
     stufen,
     einheitenProWoche: einheiten === 2 || einheiten === 3 ? einheiten : undefined,
     zusatzblock: q("zusatzblock") === undefined ? undefined : q("zusatzblock") === "1",
@@ -68,7 +82,8 @@ export function parsePlanRohwerte(q: Quelle): PlanRohwerte {
 }
 
 export interface PlanStandardwerte {
-  profilId: number;
+  equipment: EquipmentArt[];
+  gewichte: Gewichte;
   stufen: Record<Muster, number>;
   einheitenProWoche: 2 | 3;
   zusatzblock: boolean;
@@ -77,7 +92,11 @@ export interface PlanStandardwerte {
 }
 
 export interface PlanWerte {
-  profilId: number;
+  equipment: EquipmentArt[];
+  /** Geprüfte Hantelgewichte (nur für angekreuzte Arten, ohne fehlerhafte Eingaben) */
+  gewichte: Gewichte;
+  /** Gewichte als Text für das Formular: Eingabe des Nutzers, sonst die Voreinstellung */
+  gewichteText: Record<GewichtArt, string>;
   stufen: Record<Muster, number>;
   einheitenProWoche: 2 | 3;
   zusatzblock: boolean;
@@ -94,11 +113,14 @@ export interface PlanWerte {
  * entstünden Mischpläne aus alter Wahl und neuem Vorschlag.
  */
 export function planBasis(
-  w: Pick<PlanWerte, "profilId" | "stufen" | "seed" | "vorgaengerId">,
+  w: Pick<PlanWerte, "equipment" | "stufen" | "seed" | "vorgaengerId">,
 ): string {
-  return [w.profilId, MUSTER.map((m) => w.stufen[m]).join(""), w.seed, w.vorgaengerId ?? 0].join(
-    "-",
-  );
+  return [
+    [...w.equipment].sort().join("+"),
+    MUSTER.map((m) => w.stufen[m]).join(""),
+    w.seed,
+    w.vorgaengerId ?? 0,
+  ].join("-");
 }
 
 export interface PlanAufloesung {
@@ -106,7 +128,7 @@ export interface PlanAufloesung {
   /** Feldfehler, z. B. ein ungültiges Startdatum (dann gilt das Standarddatum). */
   fehler: Record<string, string>;
   /**
-   * Profil, Stufen, Seed oder Vorgänger wurden seit der letzten Vorschau geändert; die manuelle
+   * Equipment, Stufen, Seed oder Vorgänger wurden seit der letzten Vorschau geändert; die manuelle
    * Wahl wurde deshalb verworfen. Ein Speichern wäre dann nicht, was der Nutzer gesehen hat.
    */
   vorschauVeraltet: boolean;
@@ -128,8 +150,18 @@ export function loesePlanWerteAuf(roh: PlanRohwerte, standard: PlanStandardwerte
     else fehler.startDatum = "Bitte ein gültiges Datum angeben.";
   }
 
+  const equipment = roh.equipment ?? standard.equipment;
+  const standardText = gewichteZuText(standard.gewichte);
+  const gewichteText = Object.fromEntries(
+    GEWICHT_ARTEN.map((art) => [art, roh.gewichteText[art] ?? standardText[art]]),
+  ) as Record<GewichtArt, string>;
+  const gewichtePruefung = loeseEquipmentAuf(equipment, gewichteText);
+  Object.assign(fehler, gewichtePruefung.fehler);
+
   const werte: PlanWerte = {
-    profilId: roh.profilId ?? standard.profilId,
+    equipment,
+    gewichte: gewichtePruefung.gewichte,
+    gewichteText,
     stufen,
     einheitenProWoche: roh.einheitenProWoche ?? standard.einheitenProWoche,
     // Ein abgeschicktes Formular ohne Haken heißt "aus", ein nie gesendetes nimmt den Standard.
@@ -145,17 +177,3 @@ export function loesePlanWerteAuf(roh: PlanRohwerte, standard: PlanStandardwerte
   if (roh.aktion === "neu" || roh.aktion === "mischen" || veraendert) werte.auswahl = {};
   return { werte, fehler, vorschauVeraltet: veraendert };
 }
-
-export const quelleAusSearchParams =
-  (sp: Record<string, string | string[] | undefined>): Quelle =>
-  (name) => {
-    const v = sp[name];
-    return Array.isArray(v) ? v[0] : v;
-  };
-
-export const quelleAusFormData =
-  (fd: FormData): Quelle =>
-  (name) => {
-    const v = fd.get(name);
-    return typeof v === "string" ? v : undefined;
-  };

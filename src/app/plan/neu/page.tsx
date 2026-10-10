@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Checkbox, FehlerBanner, Feld, Gruppe } from "@/components/form-felder";
+import { EquipmentFelder } from "@/components/plan/equipment-felder";
 import { IconChevron, IconZurueck } from "@/components/katalog/icons-katalog";
 import { MusterPunkt } from "@/components/katalog/muster-ui";
 import { BREITE, PageShell } from "@/components/page-shell";
@@ -26,8 +27,7 @@ import { MUSTER, MUSTER_NAMEN, type Muster } from "@/domain/types";
 import { de } from "@/i18n/de";
 import { alleUebungen } from "@/server/exercises";
 import { ladePlanStandard } from "@/server/plan-defaults";
-import { getPlan, uebungsIdsVonPlan, type PlanFehlerCode } from "@/server/plans";
-import { listProfiles } from "@/server/profiles";
+import { getPlan, uebungsIdsVonPlan } from "@/server/plans";
 import type { SearchParams } from "@/server/katalog-filter";
 import { planSpeichern } from "../actions";
 
@@ -36,7 +36,8 @@ export const dynamic = "force-dynamic";
 const t = de.plan;
 const f = t.form;
 
-const FEHLER_CODES = Object.keys(t.fehler) as PlanFehlerCode[];
+type SeitenFehlerCode = keyof typeof t.fehler;
+const FEHLER_CODES = Object.keys(t.fehler) as SeitenFehlerCode[];
 
 export default async function PlanNeuPage({
   searchParams,
@@ -44,22 +45,12 @@ export default async function PlanNeuPage({
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-  const profile = listProfiles(db);
   const roh = parsePlanRohwerte(quelleAusSearchParams(sp));
   const standard = ladePlanStandard(db, undefined, roh.vorgaengerId);
-  if (!standard) return <FehlerBanner>{t.fehler.profil_unbekannt}</FehlerBanner>;
 
   const { werte: aufgeloest, fehler: feldFehler } = loesePlanWerteAuf(roh, standard);
-  // Unbekanntes Profil in der URL: Standardprofil nehmen.
-  const profil =
-    profile.find((p) => p.id === aufgeloest.profilId) ??
-    profile.find((p) => p.id === standard.profilId)!;
   const vorgaenger = aufgeloest.vorgaengerId ? getPlan(db, aufgeloest.vorgaengerId) : null;
-  const werte = {
-    ...aufgeloest,
-    profilId: profil.id,
-    vorgaengerId: vorgaenger?.id ?? null,
-  };
+  const werte = { ...aufgeloest, vorgaengerId: vorgaenger?.id ?? null };
   const basis = planBasis(werte);
 
   const fehlerParam = typeof sp.fehler === "string" ? sp.fehler : undefined;
@@ -68,7 +59,7 @@ export default async function PlanNeuPage({
   const uebungen = alleUebungen(db);
   const generatorEingabe: GeneratorEingabe = {
     uebungen,
-    equipment: profil.equipment,
+    equipment: werte.equipment,
     stufen: werte.stufen,
     vorherVerwendet: vorgaenger ? uebungsIdsVonPlan(db, vorgaenger.id) : undefined,
     seed: werte.seed,
@@ -127,15 +118,12 @@ export default async function PlanNeuPage({
                   <IconChevron className="ml-auto size-5 text-ink-3 transition-transform group-open:rotate-90" />
                 </summary>
                 <div className="border-t border-line p-5">
-                  <Feld label={f.profil}>
-                    <select name="profil" defaultValue={String(profil.id)} className={eingabe}>
-                      {profile.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </Feld>
+                  <EquipmentFelder
+                    equipment={werte.equipment}
+                    gewichteText={werte.gewichteText}
+                    fehler={feldFehler}
+                    texte={f}
+                  />
                   <Feld label={f.startDatum}>
                     <input
                       type="date"

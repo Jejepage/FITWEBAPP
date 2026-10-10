@@ -1,39 +1,16 @@
-import { EQUIPMENT_AUSWAHL, MUSTER, type EquipmentArt, type Gewichte, type Muster } from "@/domain/types";
-
-export interface StandardProfil {
-  seedKey: string;
-  name: string;
-  equipment: EquipmentArt[];
-  gewichte: Gewichte;
-  istStandard: boolean;
-}
+import { MUSTER, type EquipmentArt, type Gewichte, type Muster } from "@/domain/types";
 
 const kurzhantelGewichte = Array.from({ length: 10 }, (_, i) => 2 + i * 2); // 2–20 kg in 2-kg-Schritten
 
-export const standardProfile: StandardProfil[] = [
-  {
-    seedKey: "studio",
-    name: "Studio",
-    equipment: [...EQUIPMENT_AUSWAHL],
-    gewichte: {},
-    istStandard: true,
-  },
-  {
-    seedKey: "zuhause",
-    name: "Zuhause",
-    equipment: ["kurzhanteln", "kettlebell", "bank", "stange"],
-    gewichte: { kurzhanteln: kurzhantelGewichte, kettlebell: [12, 16] },
-    istStandard: false,
-  },
-  {
-    seedKey: "unterwegs",
-    name: "Unterwegs",
-    // Annahme: Etwas zum Hochziehen ist immer vorhanden.
-    equipment: ["stange"],
-    gewichte: {},
-    istStandard: false,
-  },
-];
+/**
+ * Voreinstellung für das Equipment des allerersten Plans. Danach gilt im Formular für einen neuen
+ * Plan das Equipment des zuletzt angelegten Plans.
+ */
+export const standardEquipment: EquipmentArt[] = ["kurzhanteln", "kettlebell", "bank", "stange"];
+export const standardGewichte: Gewichte = {
+  kurzhanteln: kurzhantelGewichte,
+  kettlebell: [12, 16],
+};
 
 export const AUFWAERMEN_TEXT_STANDARD = [
   "Mobilisation: Schultern, Brustwirbelsäule und Hüfte je 30–45 Sekunden kreisen.",

@@ -21,7 +21,10 @@ export interface FilterAuswahl {
   muster?: Muster;
   stufe?: number;
   einseitig?: boolean;
-  profilId?: number;
+  /** true = nur Ersatzübungen, false = nur Planübungen */
+  ersatz?: boolean;
+  /** Nur Übungen, die mit dem Equipment des aktiven Plans machbar sind */
+  machbar?: boolean;
   /** Inaktive Übungen mit anzeigen (aktiv=alle oder das ältere inaktive=1) */
   inaktive: boolean;
   /** Nur inaktive Übungen (aktiv=inaktiv) */
@@ -31,7 +34,7 @@ export interface FilterAuswahl {
   pruefstatus?: Pruefstatus;
   /** Suche in Name und ID */
   q?: string;
-  /** Benötigt dieses Gerät (in irgendeiner Gruppe der Equipment-Bedingung) */
+  /** Benötigt dieses Gerät  */
   geraet?: EquipmentArt;
   belastungsart?: Belastungsart;
   /** mit = nur Übungen mit Video, ohne = nur ohne */
@@ -60,7 +63,7 @@ export function parseKatalogFilter(sp: SearchParams): FilterAuswahl {
   const muster = erster(sp.muster);
   const stufe = Number(erster(sp.stufe));
   const einseitig = erster(sp.einseitig);
-  const profil = Number(erster(sp.profil));
+  const ersatz = erster(sp.ersatz);
   const aktiv = erster(sp.aktiv);
   const status = aus(PRUEFSTATI, erster(sp.status));
   const video = erster(sp.video);
@@ -72,7 +75,8 @@ export function parseKatalogFilter(sp: SearchParams): FilterAuswahl {
       Number.isInteger(stufe) && stufe >= 1 && stufe <= 5 ? stufe : undefined,
     einseitig:
       einseitig === "ja" ? true : einseitig === "nein" ? false : undefined,
-    profilId: Number.isInteger(profil) && profil > 0 ? profil : undefined,
+    ersatz: ersatz === "ja" ? true : ersatz === "nein" ? false : undefined,
+    machbar: erster(sp.machbar) === "ja" ? true : undefined,
     inaktive: erster(sp.inaktive) === "1" || aktiv === "alle",
     nurInaktive: aktiv === "inaktiv" ? true : undefined,
     nurZuPruefen: erster(sp.offen) === "1" || status === "zu_pruefen",
@@ -97,7 +101,8 @@ export function hatFilter(f: FilterAuswahl): boolean {
     f.muster !== undefined ||
     f.stufe !== undefined ||
     f.einseitig !== undefined ||
-    f.profilId !== undefined ||
+    f.ersatz !== undefined ||
+    f.machbar !== undefined ||
     f.inaktive ||
     f.nurInaktive === true ||
     f.nurZuPruefen ||
@@ -120,7 +125,8 @@ export function filterParameter(f: FilterAuswahl): URLSearchParams {
   if (f.stufe !== undefined) p.set("stufe", String(f.stufe));
   if (f.einseitig !== undefined)
     p.set("einseitig", f.einseitig ? "ja" : "nein");
-  if (f.profilId !== undefined) p.set("profil", String(f.profilId));
+  if (f.ersatz !== undefined) p.set("ersatz", f.ersatz ? "ja" : "nein");
+  if (f.machbar) p.set("machbar", "ja");
   if (f.nurInaktive) p.set("aktiv", "inaktiv");
   else if (f.inaktive) p.set("aktiv", "alle");
   if (f.pruefstatus) p.set("status", f.pruefstatus);

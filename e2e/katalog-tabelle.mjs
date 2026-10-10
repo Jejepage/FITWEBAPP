@@ -5,6 +5,7 @@ import { join } from "node:path";
 import {
   SHOTS,
   hinweisBestaetigen,
+  planAnlegen,
   sammleFehler,
   withApp,
 } from "./harness.mjs";
@@ -53,7 +54,7 @@ async function ablauf(browser, BASE) {
     "Tragen",
     "Rumpf",
   ]);
-  assert.equal(await zeilen().count(), 63);
+  assert.equal(await zeilen().count(), 76);
   assert.equal(
     await page.getByRole("heading", { level: 2 }).count(),
     0,
@@ -61,15 +62,15 @@ async function ablauf(browser, BASE) {
   );
   await shot("1-standard");
   schritt(
-    "PC: Tabelle mit Name/Stufe/Equipment, 8 Gruppen in Spec-Reihenfolge, 63 Zeilen",
+    "PC: Tabelle mit Name/Stufe/Equipment, 8 Gruppen in Spec-Reihenfolge, 76 Zeilen",
   );
 
   // --- Kopfzeilenfilter wirken sofort, ohne die Seite neu zu laden ---------------------------
   await page.evaluate(() => (window.__marke = "bleibt"));
   await page.locator("thead").getByLabel("Stufe filtern").selectOption("2");
   await warteUrl(/stufe=2/);
-  await page.getByText("21 von 63 Übungen").waitFor();
-  assert.equal(await zeilen().count(), 21);
+  await page.getByText("24 von 76 Übungen").waitFor();
+  assert.equal(await zeilen().count(), 24);
   assert.equal(
     await page.evaluate(() => window.__marke),
     "bleibt",
@@ -80,7 +81,7 @@ async function ablauf(browser, BASE) {
   await page.keyboard.type("kniebeuge");
   await warteUrl(/q=kniebeuge/);
   const treffer = await zeilen().count();
-  assert.ok(treffer >= 1 && treffer < 21);
+  assert.ok(treffer >= 1 && treffer < 24);
   for (const n of await page
     .locator("tbody tr:not(:has(th[scope=rowgroup])) :is(td,th):first-child")
     .allInnerTexts()) {
@@ -99,46 +100,52 @@ async function ablauf(browser, BASE) {
   );
   await shot("2-gefiltert");
   schritt(
-    `Filter in der Kopfzeile: Stufe 2 → 21, Suche "kniebeuge" → ${treffer}; Fokus bleibt`,
+    `Filter in der Kopfzeile: Stufe 2 → 24, Suche "kniebeuge" → ${treffer}; Fokus bleibt`,
   );
 
   await page.getByRole("link", { name: "Zurücksetzen" }).first().click();
-  await page.getByText("63 von 63 Übungen").waitFor();
+  await page.getByText("76 von 76 Übungen").waitFor();
+  // Der Machbar-Filter bezieht sich auf das Equipment des aktiven Plans (hier nur die Stange)
+  await planAnlegen(page, { equipment: ["Stange"], base: BASE });
+  await page.goto(`${BASE}/katalog`);
   await page
     .locator("thead")
-    .getByLabel("Equipment-Profil")
-    .selectOption({ label: "Machbar: Unterwegs" });
-  await warteUrl(/profil=/);
+    .getByLabel("Machbar mit meinem Equipment")
+    .selectOption({ label: "Nur machbare" });
+  await warteUrl(/machbar=ja/);
   await page.waitForFunction(
     () =>
       document.querySelectorAll("tbody tr:not(:has(th[scope=rowgroup]))")
-        .length < 63,
+        .length < 76,
   );
-  const unterwegs = await zeilen().count();
-  assert.ok(unterwegs > 0 && unterwegs < 63, "Unterwegs engt ein");
-  await page.getByText(`${unterwegs} von 63 Übungen`).first().waitFor();
-  await page.locator("thead").getByLabel("Equipment-Profil").selectOption("");
+  const machbar = await zeilen().count();
+  assert.ok(machbar > 0 && machbar < 76, "Machbar engt ein");
+  await page.getByText(`${machbar} von 76 Übungen`).first().waitFor();
+  await page
+    .locator("thead")
+    .getByLabel("Machbar mit meinem Equipment")
+    .selectOption("");
   await page
     .locator("thead")
     .getByLabel("Gerät", { exact: true })
     .selectOption({ label: "Braucht Stange" });
   await warteUrl(/geraet=stange/);
   await page.waitForFunction(
-    () => new URL(location.href).searchParams.get("profil") === null,
+    () => new URL(location.href).searchParams.get("machbar") === null,
   );
   await page.waitForFunction(
     () =>
       document.querySelectorAll("tbody tr:not(:has(th[scope=rowgroup]))")
-        .length !== 63,
+        .length !== 76,
   );
   const stange = await zeilen().count();
-  await page.getByText(`${stange} von 63 Übungen`).first().waitFor();
+  await page.getByText(`${stange} von 76 Übungen`).first().waitFor();
   assert.ok(
-    stange > 0 && stange < 63,
+    stange > 0 && stange < 76,
     `Gerät Stange: ${stange} Zeilen, URL ${page.url()}`,
   );
   schritt(
-    `Equipment-Filter: Profil Unterwegs → ${unterwegs}, Gerät Stange → ${stange}`,
+    `Equipment-Filter: machbar mit Stange → ${machbar}, Gerät Stange → ${stange}`,
   );
 
   // Weitere Spaltenfilter (erst nach dem Laden der Skripte bedienen, sonst geht die Auswahl
@@ -188,7 +195,7 @@ async function ablauf(browser, BASE) {
           "tbody tr:not(:has(th[scope=rowgroup])) :is(td,th):first-child",
         )
         .allInnerTexts()
-    ).slice(0, 8);
+    ).slice(0, 12); // erste Gruppe: Kniebeuge mit 12 Übungen
   const auf = await namen();
   assert.deepEqual(
     auf,
@@ -302,7 +309,7 @@ async function ablauf(browser, BASE) {
   await m.getByLabel("Suche (Name oder ID)").fill("klimmzug");
   await m.getByRole("button", { name: "Filtern" }).click();
   await m.waitForURL(/q=klimmzug/);
-  await m.getByText(/von 63 Übungen/).waitFor();
+  await m.getByText(/von 76 Übungen/).waitFor();
   // Erzwungene Tabelle am Handy: scrollt nur der Tabellenbereich
   await m.goto(
     `${BASE}/katalog?ansicht=tabelle&spalten=name,stufe,equipment,muskeln,steigerung,leiter,video`,

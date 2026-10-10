@@ -25,7 +25,7 @@ describe("listeEinheiten", () => {
     const { liste, gesamt } = listeEinheiten(db);
     expect(gesamt).toBe(3);
     expect(liste.map((e) => e.id)).toEqual([workoutIds[3], workoutIds[2], workoutIds[0]]);
-    expect(liste[0]).toMatchObject({ einheit: "B", woche: 2, adHoc: false, saetze: 18 });
+    expect(liste[0]).toMatchObject({ einheit: "B", woche: 2, saetze: 18 });
   });
 
   it("begrenzt die Liste, meldet aber die Gesamtzahl", () => {
@@ -44,7 +44,6 @@ describe("ladeEinheit", () => {
       einheit: "A",
       woche: 1,
       status: "abgeschlossen",
-      profilName: "Studio",
     });
     expect(e.gruppen).toHaveLength(6);
     expect(e.gruppen.every((g) => g.saetze.length === 3)).toBe(true);
@@ -82,12 +81,11 @@ describe("Übungsverlauf", () => {
     expect(ersteA).toBeDefined();
   });
 
-  it("Verlauf einer Übung: nur ihre Einheiten, älteste zuerst, Ad-hoc markiert", () => {
-    const { planId } = legeBlockAn(db, { einheiten: 5, adHoc: (n) => n === 2 });
+  it("Verlauf einer Übung: nur ihre Einheiten, älteste zuerst", () => {
+    const { planId } = legeBlockAn(db, { einheiten: 5 });
     const slot = getPlanSlotsMitId(db, planId).find((s) => s.einheit === "A" && s.muster === "KN")!;
     const v = ladeUebungsVerlauf(db, slot.exerciseId)!;
     expect(v.verlauf.zeilen).toHaveLength(3); // Einheiten 0, 2, 4
-    expect(v.verlauf.zeilen.map((z) => z.adHoc)).toEqual([false, true, false]);
     expect(v.verlauf.zeilen.map((z) => z.woche)).toEqual([1, 2, 3]);
     expect(v.verlauf.mitGewicht).toBe(true);
     expect(v.verlauf.zeilen[0]?.volumen).toBe(300); // 3 × 10 kg × 10
@@ -114,7 +112,6 @@ describe("blockUebersicht", () => {
       status: "aktiv",
       geplant: 12,
       absolviert: 5,
-      profilName: "Studio",
     });
     expect(aktiv?.wochen).toEqual([2, 2, 1, 0, 0, 0]);
   });

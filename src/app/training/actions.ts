@@ -21,23 +21,14 @@ const istId = (n: unknown): n is number => typeof n === "number" && Number.isInt
 
 /** Startseite: nächste Einheit starten (oder die laufende fortsetzen) und zum Training wechseln. */
 export async function startTraining(fd: FormData): Promise<void> {
-  const profilRoh = Number(fd.get("profil"));
-  const profilId = Number.isInteger(profilRoh) && profilRoh > 0 ? profilRoh : undefined;
   const r = startWorkout(db, {
     heute: heuteIso(),
     // Abgeschicktes Formular ohne Haken heißt: kein Zusatzblock in dieser Einheit.
     zusatzblock: fd.get("zusatzblock") === "on",
-    profilId,
   });
   if (!r.ok) {
-    if (r.code === "profil_unbekannt" || r.code === "profil_unmoeglich") {
-      const muster = r.code === "profil_unmoeglich" ? `&muster=${r.fehlendeMuster.join(",")}` : "";
-      const block = fd.get("zusatzblock") === "on" ? "&zusatzblock=on" : "";
-      redirect(
-        `/training/start?gesendet=1&profil=${profilId ?? ""}${block}&fehler=${r.code}${muster}`,
-      );
-    }
-    redirect(`/?fehler=${r.code}`);
+    const muster = r.code === "equipment_unmoeglich" ? `&muster=${r.fehlendeMuster.join(",")}` : "";
+    redirect(`/?fehler=${r.code}${muster}`);
   }
   aktualisiere();
   redirect(`/training/${r.id}`);

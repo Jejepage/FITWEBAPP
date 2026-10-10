@@ -1,4 +1,4 @@
-// Browsertest für Ad-hoc-Profilwechsel und Datensicherung (Abschnitt 8).
+// Browsertest für die Datensicherung (Abschnitt 8): Export, Import, Fehlerfälle.
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -24,7 +24,7 @@ async function ablauf(browser, dbPfad) {
   const page = await context.newPage();
   const fehler = sammleFehler(page);
   const shot = (n) =>
-    page.screenshot({ path: join(SHOTS, `adhoc-${n}.png`), fullPage: true });
+    page.screenshot({ path: join(SHOTS, `backup-${n}.png`), fullPage: true });
   const keinHorizontalScroll = async (wo) =>
     assert.ok(
       await page.evaluate(
@@ -56,37 +56,9 @@ async function ablauf(browser, dbPfad) {
     .getByRole("heading", { name: "Plan", level: 1, exact: true })
     .waitFor();
 
-  // --- 1. Ad-hoc: Vorschau mit Unterwegs ---------------------------------------------------
+  // --- 1. Eine Einheit trainieren (Daten für die Sicherung) -----------------------------------
   await page.goto(`${BASE}/`);
-  await page
-    .getByRole("link", { name: "Mit anderem Profil trainieren" })
-    .click();
-  await page
-    .getByRole("heading", { name: "Mit anderem Profil trainieren", level: 1 })
-    .waitFor();
-  await page
-    .getByLabel("Profil für diese Einheit")
-    .selectOption({ label: "Unterwegs" });
-  await page.getByRole("button", { name: "Vorschau aktualisieren" }).click();
-  await page
-    .getByRole("heading", {
-      name: /Vorschau: Einheit A · Woche 1 von 6 · Unterwegs/,
-    })
-    .waitFor();
-  const ersetzt = await page.getByText("ersetzt durch").count();
-  assert.ok(ersetzt >= 1, "mindestens eine Ersatzübung in der Vorschau");
-  assert.equal(
-    await page.locator("section li").count(),
-    6,
-    "sechs Übungen ohne Zusatzblock",
-  );
-  await keinHorizontalScroll("Ad-hoc-Vorschau");
-  await shot("1-vorschau");
-  schritt(`Vorschau für Unterwegs: 6 Übungen, ${ersetzt} ersetzt`);
-
-  // --- 2. Starten, einen Satz, vorzeitig abschließen ---------------------------------------
   await page.getByRole("button", { name: "Training starten" }).click();
-  await page.getByText("Ad-hoc · Unterwegs").waitFor();
   await page.getByRole("button", { name: "Aufwärmen erledigt" }).click();
   await page.getByRole("button", { name: "Satz erledigt" }).click();
   await page.getByRole("button", { name: "Satz erledigt" }).waitFor();
@@ -97,30 +69,20 @@ async function ablauf(browser, dbPfad) {
   await page.getByRole("heading", { name: "Geschafft", level: 1 }).waitFor();
   await page.getByRole("button", { name: "Einheit abschließen" }).click();
   await page.getByText("Einheit gespeichert. Gut gemacht!").waitFor();
-  await page
-    .getByText("Ad-hoc-Einheiten zählen nicht für die Steigerung.")
-    .waitFor();
   const w = abfrage("select * from workout")[0];
-  assert.equal(w.ad_hoc, 1);
   assert.equal(w.status, "abgeschlossen");
-  const unterwegs = abfrage(
-    "select id from equipment_profile where seed_key = 'unterwegs'",
-  )[0].id;
-  assert.equal(w.profil_id, unterwegs);
-  assert.ok(Object.keys(JSON.parse(w.ersetzungen)).length >= 1);
   const plan = abfrage("select * from plan")[0];
-  assert.notEqual(plan.profil_id, unterwegs, "Plan bleibt beim Planprofil");
-  schritt(
-    "Ad-hoc-Einheit gespeichert (ad_hoc, Profil Unterwegs, Ersetzungen), Plan unverändert",
-  );
+  assert.deepEqual(JSON.parse(plan.equipment), [
+    "kurzhanteln",
+    "kettlebell",
+    "bank",
+    "stange",
+  ]);
+  schritt("Einheit gespeichert, Plan mit Equipment");
 
   await page.getByRole("link", { name: "Zur Startseite" }).click();
   await page.getByText("Einheit B · Woche 1 von 6").waitFor();
-  await page.goto(`${BASE}/verlauf`);
-  await page.getByText("Ad-hoc", { exact: true }).first().waitFor();
-  schritt(
-    "Zählt für den Wochenfortschritt (nächste Einheit B), im Verlauf als Ad-hoc markiert",
-  );
+  schritt("Zählt für den Wochenfortschritt (nächste Einheit B)");
 
   // --- 3. Export -----------------------------------------------------------------------------
   await page.goto(`${BASE}/einstellungen`);
@@ -143,7 +105,7 @@ async function ablauf(browser, dbPfad) {
   const alles = JSON.parse(readFileSync(allesPfad, "utf8"));
   assert.equal(alles.format, "fit-backup");
   assert.equal(alles.art, "alles");
-  assert.equal(alles.daten.uebungen.length, 63);
+  assert.equal(alles.daten.uebungen.length, 76);
   assert.equal(alles.daten.einheiten.length, 1);
   assert.equal(alles.daten.plaene.length, 1);
   const [dl2] = await Promise.all([
@@ -158,7 +120,7 @@ async function ablauf(browser, dbPfad) {
     ["uebungen"],
   );
   schritt(
-    "Export: Gesamt-Backup (63 Übungen, 1 Plan, 1 Einheit) und Katalog als Download",
+    "Export: Gesamt-Backup (76 Übungen, 1 Plan, 1 Einheit) und Katalog als Download",
   );
 
   // --- 4. Katalogimport stellt Änderungen wieder her ---------------------------------------
@@ -176,7 +138,7 @@ async function ablauf(browser, dbPfad) {
     .getByRole("button", { name: "Katalog importieren" })
     .click();
   await page.getByText("Import erfolgreich.").waitFor();
-  await page.getByText(/63 Übungen/).waitFor();
+  await page.getByText(/76 Übungen/).waitFor();
   const kn = abfrage("select name, aktiv from exercise where id = 'KN-03'")[0];
   assert.deepEqual([kn.name, kn.aktiv], [originalName, 1]);
   assert.equal(
@@ -209,9 +171,9 @@ async function ablauf(browser, dbPfad) {
     abfrage("select aufwaermen_text t from settings")[0].t,
     "Zwischenstand",
   );
-  assert.equal(abfrage("select count(*) c from exercise")[0].c, 63);
+  assert.equal(abfrage("select count(*) c from exercise")[0].c, 76);
   await page.goto(`${BASE}/verlauf`);
-  await page.getByText("Ad-hoc", { exact: true }).first().waitFor();
+  await page.getByText("Einheit A · Woche 1").first().waitFor();
   schritt(
     "Vollimport: Sätze und Einstellungen wiederhergestellt, App läuft weiter",
   );

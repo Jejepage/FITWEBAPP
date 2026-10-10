@@ -14,19 +14,17 @@ import {
   type ParseErgebnis,
   type PlanSlotZeile,
   type PlanZeile,
-  type ProfilZeile,
 } from "./backup-types";
 import { MAX_ANZAHL_GEWICHTE, MAX_GEWICHT_KG } from "./gewichte";
 import { slotKey, slotVorlageVonKey } from "./plan-types";
 import { equipmentArtSchema, exerciseSchema, musterSchema } from "./schemas";
 import { MAX_AUFWAERMEN_ZEICHEN } from "./settings-form";
-import { MUSTER, type EquipmentBedingung, type Muster } from "./types";
+import { MUSTER, type Muster } from "./types";
 import { parseVideoEingabe } from "./youtube";
 
 /** Obergrenzen der Zeilenzahlen je Tabelle (Schutz vor absurd großen Dateien). */
 export const BACKUP_ZEILEN_LIMIT = {
   uebungen: 500,
-  profile: 50,
   plaene: 200,
   slotsJePlan: 16,
   planSlots: 200 * 16,
@@ -56,21 +54,11 @@ const einheitenProWocheSchema = z
   .number()
   .int()
   .refine((n) => n === 2 || n === 3, "muss 2 oder 3 sein");
-const nichtLeerSchema = z.string().refine((s) => s.trim() !== "", "darf nicht leer sein");
 
 const gewichteSchema = z.partialRecord(
   equipmentArtSchema,
   z.array(z.number().gt(0).max(MAX_GEWICHT_KG)).max(MAX_ANZAHL_GEWICHTE),
 );
-
-export const profilZeileSchema = z.object({
-  id: idSchema,
-  seedKey: z.string().min(1).nullable(),
-  name: nichtLeerSchema,
-  equipment: z.array(equipmentArtSchema),
-  gewichte: gewichteSchema,
-  istStandard: z.boolean(),
-});
 
 export const einstellungenZeileSchema = z.object({
   stufen: stufenSchema,
@@ -82,7 +70,8 @@ export const einstellungenZeileSchema = z.object({
 
 export const planZeileSchema = z.object({
   id: idSchema,
-  profilId: idSchema,
+  equipment: z.array(equipmentArtSchema),
+  gewichte: gewichteSchema,
   startDatum: datumSchema,
   einheitenProWoche: einheitenProWocheSchema,
   zusatzblock: z.boolean(),
@@ -110,8 +99,6 @@ export const einheitZeileSchema = z.object({
   datum: datumSchema,
   einheit: z.enum(["A", "B"]),
   woche: z.number().int().min(1).max(6),
-  profilId: idSchema,
-  adHoc: z.boolean(),
   zusatzblock: z.boolean(),
   status: z.enum(["laufend", "abgeschlossen", "abgebrochen"]),
   ersetzungen: z
@@ -179,7 +166,6 @@ export const katalogDatenSchema = z.object({
 });
 
 export const allesDatenSchema = katalogDatenSchema.extend({
-  profile: z.array(profilZeileSchema).max(BACKUP_ZEILEN_LIMIT.profile),
   einstellungen: einstellungenZeileSchema,
   plaene: z.array(planZeileSchema).max(BACKUP_ZEILEN_LIMIT.plaene),
   planSlots: z.array(planSlotZeileSchema).max(BACKUP_ZEILEN_LIMIT.planSlots),
@@ -228,7 +214,6 @@ class Meldungen {
 
 const TABELLEN = {
   uebungen: { plural: "Übungen", einzahl: "Übung" },
-  profile: { plural: "Profile", einzahl: "Profil" },
   plaene: { plural: "Pläne", einzahl: "Plan" },
   planSlots: { plural: "Plan-Slots", einzahl: "Plan-Slot" },
   einheiten: { plural: "Einheiten", einzahl: "Einheit" },
@@ -400,36 +385,7 @@ function pruefeKatalog(daten: KatalogDaten, m: Meldungen): Map<string, BackupUeb
   return nachId;
 }
 
-function pruefeProfile(profile: readonly ProfilZeile[], m: Meldungen): Map<number, ProfilZeile> {
-  const nachId = indexiere(
-    profile,
-    (p) => p.id,
-    (p) => `Profil ${p.id}`,
-    m,
-  );
-  const seedKeys = new Set<string>();
-  for (const p of profile) {
-    if (p.seedKey === null) continue;
-    if (seedKeys.has(p.seedKey))
-      m.add(`Profil ${p.id}: seedKey „${p.seedKey}“ kommt mehrfach vor.`);
-    else seedKeys.add(p.seedKey);
-  }
-  const standard = profile.filter((p) => p.istStandard);
-  if (profile.length > 0 && standard.length === 0) {
-    m.add("Profile: Kein Profil ist als Standard markiert.");
-  } else if (standard.length > 1) {
-    m.add(
-      `Profile: Mehrere Profile sind als Standard markiert (${standard.map((p) => p.id).join(", ")}).`,
-    );
-  }
-  return nachId;
-}
-
-function pruefePlaene(
-  plaene: readonly PlanZeile[],
-  profile: ReadonlyMap<number, ProfilZeile>,
-  m: Meldungen,
-): Map<number, PlanZeile> {
+function pruefePlaene(plaene: readonly PlanZeile[], m: Meldungen): Map<number, PlanZeile> {
   const nachId = indexiere(
     plaene,
     (p) => p.id,
@@ -437,7 +393,6 @@ function pruefePlaene(
     m,
   );
   for (const p of plaene) {
-    if (!profile.has(p.profilId)) m.add(`Plan ${p.id}: Profil ${p.profilId} existiert nicht.`);
     if (p.vorgaengerId === p.id) m.add(`Plan ${p.id}: Der Plan ist sein eigener Vorgänger.`);
     else if (p.vorgaengerId !== null && !nachId.has(p.vorgaengerId)) {
       m.add(`Plan ${p.id}: Vorgänger ${p.vorgaengerId} existiert nicht.`);
@@ -495,8 +450,7 @@ function pruefeSlots(
 
 function pruefeAlles(daten: AllesDaten, m: Meldungen): void {
   const uebungen = pruefeKatalog(daten, m);
-  const profile = pruefeProfile(daten.profile, m);
-  const plaene = pruefePlaene(daten.plaene, profile, m);
+  const plaene = pruefePlaene(daten.plaene, m);
   const slots = pruefeSlots(daten.planSlots, plaene, uebungen, m);
 
   const einheiten = indexiere(
@@ -508,7 +462,6 @@ function pruefeAlles(daten: AllesDaten, m: Meldungen): void {
   for (const e of daten.einheiten) {
     const name = `Einheit ${e.id}`;
     if (!plaene.has(e.planId)) m.add(`${name}: Plan ${e.planId} existiert nicht.`);
-    if (!profile.has(e.profilId)) m.add(`${name}: Profil ${e.profilId} existiert nicht.`);
     for (const [schluessel, uebungId] of Object.entries(e.ersetzungen)) {
       const slot = slots.get(Number(schluessel));
       if (!slot || slot.planId !== e.planId) {
@@ -567,49 +520,19 @@ function pruefeAlles(daten: AllesDaten, m: Meldungen): void {
 
 const fehlschlag = (fehler: string[]): ParseErgebnis => ({ ok: false, fehler });
 
-// Version 1 kannte keinen eigenen Kabelzug ("maschinen" schloss ihn ein). Wie Migration
-// 0003_kabelzug: Profile mit Maschinen bekommen den Kabelzug dazu, die Kabelübungen des
-// Startkatalogs wechseln auf den Kabelzug, sofern ihre Bedingung noch der alten Vorgabe entspricht.
-const KABEL_UEBUNGEN: Record<string, readonly [alt: string, neu: EquipmentBedingung]> = {
-  "ZH-01": ['[["maschinen"]]', [["kabelzug"]]],
-  "ZV-01": ['[["maschinen"]]', [["kabelzug"]]],
-  "RU-05": ['[["maschinen","band"]]', [["kabelzug", "band"]]],
-};
-
-/** Hebt die (noch ungeprüften) Daten einer Datei der Version 1 an; das Original bleibt unberührt. */
-function hebeVersion1An(daten: Record<string, unknown>): Record<string, unknown> {
-  const neu = { ...daten };
-  if (Array.isArray(daten.uebungen)) {
-    neu.uebungen = daten.uebungen.map((u: unknown) => {
-      if (!istObjekt(u) || typeof u.id !== "string" || !Object.hasOwn(KABEL_UEBUNGEN, u.id)) {
-        return u;
-      }
-      const [alt, ersatz] = KABEL_UEBUNGEN[u.id]!;
-      return JSON.stringify(u.equipment) === alt ? { ...u, equipment: ersatz } : u;
-    });
-  }
-  if (Array.isArray(daten.profile)) {
-    neu.profile = daten.profile.map((p: unknown) => {
-      if (!istObjekt(p) || !Array.isArray(p.equipment)) return p;
-      const eq: unknown[] = p.equipment;
-      const i = eq.indexOf("maschinen");
-      if (i < 0 || eq.includes("kabelzug")) return p;
-      return { ...p, equipment: [...eq.slice(0, i + 1), "kabelzug", ...eq.slice(i + 1)] };
-    });
-  }
-  return neu;
-}
-
 function pruefeKopf(roh: Record<string, unknown>, erwartet?: BackupArt): string[] {
   const fehler: string[] = [];
   if (roh.format !== BACKUP_FORMAT) {
     fehler.push(`Die Datei ist kein FIT-Backup (Feld format ist nicht „${BACKUP_FORMAT}“).`);
   }
   if (roh.version === undefined) fehler.push("Die Backup-Version fehlt.");
-  else if (roh.version !== 1 && roh.version !== BACKUP_VERSION) {
+  else if (roh.version !== BACKUP_VERSION) {
     fehler.push(
       `Backup-Version ${anzeige(roh.version)} wird nicht unterstützt ` +
-        `(diese App liest die Versionen 1 und ${BACKUP_VERSION}).`,
+        `(diese App liest Version ${BACKUP_VERSION}).` +
+        (typeof roh.version === "number" && roh.version < BACKUP_VERSION
+          ? " Sicherungen aus der Zeit mit Equipment-Profilen lassen sich nicht mehr einlesen."
+          : ""),
     );
   }
   const art = roh.art;
@@ -630,7 +553,6 @@ const TABELLEN_LIMITS: Record<BackupArt, readonly (readonly [string, string, num
   katalog: [["uebungen", "Übungen", BACKUP_ZEILEN_LIMIT.uebungen]],
   alles: [
     ["uebungen", "Übungen", BACKUP_ZEILEN_LIMIT.uebungen],
-    ["profile", "Profile", BACKUP_ZEILEN_LIMIT.profile],
     ["plaene", "Pläne", BACKUP_ZEILEN_LIMIT.plaene],
     ["planSlots", "Plan-Slots", BACKUP_ZEILEN_LIMIT.planSlots],
     ["einheiten", "Einheiten", BACKUP_ZEILEN_LIMIT.einheiten],
@@ -662,7 +584,7 @@ function parseIntern(roh: unknown, erwartet?: BackupArt): ParseErgebnis {
   // und eine kleine Datei mit sehr vielen kaputten Zeilen würde Speicher und Zeit sprengen.
   const zuViele = pruefeZeilenzahlen(roh.daten, art);
   if (zuViele.length > 0) return fehlschlag(zuViele);
-  const rohDaten = roh.version === 1 ? hebeVersion1An(roh.daten) : roh.daten;
+  const rohDaten = roh.daten;
   const schema = art === "alles" ? allesDatenSchema : katalogDatenSchema;
   const geprueft = schema.safeParse(rohDaten);
   const m = new Meldungen();

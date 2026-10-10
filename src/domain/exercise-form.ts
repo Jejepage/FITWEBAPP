@@ -11,16 +11,12 @@ import {
   type Steigerungsart,
 } from "./types";
 
-/** Zahl der Gruppen-Zeilen im Equipment-Editor (ohne JavaScript). */
-export const GRUPPEN_ANZAHL = 3;
-
 /** Alles, was das Formular einer Übung bearbeiten kann (ohne ID, Muster, Bild). */
 export interface ExerciseFormWerte {
   name: string;
   stufe: number;
   einseitig: boolean;
   equipment: EquipmentBedingung;
-  optionaleLast: EquipmentArt[];
   belastungsart: Belastungsart;
   standardBereich: string;
   steigerungsart: Steigerungsart[];
@@ -31,6 +27,7 @@ export interface ExerciseFormWerte {
   /** Eingegebener YouTube-Link (leer = kein Link); beim Speichern in die Standardform gebracht. */
   videoUrl: string;
   aktiv: boolean;
+  ersatz: boolean;
   pruefstatus: Pruefstatus;
   leichterId: string | null;
   schwererId: string | null;
@@ -42,7 +39,6 @@ const FELD_FEHLER: Record<string, string> = {
   name: "Bitte einen Namen angeben.",
   stufe: "Stufe zwischen 1 und 5 wählen.",
   equipment: "Ungültige Equipment-Angabe.",
-  optionaleLast: "Ungültige Angabe zur optionalen Last.",
   belastungsart: "Bitte eine Belastungsart wählen.",
   standardBereich:
     'Format "8–12", "20–40 s" oder "20–40 m", erste Zahl höchstens so groß wie die zweite.',
@@ -71,17 +67,11 @@ const arten = (werte: string[]): EquipmentArt[] =>
 
 /** Liest ein Formular tolerant aus; Prüfung übernimmt `validiereExercise`. */
 export function parseExerciseForm(fd: FormData): ExerciseFormWerte {
-  const equipment: EquipmentBedingung = [];
-  for (let i = 0; i < GRUPPEN_ANZAHL; i++) {
-    const gruppe = arten(eintraege(fd, `gruppe${i}`));
-    if (gruppe.length > 0) equipment.push(gruppe);
-  }
   return {
     name: text(fd.get("name")),
     stufe: text(fd.get("stufe")) === "" ? Number.NaN : Number(text(fd.get("stufe"))),
     einseitig: fd.get("einseitig") === "on",
-    equipment,
-    optionaleLast: arten(eintraege(fd, "optionaleLast")),
+    equipment: arten(eintraege(fd, "equipment")),
     belastungsart: text(fd.get("belastungsart")) as Belastungsart,
     standardBereich: text(fd.get("standardBereich")),
     steigerungsart: eintraege(fd, "steigerungsart") as Steigerungsart[],
@@ -91,6 +81,7 @@ export function parseExerciseForm(fd: FormData): ExerciseFormWerte {
     hinweise: text(fd.get("hinweise")),
     videoUrl: text(fd.get("videoUrl")),
     aktiv: fd.get("aktiv") === "on",
+    ersatz: fd.get("ersatz") === "on",
     pruefstatus: text(fd.get("pruefstatus")) as Pruefstatus,
     leichterId: text(fd.get("leichterId")) || null,
     schwererId: text(fd.get("schwererId")) || null,
@@ -139,7 +130,6 @@ export function exerciseZuFormWerte(e: Exercise): ExerciseFormWerte {
     stufe: e.stufe,
     einseitig: e.einseitig,
     equipment: e.equipment,
-    optionaleLast: e.optionaleLast,
     belastungsart: e.belastungsart,
     standardBereich: e.standardBereich,
     steigerungsart: e.steigerungsart,
@@ -149,6 +139,7 @@ export function exerciseZuFormWerte(e: Exercise): ExerciseFormWerte {
     hinweise: e.hinweise,
     videoUrl: e.videoUrl ?? "",
     aktiv: e.aktiv,
+    ersatz: e.ersatz,
     pruefstatus: e.pruefstatus,
     leichterId: e.leichterId,
     schwererId: e.schwererId,
@@ -162,7 +153,6 @@ export function leereFormWerte(): ExerciseFormWerte {
     stufe: 2,
     einseitig: false,
     equipment: [],
-    optionaleLast: [],
     belastungsart: "wdh",
     standardBereich: "8–12",
     steigerungsart: ["wdh", "gewicht"],
@@ -172,6 +162,7 @@ export function leereFormWerte(): ExerciseFormWerte {
     hinweise: "",
     videoUrl: "",
     aktiv: true,
+    ersatz: false,
     pruefstatus: "zu_pruefen",
     leichterId: null,
     schwererId: null,

@@ -1,8 +1,8 @@
 import { and, count, desc, eq, inArray } from "drizzle-orm";
-import { equipmentProfile, exercise, plan, planSlot, setLog, workout } from "@/db/schema";
+import { exercise, plan, planSlot, setLog, workout } from "@/db/schema";
 import type { Db } from "@/db/types";
-import { ersetzungenFuerEinheit } from "@/domain/ad-hoc";
 import { erfuellt } from "@/domain/equipment";
+import { ersetzungenFuerEinheit } from "@/domain/ersetzungen";
 import { satzEingabeSchema } from "@/domain/satz-eingabe";
 import type { SatzWerte } from "@/domain/training-types";
 import type { Muster } from "@/domain/types";
@@ -30,21 +30,18 @@ export function getLaufendesWorkout(db: Db): Workout | null {
 
 export type StartErgebnis =
   | { ok: true; id: number; neu: boolean }
-  | { ok: false; code: "kein_plan" | "block_fertig" | "profil_unbekannt" }
-  | { ok: false; code: "profil_unmoeglich"; fehlendeMuster: Muster[] };
+  | { ok: false; code: "kein_plan" | "block_fertig" }
+  | { ok: false; code: "equipment_unmoeglich"; fehlendeMuster: Muster[] };
 
 /**
  * Startet die nächste fällige Einheit des aktiven Plans. Läuft schon eine Einheit, wird diese
  * zurückgegeben (es läuft höchstens eine gleichzeitig).
  *
- * Mit `profilId` ≠ Planprofil ist es eine Ad-hoc-Einheit (Spec F6): Die Übungen, die das Profil
- * nicht erfüllt, werden für diese Einheit ersetzt (`workout.ersetzungen`), der Plan bleibt
- * unverändert. Die Einheit zählt für den Wochenfortschritt, nicht für die Steigerung.
+ * Übungen, die das Equipment des Plans nicht (mehr) erfüllen, z. B. weil das Equipment geändert
+ * wurde, werden für diese Einheit ersetzt (`workout.ersetzungen`); der Plan bleibt unverändert.
+ * Wer unterwegs trainiert, tauscht Übungen im Training selbst (Ersatzübungen).
  */
-export function startWorkout(
-  db: Db,
-  opts: { heute: string; zusatzblock?: boolean; profilId?: number },
-): StartErgebnis {
+export function startWorkout(db: Db, opts: { heute: string; zusatzblock?: boolean }): StartErgebnis {
   return db.transaction((tx): StartErgebnis => {
     const laufend = tx
       .select({ id: workout.id })
@@ -65,37 +62,25 @@ export function startWorkout(
     const naechste = einheitNachFortschritt(fertig, p.einheitenProWoche === 3 ? 3 : 2);
     if (naechste.blockFertig) return { ok: false, code: "block_fertig" };
 
-    const adHoc = opts.profilId !== undefined && opts.profilId !== p.profilId;
-    let profilId = p.profilId;
-    let ersetzungen: Record<string, string> = {};
-    if (adHoc) {
-      const profil = tx
-        .select()
-        .from(equipmentProfile)
-        .where(eq(equipmentProfile.id, opts.profilId as number))
-        .get();
-      if (!profil) return { ok: false, code: "profil_unbekannt" };
-      const slots = tx
-        .select()
-        .from(planSlot)
-        .where(and(eq(planSlot.planId, p.id), eq(planSlot.einheit, naechste.einheit)))
-        .all();
-      const r = ersetzungenFuerEinheit({
-        slots: slots.map((s) => ({
-          slotId: s.id,
-          block: s.block,
-          muster: s.muster,
-          exerciseId: s.exerciseId,
-        })),
-        uebungen: tx.select().from(exercise).all().map(zuExercise),
-        equipment: profil.equipment,
-        zusatzblock: opts.zusatzblock ?? p.zusatzblock,
-      });
-      if (r.fehlendeMuster.length > 0) {
-        return { ok: false, code: "profil_unmoeglich", fehlendeMuster: r.fehlendeMuster };
-      }
-      profilId = profil.id;
-      ersetzungen = r.ersetzungen;
+    const zusatzblock = opts.zusatzblock ?? p.zusatzblock;
+    const slots = tx
+      .select()
+      .from(planSlot)
+      .where(and(eq(planSlot.planId, p.id), eq(planSlot.einheit, naechste.einheit)))
+      .all();
+    const r = ersetzungenFuerEinheit({
+      slots: slots.map((s) => ({
+        slotId: s.id,
+        block: s.block,
+        muster: s.muster,
+        exerciseId: s.exerciseId,
+      })),
+      uebungen: tx.select().from(exercise).all().map(zuExercise),
+      equipment: p.equipment,
+      zusatzblock,
+    });
+    if (r.fehlendeMuster.length > 0) {
+      return { ok: false, code: "equipment_unmoeglich", fehlendeMuster: r.fehlendeMuster };
     }
 
     const neu = tx
@@ -105,11 +90,9 @@ export function startWorkout(
         datum: opts.heute,
         einheit: naechste.einheit,
         woche: naechste.woche,
-        profilId,
-        adHoc,
-        zusatzblock: opts.zusatzblock ?? p.zusatzblock,
+        zusatzblock,
         status: "laufend",
-        ersetzungen,
+        ersetzungen: r.ersetzungen,
       })
       .returning({ id: workout.id })
       .get();
@@ -213,9 +196,9 @@ export type ErsatzErgebnis =
     };
 
 /**
- * Ersetzt die Übung eines Slots nur für diese Einheit (z. B. Gerät belegt). Erlaubt sind aktive
- * Übungen desselben Musters, die mit dem Equipment des Profils machbar sind; die geplante Übung
- * selbst hebt den Ersatz wieder auf. Der Plan bleibt unverändert.
+ * Ersetzt die Übung eines Slots nur für diese Einheit (z. B. Gerät belegt oder unterwegs). Erlaubt
+ * sind aktive Übungen desselben Musters, die mit dem Equipment des Plans machbar sind, und alle
+ * Ersatzübungen; die geplante Übung selbst hebt den Ersatz wieder auf. Der Plan bleibt unverändert.
  */
 export function ersetzeUebung(
   db: Db,
@@ -236,18 +219,14 @@ export function ersetzeUebung(
     if (exerciseId === slot.exerciseId) {
       delete ersetzungen[String(slot.id)];
     } else {
-      const profil = tx
-        .select()
-        .from(equipmentProfile)
-        .where(eq(equipmentProfile.id, w.profilId))
-        .get();
+      const p = tx.select().from(plan).where(eq(plan.id, w.planId)).get();
       const u = tx.select().from(exercise).where(eq(exercise.id, exerciseId)).get();
       if (
-        !profil ||
+        !p ||
         !u ||
         !u.aktiv ||
         u.muster !== slot.muster ||
-        !erfuellt(u.equipment, profil.equipment)
+        !(u.ersatz || erfuellt(u.equipment, p.equipment))
       ) {
         return { ok: false, code: "uebung_ungueltig" };
       }
@@ -331,13 +310,12 @@ export interface LetzteEinheit {
   saetze: SatzWerte[];
   datum: string;
   woche: number;
-  adHoc: boolean;
 }
 
 export interface UebungsHistorie {
   /** Letzte abgeschlossene Einheit mit dieser Übung (zur Anzeige "Letztes Mal") */
   anzeige: LetzteEinheit | null;
-  /** Letzte Grundlage für den Vorschlag: nicht Ad-hoc, nicht Woche 6 (Spec 2.5, F6) */
+  /** Letzte Grundlage für den Vorschlag: nicht Woche 6 (Entlastung, Spec 2.5) */
   vorschlagBasis: LetzteEinheit | null;
 }
 
@@ -384,10 +362,9 @@ export function letzteWerte(
         saetze: saetze.map(zuSatzWerte),
         datum: w.datum,
         woche: w.woche,
-        adHoc: w.adHoc,
       };
       historie.anzeige ??= eintrag;
-      if (!w.adHoc && w.woche < 6) {
+      if (w.woche < 6) {
         historie.vorschlagBasis ??= eintrag;
         break;
       }

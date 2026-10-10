@@ -31,39 +31,39 @@ const basis = {
 const fest = { id: "DH-99", muster: "DH" as const, bild: null };
 
 describe("parseExerciseForm", () => {
-  it("liest Zeilenfelder, Checkboxen und Gruppen", () => {
+  it("liest Zeilenfelder, Checkboxen und Equipment", () => {
     const w = parseExerciseForm(
       formular({
         ...basis,
         einseitig: "on",
-        gruppe0: ["kurzhanteln", "kettlebell"],
-        gruppe1: "bank",
-        gruppe2: [],
-        optionaleLast: ["kurzhanteln"],
+        ersatz: "on",
+        equipment: ["kurzhanteln", "bank"],
         leichterId: "DH-01",
         schwererId: "",
       }),
     );
     expect(w.ausfuehrung).toEqual(["Schritt eins", "Schritt zwei", "Schritt drei"]);
     expect(w.einseitig).toBe(true);
-    expect(w.equipment).toEqual([["kurzhanteln", "kettlebell"], ["bank"]]);
-    expect(w.optionaleLast).toEqual(["kurzhanteln"]);
+    expect(w.ersatz).toBe(true);
+    expect(w.equipment).toEqual(["kurzhanteln", "bank"]);
     expect(w.leichterId).toBe("DH-01");
     expect(w.schwererId).toBeNull();
     expect(w.stufe).toBe(3);
   });
 
-  it("ignoriert unbekannte oder doppelte Equipment-Arten und leere Gruppen", () => {
+  it("ignoriert unbekannte oder doppelte Equipment-Arten", () => {
     const w = parseExerciseForm(
-      formular({ ...basis, gruppe0: ["hantelbank", "keins", "bank", "bank"], gruppe1: [] }),
+      formular({ ...basis, equipment: ["hantelbank", "keins", "bank", "bank"] }),
     );
-    expect(w.equipment).toEqual([["bank"]]);
+    expect(w.equipment).toEqual(["bank"]);
+    expect(parseExerciseForm(formular(basis)).equipment).toEqual([]);
   });
 
   it("fehlende Checkboxen bedeuten false", () => {
     const w = parseExerciseForm(formular({ name: "x" }));
     expect(w.einseitig).toBe(false);
     expect(w.aktiv).toBe(false);
+    expect(w.ersatz).toBe(false);
   });
 });
 
@@ -159,7 +159,6 @@ describe("Vorlagen", () => {
       stufe: 2,
       einseitig: false,
       equipment: [],
-      optionaleLast: [],
       leichterId: null,
       schwererId: "DH-98",
       hauptmuskeln: ["Brust"],
@@ -172,9 +171,11 @@ describe("Vorlagen", () => {
       bild: null,
       videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       aktiv: true,
+      ersatz: true,
       pruefstatus: "geprueft",
     };
     const w = exerciseZuFormWerte(e);
+    expect(w.ersatz).toBe(true);
     expect(w.schwererId).toBe("DH-98");
     expect(w.videoUrl).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     expect(validiereExercise(w, { id: e.id, muster: e.muster, bild: e.bild }).ok).toBe(true);

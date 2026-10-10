@@ -1,5 +1,5 @@
 // Plan-Generator (Spec 2.4 und F3). Rein und deterministisch: kein Math.random, kein Date.
-import { erfuellt } from "./equipment";
+import { erfuellt, gleicheBewegung } from "./equipment";
 import {
   SLOT_VORLAGE,
   type GeneratorEingabe,
@@ -38,22 +38,34 @@ function mulberry32(start: number): () => number {
 const nachId = (a: Exercise, b: Exercise): number => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
 /**
- * Kandidaten eines Musters, bestmöglich zuerst. Die Stufe geht vor der Abwechslung
- * (vorherVerwendet); der Seed mischt nur innerhalb gleichwertiger Gruppen.
+ * Kandidaten eines Musters, bestmöglich zuerst: Planübungen vor Ersatzübungen (Körpergewicht,
+ * Band), darin die Stufe, dann die Abwechslung (vorherVerwendet); der Seed mischt nur innerhalb
+ * gleichwertiger Gruppen. So stehen Ersatzübungen nur dann vorn, wenn es für das Muster mit dem
+ * Equipment keine Planübungen gibt, und füllen sonst höchstens die fehlenden Plätze auf.
  */
 function sortierteKandidaten(e: KandidatenEingabe, muster: Muster, seed: number): Exercise[] {
   const wunsch = begrenzeStufe(e.stufen[muster]);
   const zufall = seed > 0 ? mulberry32(seed * 1000 + MUSTER.indexOf(muster)) : null;
+  // Auch eine Variante einer zuletzt verwendeten Übung zählt als schon benutzt.
+  const vorher = e.vorherVerwendet
+    ? e.uebungen.filter((u) => e.vorherVerwendet!.has(u.id))
+    : [];
   return e.uebungen
     .filter((u) => u.muster === muster && u.aktiv && erfuellt(u.equipment, e.equipment))
     .sort(nachId)
     .map((u) => ({
       u,
       rang: stufenRang(u.stufe, wunsch),
-      benutzt: e.vorherVerwendet?.has(u.id) ? 1 : 0,
+      benutzt: vorher.some((v) => gleicheBewegung(u, v)) ? 1 : 0,
       los: zufall ? zufall() : 0,
     }))
-    .sort((a, b) => a.rang - b.rang || a.benutzt - b.benutzt || a.los - b.los)
+    .sort(
+      (a, b) =>
+        Number(a.u.ersatz) - Number(b.u.ersatz) ||
+        a.rang - b.rang ||
+        a.benutzt - b.benutzt ||
+        a.los - b.los,
+    )
     .map((x) => x.u);
 }
 
@@ -62,12 +74,29 @@ export function kandidatenFuerSlot(e: KandidatenEingabe, muster: Muster): Exerci
 }
 
 /**
+ * Tauschliste für das Training (z. B. unterwegs): alle mit dem Equipment machbaren Übungen wie in
+ * `kandidatenFuerSlot`, danach die übrigen Ersatzübungen des Musters, auch wenn ihr Equipment (z. B.
+ * ein Band) im Plan nicht angekreuzt ist. Ersatzübungen sind genau für den Fall gedacht, dass das
+ * Plan-Equipment gerade nicht zur Verfügung steht.
+ */
+export function tauschKandidaten(e: KandidatenEingabe, muster: Muster): Exercise[] {
+  const machbar = sortierteKandidaten(e, muster, 0);
+  const schon = new Set(machbar.map((u) => u.id));
+  const wunsch = begrenzeStufe(e.stufen[muster]);
+  const weitere = e.uebungen
+    .filter((u) => u.muster === muster && u.aktiv && u.ersatz && !schon.has(u.id))
+    .sort((a, b) => stufenRang(a.stufe, wunsch) - stufenRang(b.stufe, wunsch) || nachId(a, b));
+  return [...machbar, ...weitere];
+}
+
+/**
  * Stellt sicher, dass in KN/HB eine einseitige Übung steht; ersetzt dafür genau einen Slot.
  * Gewählt wird der Slot, dessen bester einseitiger Kandidat den kleinsten Stufenrang hat (also
  * der Wunschstufe seines Musters am nächsten liegt). Bei Gleichstand wird die schlechter
  * eingestufte Übung verdrängt (meist B), danach entscheidet die Reihenfolge der Vorlage.
  * Verglichen wird der Stufenrang, nicht die Listenposition: So hängt die Entscheidung nicht
- * von gleichrangigen Übungen davor ab und damit auch nicht vom Seed.
+ * von gleichrangigen Übungen davor ab und damit auch nicht vom Seed. Einseitige Ersatzübungen
+ * kommen erst in Frage, wenn es keine einseitige Planübung gibt.
  */
 function erzwingeEinseitig(
   slots: SlotZuordnung[],
@@ -85,9 +114,14 @@ function erzwingeEinseitig(
     const liste = kandidaten[slot.muster];
     const einseitige = liste.filter((u) => u.einseitig);
     const andere = slots.find((s) => s.muster === slot.muster && s.einheit !== slot.einheit);
-    const wahl = einseitige.find((u) => u.id !== andere?.exerciseId) ?? einseitige[0];
+    const andereUebung = andere && liste.find((u) => u.id === andere.exerciseId);
+    const wahl =
+      einseitige.find((u) => !andereUebung || !gleicheBewegung(u, andereUebung)) ??
+      einseitige.find((u) => u.id !== andere?.exerciseId) ??
+      einseitige[0];
     if (!wahl) continue;
-    const rang = stufenRang(wahl.stufe, begrenzeStufe(stufen[slot.muster]));
+    // Eine einseitige Planübung schlägt eine einseitige Ersatzübung, danach zählt der Stufenrang.
+    const rang = Number(wahl.ersatz) * 10 + stufenRang(wahl.stufe, begrenzeStufe(stufen[slot.muster]));
     const verdraengt = liste.findIndex((u) => u.id === slot.exerciseId);
     const besser =
       !beste || rang < beste.rang || (rang === beste.rang && verdraengt > beste.verdraengt); // sonst gewinnt der frühere Slot
@@ -107,8 +141,13 @@ export function generierePlan(e: GeneratorEingabe): GeneratorErgebnis {
 
   const slots: SlotZuordnung[] = SLOT_VORLAGE.map((vorlage) => {
     const liste = kandidaten[vorlage.muster];
-    // Gibt es nur einen Kandidaten, teilen sich A und B dieselbe Übung.
-    const wahl = (vorlage.einheit === "A" ? liste[0] : (liste[1] ?? liste[0])) as Exercise;
+    const a = liste[0] as Exercise;
+    // B: die beste Übung, die keine Variante von A ist; sonst die zweitbeste. Gibt es nur einen
+    // Kandidaten, teilen sich A und B dieselbe Übung.
+    const wahl =
+      vorlage.einheit === "A"
+        ? a
+        : (liste.find((u) => !gleicheBewegung(u, a)) ?? liste[1] ?? a);
     return { ...vorlage, exerciseId: wahl.id };
   });
   erzwingeEinseitig(slots, kandidaten, e.stufen);

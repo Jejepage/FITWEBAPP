@@ -43,7 +43,7 @@ export function naechstesGewicht(
 }
 
 function artDerSteigerung(u: VorschlagEingabe["uebung"]): Art {
-  const arten = new Set<string>([...u.equipment.flat(), ...u.optionaleLast]);
+  const arten = new Set<string>(u.equipment);
   if (arten.has("kurzhanteln") || arten.has("kettlebell")) return "gewicht-hantel";
   if (arten.has("maschinen") || arten.has("kabelzug") || arten.has("langhantel")) return "gewicht-maschine";
   return "gewicht-alltag";
@@ -51,7 +51,7 @@ function artDerSteigerung(u: VorschlagEingabe["uebung"]): Art {
 
 /** Vereinigte Stufenliste der Hantelarten, die die Übung nutzt (aufsteigend, ohne Doppelte). */
 function hantelListe(u: VorschlagEingabe["uebung"], gewichte: Gewichte): number[] {
-  const arten = new Set<string>([...u.equipment.flat(), ...u.optionaleLast]);
+  const arten = new Set<string>(u.equipment);
   const alle: number[] = [];
   if (arten.has("kurzhanteln")) alle.push(...(gewichte.kurzhanteln ?? []));
   if (arten.has("kettlebell")) alle.push(...(gewichte.kettlebell ?? []));
@@ -139,11 +139,15 @@ export function vorschlagFuerUebung(e: VorschlagEingabe): Vorschlag {
       const neu = naechsteStufeGewicht(ref, gewichtsArt, liste);
       if (neu !== null) return bauen("mehr_gewicht", neu, ziel.min, false);
     }
-    if (art === "wdh" && uebung.steigerungsart.includes("tempo") && !tempoSchonGenutzt) {
-      return bauen("tempo", ref, ziel.max, true);
-    }
-    if (uebung.steigerungsart.includes("stufe") && uebung.schwererId) {
-      return bauen("naechste_stufe", ref, ziel.max, mitTempo);
+    // Ersatzübungen steigern nur über Wiederholungen (und Gewicht): Tempo und nächste Stufe wählt
+    // man dort selbst.
+    if (!uebung.ersatz) {
+      if (art === "wdh" && uebung.steigerungsart.includes("tempo") && !tempoSchonGenutzt) {
+        return bauen("tempo", ref, ziel.max, true);
+      }
+      if (uebung.steigerungsart.includes("stufe") && uebung.schwererId) {
+        return bauen("naechste_stufe", ref, ziel.max, mitTempo);
+      }
     }
     return bauen("wiederholen", ref, ziel.max, mitTempo);
   }

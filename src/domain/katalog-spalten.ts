@@ -10,12 +10,12 @@ export const SPALTEN = [
   "stufe",
   "equipment",
   "einseitig",
+  "ersatz",
   "belastung",
   "bereich",
   "muskeln",
   "steigerung",
   "leiter",
-  "last",
   "status",
   "aktiv",
   "video",
@@ -105,6 +105,8 @@ export function sortWert(e: Exercise, spalte: Spalte): string | number {
       return beschreibeBedingung(e.equipment).toLocaleLowerCase("de");
     case "einseitig":
       return e.einseitig ? 1 : 0;
+    case "ersatz":
+      return e.ersatz ? 1 : 0;
     case "belastung":
       return e.belastungsart;
     case "bereich":
@@ -115,8 +117,6 @@ export function sortWert(e: Exercise, spalte: Spalte): string | number {
       return e.steigerungsart.join(" ");
     case "leiter":
       return `${e.leichterId ?? ""}|${e.schwererId ?? ""}`;
-    case "last":
-      return e.optionaleLast.join(" ");
     case "status":
       return e.pruefstatus;
     case "aktiv":

@@ -6,12 +6,12 @@ Dieses Repo enthält **Phase 1** laut [docs/SPEC.md](docs/SPEC.md) (ohne Schaubi
 
 ## Funktionen
 
-- **Übungskatalog** mit Filtern (Muster, Equipment-Profil, Stufe, einseitig), Stufenleitern, eigene Übungen anlegen, bearbeiten, deaktivieren
-- **Equipment-Profile** (z. B. „Unterwegs") und Einstellungen: Startstufe pro Muster, Einheiten pro Woche, Zusatzblock
-- **Plan-Generator** für 6-Wochen-Blöcke mit Einheiten A und B, Slots manuell tauschbar
+- **Übungskatalog** mit Filtern (Muster, „machbar mit meinem Equipment“, Stufe, einseitig, Ersatzübung), Stufenleitern, eigene Übungen anlegen, bearbeiten, deaktivieren
+- **Equipment im Plan**: Beim Anlegen eines Plans wählst du, was du zur Verfügung hast (Geräte und Hantelgewichte); das lässt sich später ändern, z. B. nach dem Kauf eines Geräts. Einstellungen: Startstufe pro Muster, Einheiten pro Woche, Zusatzblock
+- **Plan-Generator** für 6-Wochen-Blöcke mit Einheiten A und B, Slots manuell tauschbar; bevorzugt Übungen mit Equipment, **Ersatzübungen** (Körpergewicht, Band) nur als Auffüllung
 - **Training durchführen**, mobil optimiert: rundenweise Sätze mit Gewicht, Wiederholungen/Zeit und RPE, Einheit unterbrechen und fortsetzen
 - **Steigerung**: Vorschläge nach jeder Einheit, Stufen-Check am Blockende, „Nächsten Block erstellen"
-- **Ad-hoc-Profilwechsel** vor einer Einheit, ohne den Plan zu ändern
+- **Unterwegs trainieren**: Im Training lassen sich Übungen für diese Einheit tauschen, Ersatzübungen stehen immer zur Wahl; der Plan bleibt unverändert
 - **Verlauf** mit Einheitenliste, Verlauf pro Übung (inkl. Diagramm) und Blockübersicht
 - **Datensicherung**: Export/Import aller Daten oder nur des Katalogs als JSON
 
@@ -24,7 +24,7 @@ npm ci
 npm run dev
 ```
 
-Die App läuft dann unter <http://localhost:3000>. Die SQLite-Datei liegt unter `./data/fit.db`; Migration und Seed (Startkatalog, Standardprofile) laufen beim Start automatisch. Einen anderen Pfad setzt du mit der Umgebungsvariable `DB_PATH` (siehe `.env.example`).
+Die App läuft dann unter <http://localhost:3000>. Die SQLite-Datei liegt unter `./data/fit.db`; Migration und Seed (Startkatalog, Einstellungen) laufen beim Start automatisch. Einen anderen Pfad setzt du mit der Umgebungsvariable `DB_PATH` (siehe `.env.example`).
 
 ## Tests und Prüfungen
 
@@ -65,7 +65,7 @@ src/app/         Seiten und API-Routen (Next.js App Router; /api/health, /api/ex
 src/components/  React-Komponenten, nach Bereichen gegliedert
 src/domain/      Fachlogik ohne Datenbank (Generator, Steigerung, Ablauf, Backup-Format) samt Unit-Tests
 src/server/      Serverlogik mit Datenbankzugriff (Pläne, Einheiten, Verlauf, Backup)
-src/db/          Schema, Migration, Seed-Daten (Startkatalog, Profile) und DB-Verbindung
+src/db/          Schema, Migration, Seed-Daten (Startkatalog) und DB-Verbindung
 src/i18n/        Oberflächentexte (Deutsch), zentral abgelegt
 src/lib/         kleine Hilfsfunktionen
 drizzle/         erzeugte SQL-Migrationen

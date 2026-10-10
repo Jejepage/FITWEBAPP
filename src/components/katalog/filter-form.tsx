@@ -8,10 +8,10 @@ import {
   MUSTER,
   MUSTER_NAMEN,
   PRUEFSTATI,
+  type EquipmentArt,
 } from "@/domain/types";
 import { de } from "@/i18n/de";
 import type { FilterAuswahl } from "@/server/katalog-filter";
-import type { Profil } from "@/server/profiles";
 import { IconChevron } from "./icons-katalog";
 
 const t = de.katalog;
@@ -77,17 +77,19 @@ function Segmente({
 /** Reines GET-Formular (Kartenansicht): funktioniert ohne JavaScript, Filter stehen in der URL. */
 export function FilterForm({
   filter,
-  profile,
+  planEquipment,
   aktiv,
   versteckt = [],
 }: {
   filter: FilterAuswahl;
-  profile: Profil[];
+  /** Equipment des aktiven Plans; null, wenn es keinen Plan gibt (dann kein Machbar-Filter) */
+  planEquipment: readonly EquipmentArt[] | null;
   aktiv: boolean;
   /** Parameter, die beim Absenden erhalten bleiben sollen (Sortierung, Ansicht, Spalten) */
   versteckt?: readonly (readonly [string, string])[];
 }) {
   const einseitigWert = filter.einseitig === undefined ? "" : filter.einseitig ? "ja" : "nein";
+  const ersatzWert = filter.ersatz === undefined ? "" : filter.ersatz ? "ja" : "nein";
   const videoWert = filter.video === undefined ? "" : filter.video ? "mit" : "ohne";
   const alle = <option value="">{t.alle}</option>;
   return (
@@ -127,18 +129,12 @@ export function FilterForm({
             </option>
           ))}
         </Auswahl>
-        <Auswahl
-          name="profil"
-          label={t.profil}
-          wert={filter.profilId ? String(filter.profilId) : ""}
-        >
-          {alle}
-          {profile.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </Auswahl>
+        {planEquipment && (
+          <Auswahl name="machbar" label={t.machbar} wert={filter.machbar ? "ja" : ""}>
+            <option value="">{tt.alleUebungen}</option>
+            <option value="ja">{tt.nurMachbar}</option>
+          </Auswahl>
+        )}
         <Auswahl name="geraet" label={t.geraet} wert={filter.geraet ?? ""}>
           <option value="">{tt.alleGeraete}</option>
           {EQUIPMENT_AUSWAHL.map((a) => (
@@ -181,6 +177,16 @@ export function FilterForm({
           name="einseitig"
           label={t.einseitig}
           wert={einseitigWert}
+          optionen={[
+            { wert: "", text: t.alle },
+            { wert: "ja", text: t.ja },
+            { wert: "nein", text: t.nein },
+          ]}
+        />
+        <Segmente
+          name="ersatz"
+          label={t.ersatzFilter}
+          wert={ersatzWert}
           optionen={[
             { wert: "", text: t.alle },
             { wert: "ja", text: t.ja },

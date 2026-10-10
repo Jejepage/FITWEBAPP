@@ -28,7 +28,6 @@ const einheit = (
   datum: `2026-10-${String(id).padStart(2, "0")}`,
   woche: 1,
   einheit: "A",
-  adHoc: false,
   saetze,
   ...o,
 });
@@ -117,14 +116,14 @@ describe("uebungsVerlauf", () => {
     expect(uebungsVerlauf([einheit(1, [satz({ meter: 5 })])], "strecke").volumenEinheit).toBe("m");
   });
 
-  it("übernimmt Reihenfolge und Metadaten, auch Ad-hoc", () => {
+  it("übernimmt Reihenfolge und Metadaten", () => {
     const v = uebungsVerlauf(
-      [einheit(1, [satz({ wdh: 8 })]), einheit(2, [satz({ wdh: 9 })], { adHoc: true, woche: 2 })],
+      [einheit(1, [satz({ wdh: 8 })]), einheit(2, [satz({ wdh: 9 })], { woche: 2 })],
       "wdh",
     );
-    expect(v.zeilen.map((z) => [z.workoutId, z.adHoc, z.woche])).toEqual([
-      [1, false, 1],
-      [2, true, 2],
+    expect(v.zeilen.map((z) => [z.workoutId, z.woche])).toEqual([
+      [1, 1],
+      [2, 2],
     ]);
   });
 

@@ -41,7 +41,6 @@ export function EinheitenListe({ einheiten }: { einheiten: EinheitKurz[] }) {
                     <span className="block font-semibold">{datumLang(e.datum)}</span>
                     <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-2">
                       {t.einheitZeile(e.einheit, e.woche)} · {t.saetze(e.saetze)}
-                      {e.adHoc && <Badge farbe="hinweis">{t.adHoc}</Badge>}
                       {e.zusatzblock && <Badge>{t.mitZusatzblock}</Badge>}
                     </span>
                   </span>

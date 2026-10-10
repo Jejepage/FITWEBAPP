@@ -104,9 +104,9 @@ try {
 
   const d = new Database(dbPfad, { readonly: true });
   assert.equal(d.prepare("select count(*) c from exercise").get().c, 60);
-  assert.equal(d.prepare("select count(*) c from equipment_profile").get().c, 3);
+  assert.equal(d.prepare("select count(*) c from settings").get().c, 1);
   d.close();
-  schritt("Migration und Seed sind gelaufen (60 Übungen, 3 Profile)");
+  schritt("Migration und Seed sind gelaufen (60 Übungen, Einstellungen)");
 
   // Backup-Skript wie im Container: DB_PATH gesetzt, Ziel neben der Datenbank
   const bak = join(tmp, "data", "backup");

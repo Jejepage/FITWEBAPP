@@ -33,7 +33,7 @@ Grundregeln:
 - **Kein Zugriff aus dem Internet.** In der FritzBox wird **keine Portfreigabe** für die App eingerichtet. Von außen kommst du nur über das FritzBox-WireGuard-VPN ins Heimnetz.
 - **`BIND_ADDR` zeigt auf die LAN-IP des Docker-Hosts** (z. B. `192.168.178.50`), **nie auf `0.0.0.0`**. Ohne Angabe ist die App nur auf dem Server selbst erreichbar (`127.0.0.1`).
 - **Vorerst nur HTTP.** HTTPS ist als optionaler Anhang beschrieben ([Anhang A](#12-anhang-a-https-optional-später)). Was ohne HTTPS fehlt, steht in [Abschnitt 7](#7-zugriff-vom-handy-und-per-vpn).
-- **Beim Containerstart laufen Migration und Seed automatisch.** Der Seed ergänzt nur fehlende Übungen und Profile und überschreibt nie deine Änderungen.
+- **Beim Containerstart laufen Migration und Seed automatisch.** Der Seed ergänzt nur fehlende Übungen und überschreibt nie deine Änderungen.
 - **Gesundheitsprüfung:** `GET /api/health` antwortet mit `{"ok":true}`. Diese Adresse ist immer frei zugänglich, auch wenn ein Passwort gesetzt ist.
 
 ## 2. Proxmox: VM anlegen
@@ -216,11 +216,11 @@ docker compose up -d                  # (wieder) starten
 
 3. Prüfen: `docker compose ps` (Status `healthy`) und `docker compose logs --tail 50 app`.
 
-Die Daten im Volume bleiben erhalten; Migrationen laufen beim Start automatisch. Alte Images kannst du bei Bedarf mit `docker image prune -f` aufräumen.
+Die Daten im Volume bleiben erhalten; Migrationen laufen beim Start automatisch. **Ausnahme beim Update auf die Version ohne Equipment-Profile:** Die Migration `0004` verwirft dabei vorhandene Pläne, Einheiten und Sätze (die Equipment-Profile entfallen, das Equipment gehört jetzt zum Plan); Katalog und Einstellungen bleiben. Mache vorher einen Export, wenn du die Daten noch brauchst. Gesamt-Sicherungen aus der Zeit mit Profilen (Backup-Version 1) lassen sich danach nicht mehr einlesen. Alte Images kannst du bei Bedarf mit `docker image prune -f` aufräumen.
 
 **Rückgängig machen:** Eine ältere Version bekommst du mit `git checkout <alter-commit>` und erneutem `docker compose up -d --build`. Hat die neue Version aber bereits die Datenbank-Struktur geändert, spiele zusätzlich das Backup von vor dem Update ein ([Abschnitt 10](#10-wiederherstellung)).
 
-**Neue Katalogversionen:** Der Seed legt nur **fehlende** Übungen und Profile an und überschreibt nie deine Änderungen. Übungen, die eine neue Version im Startkatalog ändert oder ergänzt, erreichen eine bestehende Installation daher nicht von selbst. Wenn du sie übernehmen willst: Auf einer frischen Installation (z. B. lokal oder einer zweiten Instanz mit neuer Datenbank) in der App **Einstellungen → Datensicherung → „Nur den Katalog exportieren"**, die Datei in der produktiven App mit dem Katalogimport einlesen (er **führt zusammen**). Mache vorher ein Backup und prüfe das Ergebnis im Katalog.
+**Neue Katalogversionen:** Der Seed legt nur **fehlende** Übungen an und überschreibt nie deine Änderungen. Übungen, die eine neue Version im Startkatalog ändert oder ergänzt, erreichen eine bestehende Installation daher nicht von selbst. Wenn du sie übernehmen willst: Auf einer frischen Installation (z. B. lokal oder einer zweiten Instanz mit neuer Datenbank) in der App **Einstellungen → Datensicherung → „Nur den Katalog exportieren"**, die Datei in der produktiven App mit dem Katalogimport einlesen (er **führt zusammen**). Mache vorher ein Backup und prüfe das Ergebnis im Katalog.
 
 Wenn du das HTTPS-Profil nutzt, muss jeder dieser Befehle mit denselben `-f`- und `--profile`-Angaben aufgerufen werden (oder mit `COMPOSE_FILE`/`COMPOSE_PROFILES` in `.env`), siehe Anhang A.
 
@@ -262,7 +262,7 @@ Der Benutzer, dem die Cron-Tabelle gehört, muss Docker benutzen dürfen (Gruppe
 
 **Einstellungen → Datensicherung:**
 
-- **„Alle Daten exportieren"**: JSON mit Katalog, Profilen, Einstellungen, Plänen, Einheiten und allen Sätzen.
+- **„Alle Daten exportieren"**: JSON mit Katalog, Einstellungen, Plänen (mit Equipment), Einheiten und allen Sätzen.
 - **„Nur den Katalog exportieren"**: nur die Übungen mit deinen Änderungen.
 
 Die Dateien sind **nicht verschlüsselt**: Bewahre sie so auf, wie du es mit Gesundheits- und Trainingsdaten tun würdest. Die Export-Datei lässt sich auch am Handy speichern, praktisch für einen Export vor einem Update.
