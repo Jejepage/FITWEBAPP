@@ -15,3 +15,4 @@ next-env.d.ts
 *.tsbuildinfo
 .DS_Store
 /katalog-seed.json
+video-pruefung.md
