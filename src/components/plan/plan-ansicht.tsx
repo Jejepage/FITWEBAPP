@@ -38,7 +38,7 @@ export function PlanAnsicht({
         <section
           key={einheit}
           aria-labelledby={`einheit-${einheit}`}
-          className="rounded-card border border-line/50 bg-surface p-4 shadow-card sm:p-5"
+          className="rounded-card border border-line bg-surface p-4 shadow-card sm:p-5"
         >
           <h2
             id={`einheit-${einheit}`}
@@ -46,7 +46,7 @@ export function PlanAnsicht({
           >
             <span
               aria-hidden="true"
-              className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-hero-from to-hero-to text-lg font-bold text-on-accent"
+              className="grid size-9 place-items-center rounded-2xl bg-gradient-to-br from-hero-from to-hero-to text-lg font-bold text-on-accent"
             >
               {einheit}
             </span>
@@ -64,7 +64,7 @@ export function PlanAnsicht({
                   {t.block[block]} · {t.runden(BLOCK_RUNDEN[block])}
                 </h3>
                 {aus && !kandidaten && (
-                  <p className="mb-2 rounded-xl bg-warn-soft px-3 py-2 text-sm text-ink">
+                  <p className="mb-2 rounded-2xl bg-warn-soft px-3 py-2 text-sm text-ink">
                     {t.zusatzAusHinweis}
                   </p>
                 )}

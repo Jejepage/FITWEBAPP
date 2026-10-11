@@ -59,7 +59,7 @@ export default async function DatenPage({ searchParams }: { searchParams: Promis
             <div className="min-w-0">
               <p className="text-lg font-semibold text-bad-ink">{t.ergebnisFehler}</p>
               {fehler.length > 0 && (
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px]">
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                   {fehler.map((f, i) => (
                     <li key={i}>{f}</li>
                   ))}

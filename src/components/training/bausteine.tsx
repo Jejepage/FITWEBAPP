@@ -29,7 +29,7 @@ export function InfoKarte({
   children: ReactNode;
 }) {
   return (
-    <div className={`flex items-start gap-3 rounded-2xl p-4 text-[15px] leading-snug ${klasse}`}>
+    <div className={`flex items-start gap-3 rounded-2xl p-4 text-sm leading-snug ${klasse}`}>
       <span className="mt-px shrink-0">{symbol}</span>
       <div className="min-w-0 flex-1">{children}</div>
     </div>

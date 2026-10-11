@@ -97,7 +97,7 @@ export function SymbolKachel({
   return (
     <span
       aria-hidden="true"
-      className={`grid shrink-0 place-items-center ${gross ? "size-12 rounded-2xl" : "size-10 rounded-xl"} ${TON[ton]}`}
+      className={`grid shrink-0 place-items-center ${gross ? "size-12 rounded-2xl" : "size-10 rounded-2xl"} ${TON[ton]}`}
     >
       {children}
     </span>

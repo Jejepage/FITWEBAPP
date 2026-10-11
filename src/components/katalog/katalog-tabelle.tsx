@@ -383,7 +383,7 @@ export function KatalogTabelle({
           );
         })}
       </nav>
-      <div className="relative max-h-[calc(100dvh-15rem)] min-h-80 overflow-auto rounded-card border border-line/50 bg-surface shadow-card">
+      <div className="relative max-h-[calc(100dvh-15rem)] min-h-80 overflow-auto rounded-card border border-line bg-surface shadow-card">
         <table className="w-full min-w-[40rem] border-separate border-spacing-0 text-left text-sm">
           <caption className="sr-only">{tt.tabelleBeschreibung}</caption>
           <thead className="sticky top-0 z-10 bg-surface">
@@ -428,7 +428,7 @@ export function KatalogTabelle({
                     id={`muster-${m}`}
                     scope="rowgroup"
                     colSpan={spalten.length}
-                    className={`scroll-mt-36 border-b border-line px-4 py-2.5 text-left text-[15px] font-semibold ${farbe.soft} ${farbe.ink}`}
+                    className={`scroll-mt-36 border-b border-line px-4 py-2.5 text-left text-sm font-semibold ${farbe.soft} ${farbe.ink}`}
                   >
                     <MusterPunkt muster={m} klasse="mr-2.5 size-3" />
                     {MUSTER_NAMEN[m]} <span className="font-normal">({m})</span>

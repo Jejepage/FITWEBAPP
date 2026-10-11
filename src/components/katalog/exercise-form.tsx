@@ -212,7 +212,7 @@ export function ExerciseForm({
             </Feld>
           </div>
         ) : (
-          <p className="text-[15px] text-ink-3">{f.leiterNurBeimBearbeiten}</p>
+          <p className="text-sm text-ink-3">{f.leiterNurBeimBearbeiten}</p>
         )}
       </Abschnitt>
 
@@ -234,7 +234,7 @@ export function ExerciseForm({
         </div>
       </Abschnitt>
 
-      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-6 flex gap-3 bg-overlay px-4 py-3 backdrop-blur-xl backdrop-saturate-150 sm:-mx-6 sm:px-6 lg:bottom-4 lg:mx-0 lg:rounded-card lg:border lg:border-line/50 lg:px-4 lg:shadow-card">
+      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-6 flex gap-3 bg-overlay px-4 py-3 backdrop-blur-xl backdrop-saturate-150 sm:-mx-6 sm:px-6 lg:bottom-4 lg:mx-0 lg:rounded-card lg:border lg:border-line lg:px-4 lg:shadow-card">
         <button
           type="submit"
           disabled={pending}
@@ -264,7 +264,7 @@ function Abschnitt({
     <section className="mb-6">
       <h2 className={kopfzeileKlein}>{titel}</h2>
       <div className={karte}>
-        {hilfe && <p className="mb-4 text-[15px] text-ink-3">{hilfe}</p>}
+        {hilfe && <p className="mb-4 text-sm text-ink-3">{hilfe}</p>}
         {children}
       </div>
     </section>

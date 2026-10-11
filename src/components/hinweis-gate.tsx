@@ -28,7 +28,7 @@ export function HinweisGate() {
         </h1>
       </div>
       <div className={`${karte} mt-8 sm:p-7`}>
-        <p className="text-[17px] leading-relaxed text-ink">{t.text}</p>
+        <p className="text-base leading-relaxed text-ink">{t.text}</p>
         <ul className="my-5 space-y-3">
           {t.zusatz.map((z) => (
             <li key={z} className="flex items-start gap-3 rounded-2xl bg-fill p-4">

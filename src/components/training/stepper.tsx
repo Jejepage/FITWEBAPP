@@ -87,7 +87,7 @@ export function Stepper({
             setText(e.target.value);
             onChange(lies(e.target.value));
           }}
-          className="h-14 min-w-0 flex-1 rounded-xl bg-transparent text-center text-4xl font-bold tabular-nums tracking-tight text-ink placeholder:text-2xl placeholder:font-medium placeholder:text-ink-3 focus:bg-fill"
+          className="h-14 min-w-0 flex-1 rounded-2xl bg-transparent text-center text-4xl font-bold tabular-nums tracking-tight text-ink placeholder:text-2xl placeholder:font-medium placeholder:text-ink-3 focus:bg-fill"
         />
         <button
           type="button"

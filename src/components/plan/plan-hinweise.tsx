@@ -33,7 +33,7 @@ export function PlanHinweise({ hinweise }: { hinweise: readonly PlanHinweis[] })
       >
         {h.titel}
       </h2>
-      <ul className="space-y-2 text-[15px]">
+      <ul className="space-y-2 text-sm">
         {hinweise.map((x, i) => {
           const warnung = WARNUNG.has(x.code);
           return (

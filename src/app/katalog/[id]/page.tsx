@@ -41,8 +41,8 @@ function Abschnitt({
 function Eckdatum({ name, children }: { name: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 px-4 py-3">
-      <dt className="shrink-0 text-[15px] text-ink-3">{name}</dt>
-      <dd className="min-w-0 text-right text-[15px] font-medium">{children}</dd>
+      <dt className="shrink-0 text-sm text-ink-3">{name}</dt>
+      <dd className="min-w-0 text-right text-sm font-medium">{children}</dd>
     </div>
   );
 }
@@ -61,7 +61,7 @@ export default async function UebungPage({ params }: { params: Promise<{ id: str
       <div className={`mx-auto w-full ${BREITE.weit}`}>
         <Link
           href="/katalog"
-          className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-[17px] font-medium text-accent-ink hover:underline"
+          className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-base font-medium text-accent-ink hover:underline"
         >
           <IconZurueck className="size-5" />
           {t.zurueckZurListe}

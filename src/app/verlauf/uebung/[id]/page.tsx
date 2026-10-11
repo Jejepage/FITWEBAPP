@@ -51,8 +51,8 @@ export default async function UebungsVerlaufPage({
     <Link
       href={`/verlauf/uebung/${daten.id}${m === "volumen" ? "?metrik=volumen" : ""}`}
       aria-current={metrik === m ? "true" : undefined}
-      className={`press flex min-h-11 flex-1 items-center justify-center rounded-[0.65rem] px-4 text-center text-[15px] font-medium ${
-        metrik === m ? "bg-surface text-ink shadow-sm" : "text-ink-2 hover:text-ink"
+      className={`press flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-center text-sm font-medium ${
+        metrik === m ? "bg-tint font-semibold text-on-tint" : "text-ink-2 hover:text-ink"
       }`}
     >
       {text}
@@ -64,7 +64,7 @@ export default async function UebungsVerlaufPage({
       <div className={`mx-auto w-full ${BREITE.weit}`}>
         <Link
           href="/verlauf"
-          className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-[17px] font-medium text-accent-ink hover:underline"
+          className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-base font-medium text-accent-ink hover:underline"
         >
           <IconZurueck className="size-5" />
           {t.zurueck}
@@ -96,7 +96,7 @@ export default async function UebungsVerlaufPage({
           <>
             <nav
               aria-label={t.metrik}
-              className="mb-4 flex rounded-xl bg-fill-2 p-0.5 sm:inline-flex sm:min-w-80"
+              className="mb-4 flex rounded-2xl border border-line bg-surface p-1 sm:inline-flex sm:min-w-80"
             >
               {umschalter("bester", t.bester)}
               {umschalter("volumen", t.volumen)}
@@ -104,7 +104,7 @@ export default async function UebungsVerlaufPage({
             {/* PC: großes Diagramm links (bleibt beim Scrollen stehen), Tabelle daneben */}
             <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-start xl:gap-6">
               <section className={`${karte} min-w-0 xl:sticky xl:top-8`}>
-                <p className="mb-3 text-[15px] text-ink-2">{hilfe}</p>
+                <p className="mb-3 text-sm text-ink-2">{hilfe}</p>
                 <VerlaufDiagramm
                   punkte={punkte}
                   einheit={einheit}
@@ -113,8 +113,8 @@ export default async function UebungsVerlaufPage({
                 />
               </section>
 
-              <div className="min-w-0 overflow-x-auto rounded-card border border-line/50 bg-surface px-4 py-2 shadow-card">
-                <table className="w-full text-left text-[15px]">
+              <div className="min-w-0 overflow-x-auto rounded-card border border-line bg-surface px-4 py-2 shadow-card">
+                <table className="w-full text-left text-sm">
                   <caption className="sr-only">{t.diagrammTitel(daten.name, metrikName)}</caption>
                   <thead>
                     <tr className="border-b border-line text-xs uppercase tracking-wide text-ink-3">

@@ -33,7 +33,7 @@ export function Ladder({ kette, aktuellId }: { kette: Exercise[]; aktuellId: str
             <Link
               href={`/katalog/${e.id}`}
               aria-current={aktuell ? "page" : undefined}
-              className={`press flex min-h-12 items-center justify-between gap-3 rounded-xl px-3.5 py-2 ${
+              className={`press flex min-h-12 items-center justify-between gap-3 rounded-2xl px-3.5 py-2 ${
                 aktuell
                   ? `${farbe.soft} border-2 ${farbe.rand} font-semibold`
                   : "bg-fill hover:bg-fill-2"

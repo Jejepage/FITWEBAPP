@@ -43,11 +43,11 @@ export function MainNav() {
       <div className="hidden items-center gap-3 px-6 pb-6 pt-8 lg:flex">
         <span
           aria-hidden="true"
-          className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-hero-from to-hero-to text-white shadow-card"
+          className="grid size-10 place-items-center rounded-2xl bg-accent text-on-accent"
         >
           <IconHantel className="size-6" />
         </span>
-        <span className="text-xl font-bold tracking-tight">{de.app.name}</span>
+        <span className="text-lg font-bold tracking-tight">{de.app.name}</span>
       </div>
       <ul className="mx-auto flex max-w-xl justify-around px-1 lg:mx-0 lg:max-w-none lg:flex-col lg:gap-1 lg:px-3">
         {items.map(({ href, label, Icon }) => {
@@ -57,13 +57,19 @@ export function MainNav() {
               <Link
                 href={href}
                 aria-current={aktiv ? "page" : undefined}
-                className={`press flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1.5 text-[11px] font-medium lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-base ${
+                className={`press group flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 py-1.5 text-[10px] font-medium tracking-tighter lg:min-h-12 lg:tracking-normal lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-[15px] ${
                   aktiv
-                    ? "text-accent-ink lg:bg-accent-soft lg:font-semibold"
+                    ? "font-semibold text-ink lg:bg-tint lg:text-on-tint"
                     : "text-ink-3 hover:text-ink lg:hover:bg-fill"
                 }`}
               >
-                <Icon className="size-6" />
+                <span
+                  className={`grid h-8 w-14 place-items-center rounded-full transition-colors lg:size-auto lg:bg-transparent lg:text-inherit ${
+                    aktiv ? "bg-tint text-on-tint" : ""
+                  }`}
+                >
+                  <Icon className="size-6" />
+                </span>
                 {label}
               </Link>
             </li>

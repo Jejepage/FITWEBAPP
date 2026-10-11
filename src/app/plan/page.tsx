@@ -27,7 +27,7 @@ function Kachel({ name, children }: { name: string; children: React.ReactNode })
   return (
     <div className="rounded-2xl bg-fill p-4">
       <dt className="text-sm text-ink-3">{name}</dt>
-      <dd className="mt-0.5 text-[17px] font-semibold leading-snug">{children}</dd>
+      <dd className="mt-0.5 text-base font-semibold leading-snug">{children}</dd>
     </div>
   );
 }
@@ -46,7 +46,7 @@ export default function PlanPage() {
             <IconPlan className="size-9" />
           </span>
           <p className="mb-2 text-xl font-semibold">{t.keinPlan}</p>
-          <p className="mx-auto mb-6 max-w-md text-[15px] text-ink-2">{t.keinPlanHilfe}</p>
+          <p className="mx-auto mb-6 max-w-md text-sm text-ink-2">{t.keinPlanHilfe}</p>
           <Link href="/plan/neu" className={knopfPrimaer}>
             {t.erstellen}
           </Link>
@@ -79,7 +79,7 @@ export default function PlanPage() {
       <section className={`${karte} mb-6`} aria-label={t.aktiverPlan}>
         <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Kachel name={t.equipment}>
-            <span className="block text-[15px] font-medium leading-snug">
+            <span className="block text-sm font-medium leading-snug">
               {plan.equipment.length > 0
                 ? plan.equipment.map((a) => EQUIPMENT_NAMEN[a]).join(", ")
                 : t.keinEquipment}
@@ -89,7 +89,7 @@ export default function PlanPage() {
             )}
             <Link
               href="/plan/equipment"
-              className="mt-1 inline-flex min-h-11 items-center text-[15px] font-medium text-accent-ink hover:underline"
+              className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-accent-ink hover:underline"
             >
               {t.equipmentAendern}
             </Link>
@@ -109,7 +109,7 @@ export default function PlanPage() {
           </Kachel>
         </dl>
         {fehlt > 0 && (
-          <p role="status" className={`${bannerInfo} mt-4 text-[15px]`}>
+          <p role="status" className={`${bannerInfo} mt-4 text-sm`}>
             {t.equipmentFehlt(fehlt)}
           </p>
         )}

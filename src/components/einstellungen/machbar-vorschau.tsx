@@ -39,11 +39,11 @@ export function MachbarVorschau({
             return (
               <div
                 key={m}
-                className={`grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 rounded-xl px-3.5 py-3 ${
+                className={`grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 rounded-2xl px-3.5 py-3 ${
                   keine ? "bg-bad-soft" : "bg-fill"
                 }`}
               >
-                <dt className="flex min-w-0 items-center gap-2 text-[15px] font-medium text-ink">
+                <dt className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink">
                   <span
                     aria-hidden="true"
                     className={`size-2.5 shrink-0 rounded-full ${keine ? "bg-bad" : farbe.fl}`}

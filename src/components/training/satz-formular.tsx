@@ -143,7 +143,7 @@ export function SatzFormular({
                 aria-checked={gewaehlt}
                 aria-label={st.text}
                 onClick={() => set("rpe", st.wert)}
-                className={`press flex min-h-[4.5rem] flex-col items-center justify-center rounded-xl px-2 py-2 ${STUFE_KLASSE[st.key]} ${
+                className={`press flex min-h-[4.5rem] flex-col items-center justify-center rounded-2xl px-2 py-2 ${STUFE_KLASSE[st.key]} ${
                   gewaehlt
                     ? "z-10 scale-[1.03] shadow-lg ring-[3px] ring-ink ring-offset-2 ring-offset-surface"
                     : "hover:brightness-95"

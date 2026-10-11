@@ -10,7 +10,7 @@ const t = de.katalog.tabelle;
 export function SpaltenWahl({ spalten, zurueck }: { spalten: readonly Spalte[]; zurueck: string }) {
   return (
     <details className="relative">
-      <summary className="press inline-flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-xl bg-fill-2 px-4 text-[15px] font-semibold text-ink hover:brightness-95 [&::-webkit-details-marker]:hidden">
+      <summary className="press inline-flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-2xl bg-fill-2 px-4 text-sm font-semibold text-ink hover:brightness-95 [&::-webkit-details-marker]:hidden">
         <IconTabelle className="size-5 text-ink-2" />
         {t.spaltenKnopf}
         <span className="font-medium text-ink-2">({spalten.length})</span>
@@ -26,7 +26,7 @@ export function SpaltenWahl({ spalten, zurueck }: { spalten: readonly Spalte[]; 
         <ul className="mb-4 grid grid-cols-2 gap-x-3">
           {SPALTEN.map((s) => (
             <li key={s}>
-              <label className="flex min-h-11 items-center gap-2.5 text-[15px]">
+              <label className="flex min-h-11 items-center gap-2.5 text-sm">
                 <input
                   type="checkbox"
                   name="spalte"

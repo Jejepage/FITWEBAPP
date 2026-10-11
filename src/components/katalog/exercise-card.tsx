@@ -13,12 +13,12 @@ export function ExerciseCard({ e }: { e: Exercise }) {
   return (
     <Link
       href={`/katalog/${e.id}`}
-      className={`press group relative block h-full overflow-hidden rounded-card border border-line/50 bg-surface p-4 pl-5 shadow-card transition-shadow hover:shadow-lg`}
+      className={`press group relative block h-full overflow-hidden rounded-card border border-line bg-surface p-4 pl-5 shadow-card transition-shadow hover:shadow-lg`}
     >
       <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1.5 ${farbe.fl}`} />
       <div className="flex items-start justify-between gap-3">
         <span
-          className={`text-[17px] font-semibold leading-snug ${e.aktiv ? "text-ink" : "text-ink-2"}`}
+          className={`text-base font-semibold leading-snug ${e.aktiv ? "text-ink" : "text-ink-2"}`}
         >
           {e.name}
         </span>

@@ -6,8 +6,8 @@ import { de } from "@/i18n/de";
 const t = de.katalog.tabelle;
 
 const grund =
-  "press inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[0.65rem] px-4 text-[15px] font-medium";
-const aktivKlasse = "bg-surface text-ink shadow-sm";
+  "press inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-2xl px-4 text-sm font-medium";
+const aktivKlasse = "bg-tint font-semibold text-on-tint";
 const inaktivKlasse = "text-ink-2 hover:text-ink";
 
 /**
@@ -30,8 +30,8 @@ export function AnsichtUmschalter({
         : ansicht !== "auto"
           ? inaktivKlasse
           : wert === "karten"
-            ? `${aktivKlasse} md:bg-transparent md:text-ink-2 md:shadow-none`
-            : `${inaktivKlasse} md:bg-surface md:text-ink md:shadow-sm`;
+            ? `${aktivKlasse} md:bg-transparent md:font-medium md:text-ink-2`
+            : `${inaktivKlasse} md:bg-tint md:font-semibold md:text-on-tint`;
     const Icon = wert === "karten" ? IconKarten : IconTabelle;
     return (
       <button
@@ -51,7 +51,7 @@ export function AnsichtUmschalter({
       action={speichereAnsicht}
       role="group"
       aria-label={t.ansicht}
-      className="inline-flex rounded-xl bg-fill-2 p-0.5"
+      className="inline-flex rounded-2xl border border-line bg-surface p-1"
     >
       <input type="hidden" name="was" value="ansicht" />
       <input type="hidden" name="zurueck" value={zurueck} />
