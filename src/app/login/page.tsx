@@ -40,7 +40,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         {fehler && (
           <div
             role="alert"
-            className={`${sperre ? bannerWarn : bannerFehler} mb-5 flex items-start gap-3 text-[15px] font-medium`}
+            className={`${sperre ? bannerWarn : bannerFehler} mb-5 flex items-start gap-3 text-sm font-medium`}
           >
             {sperre ? (
               <IconSchloss className="mt-0.5 size-5 shrink-0 text-warn-ink" />

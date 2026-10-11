@@ -6,146 +6,170 @@
  * Text steht immer in den Textfarben (ink*, *-ink); Farbflächen dienen als Fläche, Punkt und Tönung.
  * Kontrastpaare prüft src/lib/kontrast.test.ts direkt gegen diese Datei.
  */
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+@import "@fontsource/ibm-plex-mono/700.css";
+
 :root {
   color-scheme: light dark;
 
-  /* Flächen */
-  --bg: #f2f2f7;
+  /* Flächen (Designvorlage: Hintergrund #F5F6F6, Fläche #FFFFFF) */
+  --bg: #f5f6f6;
   --surface: #ffffff;
-  --fill: #f2f2f7;
-  --fill-2: #e5e5ea;
-  --line: #e0e0e5;
-  --overlay: rgb(255 255 255 / 0.72);
+  --fill: #f0f2f3;
+  --fill-2: #e3e8ea;
+  --line: #dfe4e6;
+  --overlay: rgb(255 255 255 / 0.78);
 
   /* Text */
-  --ink: #1c1c1e;
-  --ink-2: #48484a;
-  --ink-3: #6c6c70;
+  --ink: #24262b;
+  --ink-2: #474b52;
+  --ink-3: #62676f;
 
-  /* Akzent (iOS-Blau): --accent ist Knopffläche (Weiß darauf), --accent-ink Text/Link auf Flächen */
-  --accent: #0071e3;
-  --accent-ink: #0066cc;
-  --accent-soft: #e3f0fd;
+  /* Akzent: --accent ist die Hauptknopffläche (hell: Textfarbe, dunkel: Akzent #AECFD5),
+     --accent-ink Text/Link auf Flächen, --tint die Pastellfläche (Segment, Tab, Nebenknopf) */
+  --accent: #24262b;
+  --accent-ink: #2e5c65;
+  --accent-soft: #e4eff1;
   --on-accent: #ffffff;
+  --tint: #c7dde0;
+  --on-tint: #24262b;
+  --tint-2: #c7dde0;
+  --on-tint-2: #24262b;
+
+  /* Pastellfarben der Vorlage */
+  --lavendel: #e6dff0;
+  --salbei: #e1e8d7;
 
   /* Status */
-  --ok: #34c759;
-  --ok-ink: #1e7a36;
-  --ok-soft: #e3f7e8;
-  --warn: #ff9500;
-  --warn-ink: #8a5300;
-  --warn-soft: #fff1dc;
-  --bad: #ff3b30;
-  --bad-ink: #c4221a;
-  --bad-soft: #ffe8e6;
+  --ok: #7fa36f;
+  --ok-ink: #3c6530;
+  --ok-soft: #e1e8d7;
+  --warn: #d9a25a;
+  --warn-ink: #7c5212;
+  --warn-soft: #f6ecdc;
+  --bad: #e5484d;
+  --bad-ink: #b4232a;
+  --bad-soft: #fbe6e6;
 
-  /* Bewegungsmuster: Fläche/Punkt, Tönung, Text */
-  --m-kn: #34c759;
-  --m-kn-soft: #e3f7e8;
-  --m-kn-ink: #207b37;
-  --m-hb: #5856d6;
-  --m-hb-soft: #e8e7f9;
-  --m-hb-ink: #5856d6;
-  --m-dh: #ff9500;
-  --m-dh-soft: #fff0db;
-  --m-dh-ink: #9e5c00;
-  --m-dv: #ff2d55;
-  --m-dv-soft: #ffe2e7;
-  --m-dv-ink: #c72342;
-  --m-zh: #007aff;
-  --m-zh-soft: #dbecff;
-  --m-zh-ink: #0064d1;
-  --m-zv: #af52de;
-  --m-zv-soft: #f4e7fa;
-  --m-zv-ink: #9345ba;
-  --m-tr: #a2845e;
-  --m-tr-soft: #f2eee8;
-  --m-tr-ink: #7e6749;
-  --m-ru: #30b0c7;
-  --m-ru-soft: #e2f4f7;
-  --m-ru-ink: #207483;
+  /* Bewegungsmuster: Fläche/Punkt, Tönung, Text (gedeckte Pastelltöne) */
+  --m-kn: #8fb08a;
+  --m-kn-soft: #e3ebdc;
+  --m-kn-ink: #3d6638;
+  --m-hb: #8e8cc8;
+  --m-hb-soft: #e7e6f4;
+  --m-hb-ink: #4e4b9a;
+  --m-dh: #d9a36a;
+  --m-dh-soft: #f5eadc;
+  --m-dh-ink: #80521c;
+  --m-dv: #d88a9a;
+  --m-dv-soft: #f6e3e7;
+  --m-dv-ink: #96394e;
+  --m-zh: #7fa7c9;
+  --m-zh-soft: #deeaf3;
+  --m-zh-ink: #2e5d84;
+  --m-zv: #b49ad6;
+  --m-zv-soft: #e6dff0;
+  --m-zv-ink: #674791;
+  --m-tr: #b59c7e;
+  --m-tr-soft: #efe9e1;
+  --m-tr-ink: #6b563d;
+  --m-ru: #8fc0c7;
+  --m-ru-soft: #dcecee;
+  --m-ru-ink: #2a6670;
 
-  /* RPE-Skala 1-10 von grün nach rot (Flächen; Text darauf ist --on-rpe) */
-  --rpe-1: #34c759;
-  --rpe-2: #5dc95a;
-  --rpe-3: #86cb4f;
-  --rpe-4: #b0cc40;
-  --rpe-5: #d8c92f;
-  --rpe-6: #f5bd1f;
-  --rpe-7: #ff9f0a;
-  --rpe-8: #ff7a1a;
-  --rpe-9: #ff5530;
-  --rpe-10: #cf3517;
-  --on-rpe: #1c1c1e;
-  --on-rpe-hi: #ffffff; /* Text auf RPE 10 */
+  /* RPE-Skala 1-10 von Salbei nach Koralle (Pastellflächen; Text darauf ist --on-rpe) */
+  --rpe-1: #a8d5a2;
+  --rpe-2: #b5d79c;
+  --rpe-3: #c3d896;
+  --rpe-4: #d2d98f;
+  --rpe-5: #e0d68a;
+  --rpe-6: #ebcd86;
+  --rpe-7: #f0bd84;
+  --rpe-8: #efab83;
+  --rpe-9: #ec9a86;
+  --rpe-10: #e5878a;
+  --on-rpe: #24262b;
+  --on-rpe-hi: #24262b; /* Text auf RPE 10 */
 
-  --card-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 20px rgb(0 0 0 / 0.06);
-  --hero-from: #0071e3;
-  --hero-to: #5448c8;
+  --card-shadow: 0 1px 2px rgb(36 38 43 / 0.04), 0 4px 16px rgb(36 38 43 / 0.04);
+  --hero-from: #24262b;
+  --hero-to: #3a414b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;
-    --surface: #1c1c1e;
-    --fill: #2c2c2e;
-    --fill-2: #3a3a3c;
-    --line: #38383a;
-    --overlay: rgb(28 28 30 / 0.72);
+    /* Designvorlage: Hintergrund #121619, Fläche #1B2025, Karte #252C32 */
+    --bg: #121619;
+    --surface: #1b2025;
+    --fill: #252c32;
+    --fill-2: #2f373e;
+    --line: #2c343b;
+    --overlay: rgb(27 32 37 / 0.8);
 
-    --ink: #f5f5f7;
-    --ink-2: #d1d1d6;
-    --ink-3: #98989f;
+    --ink: #eef2f3;
+    --ink-2: #c9d1d6;
+    --ink-3: #aab5bd;
 
-    --accent: #0071e3;
-    --accent-ink: #4da3ff;
-    --accent-soft: #10263f;
+    --accent: #aecfd5;
+    --accent-ink: #aecfd5;
+    --accent-soft: #22333a;
+    --on-accent: #121619;
+    --tint: #aecfd5;
+    --on-tint: #121619;
+    --tint-2: #c6b8de;
+    --on-tint-2: #121619;
 
-    --ok: #30d158;
-    --ok-ink: #5fdc7e;
-    --ok-soft: #12301b;
-    --warn: #ff9f0a;
-    --warn-ink: #ffc14d;
-    --warn-soft: #3a2a08;
-    --bad: #ff453a;
-    --bad-ink: #ff7a72;
-    --bad-soft: #3d1613;
+    --lavendel: #c6b8de;
+    --salbei: #bdcbb0;
 
-    --m-kn: #30d158;
-    --m-kn-soft: #20442b;
-    --m-kn-ink: #30d158;
-    --m-hb: #5e5ce6;
-    --m-hb-soft: #2b2a4a;
-    --m-hb-ink: #9897ef;
-    --m-dh: #ff9f0a;
-    --m-dh-soft: #4e391a;
-    --m-dh-ink: #ff9f0a;
-    --m-dv: #ff375f;
-    --m-dv-soft: #4e222c;
-    --m-dv-ink: #ff7792;
-    --m-zh: #0a84ff;
-    --m-zh-soft: #183350;
-    --m-zh-ink: #54a9ff;
-    --m-zv: #bf5af2;
-    --m-zv-soft: #402a4d;
-    --m-zv-ink: #d28cf6;
-    --m-tr: #ac8e68;
-    --m-tr-soft: #3c352e;
-    --m-tr-ink: #bea789;
-    --m-ru: #40c8e0;
-    --m-ru-soft: #244249;
-    --m-ru-ink: #40c8e0;
+    --ok: #bdcbb0;
+    --ok-ink: #c4d4b5;
+    --ok-soft: #252f27;
+    --warn: #e8c48a;
+    --warn-ink: #ecc994;
+    --warn-soft: #362d1f;
+    --bad: #f47174;
+    --bad-ink: #f6989a;
+    --bad-soft: #3a2125;
+
+    --m-kn: #a9c49d;
+    --m-kn-soft: #263128;
+    --m-kn-ink: #bdcbb0;
+    --m-hb: #a3a1e0;
+    --m-hb-soft: #29293f;
+    --m-hb-ink: #bab8ee;
+    --m-dh: #e3b583;
+    --m-dh-soft: #382d21;
+    --m-dh-ink: #e8c49a;
+    --m-dv: #e39aaa;
+    --m-dv-soft: #3a252b;
+    --m-dv-ink: #edb0bd;
+    --m-zh: #92b8da;
+    --m-zh-soft: #1f2e3b;
+    --m-zh-ink: #a9c8e4;
+    --m-zv: #c6b8de;
+    --m-zv-soft: #2e293a;
+    --m-zv-ink: #d3c8e7;
+    --m-tr: #c2ab8f;
+    --m-tr-soft: #322c26;
+    --m-tr-ink: #d0bca3;
+    --m-ru: #aecfd5;
+    --m-ru-soft: #1f3237;
+    --m-ru-ink: #aecfd5;
+
+    --on-rpe: #121619;
 
     --card-shadow: none;
-    --hero-from: #0a5fd6;
-    --hero-to: #4240b8;
+    --hero-from: #aecfd5;
+    --hero-to: #c6b8de;
   }
 }
 
 @theme inline {
-  --font-sans:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    system-ui, sans-serif;
+  --font-sans: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -160,6 +184,12 @@
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
+  --color-tint: var(--tint);
+  --color-on-tint: var(--on-tint);
+  --color-tint-2: var(--tint-2);
+  --color-on-tint-2: var(--on-tint-2);
+  --color-lavendel: var(--lavendel);
+  --color-salbei: var(--salbei);
   --color-brand: var(--accent);
   --color-ok: var(--ok);
   --color-ok-ink: var(--ok-ink);
@@ -213,7 +243,7 @@
   --color-hero-to: var(--hero-to);
 
   --shadow-card: var(--card-shadow);
-  --radius-card: 1.25rem;
+  --radius-card: 1.5rem; /* Karten 24 px, Felder 16 px (rounded-2xl) */
 }
 
 html {

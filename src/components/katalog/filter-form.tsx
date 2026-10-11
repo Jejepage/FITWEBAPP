@@ -53,11 +53,11 @@ function Segmente({
   return (
     <fieldset>
       <legend className="mb-1.5 text-sm font-medium text-ink-2">{label}</legend>
-      <div className="flex rounded-xl bg-fill-2 p-0.5">
+      <div className="flex rounded-2xl border border-line bg-surface p-1">
         {optionen.map((o) => (
           <label
             key={o.wert}
-            className="press relative flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-[0.65rem] px-2 text-center text-[15px] font-medium text-ink-2 has-checked:bg-surface has-checked:text-ink has-checked:shadow-sm has-focus-visible:outline-2 has-focus-visible:outline-accent-ink"
+            className="press relative flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-xl px-2 text-center text-sm font-medium text-ink-2 has-checked:bg-tint has-checked:font-semibold has-checked:text-on-tint has-focus-visible:outline-2 has-focus-visible:outline-accent-ink"
           >
             <input
               type="radio"
@@ -95,9 +95,9 @@ export function FilterForm({
   return (
     <details
       open={aktiv}
-      className="group mb-6 rounded-card border border-line/50 bg-surface shadow-card"
+      className="group mb-6 rounded-card border border-line bg-surface shadow-card"
     >
-      <summary className="press flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-card px-5 py-3 text-[17px] font-semibold [&::-webkit-details-marker]:hidden">
+      <summary className="press flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-card px-5 py-3 text-base font-semibold [&::-webkit-details-marker]:hidden">
         <IconFilter className="size-5 text-accent-ink" />
         {t.filter}
         {aktiv && <span className="text-sm font-normal text-accent-ink">●</span>}

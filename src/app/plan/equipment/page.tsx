@@ -21,7 +21,7 @@ export default function PlanEquipmentPage() {
     <div className={`mx-auto w-full ${BREITE.normal}`}>
       <Link
         href="/plan"
-        className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-[17px] font-medium text-accent-ink hover:underline"
+        className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-base font-medium text-accent-ink hover:underline"
       >
         <IconZurueck className="size-5" />
         {t.zurueck}
@@ -35,7 +35,7 @@ export default function PlanEquipmentPage() {
         {zurueck}
         <PageShell title={t.titel} breite="normal">
           <section className={`${karte} py-8 text-center`}>
-            <p className="mb-4 text-[17px]">{de.plan.keinPlan}</p>
+            <p className="mb-4 text-base">{de.plan.keinPlan}</p>
             <Link href="/plan/neu" className={knopfPrimaer}>
               {de.plan.erstellen}
             </Link>

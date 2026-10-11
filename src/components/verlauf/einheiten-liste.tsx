@@ -33,7 +33,7 @@ export function EinheitenListe({ einheiten }: { einheiten: EinheitKurz[] }) {
                 >
                   <span
                     aria-hidden="true"
-                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-lg font-bold text-accent-ink"
+                    className="grid size-10 shrink-0 place-items-center rounded-2xl bg-accent-soft text-lg font-bold text-accent-ink"
                   >
                     {e.einheit}
                   </span>

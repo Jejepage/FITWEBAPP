@@ -89,7 +89,7 @@ export default async function PlanNeuPage({
       <div className={`mx-auto w-full ${BREITE.weit}`}>
         <Link
           href="/plan"
-          className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-[17px] font-medium text-accent-ink hover:underline"
+          className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-base font-medium text-accent-ink hover:underline"
         >
           <IconZurueck className="size-5" />
           {t.zurueck}
@@ -108,12 +108,12 @@ export default async function PlanNeuPage({
           <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start lg:gap-8 xl:grid-cols-[24rem_minmax(0,1fr)]">
             {/* Eingaben: am PC links und beim Scrollen stehen bleibend */}
             <div className="lg:sticky lg:top-8 lg:-m-2 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:p-2">
-              {vorgaenger && <p className={`${bannerInfo} mb-4 text-[15px]`}>{f.folgeblock}</p>}
+              {vorgaenger && <p className={`${bannerInfo} mb-4 text-sm`}>{f.folgeblock}</p>}
               <details
                 open
-                className="group rounded-card border border-line/50 bg-surface shadow-card"
+                className="group rounded-card border border-line bg-surface shadow-card"
               >
-                <summary className="press flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-card px-5 py-3 text-[17px] font-semibold [&::-webkit-details-marker]:hidden">
+                <summary className="press flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-card px-5 py-3 text-base font-semibold [&::-webkit-details-marker]:hidden">
                   {f.eingaben}
                   <IconChevron className="ml-auto size-5 text-ink-3 transition-transform group-open:rotate-90" />
                 </summary>
@@ -164,7 +164,7 @@ export default async function PlanNeuPage({
                       {[2, 3].map((n) => (
                         <label
                           key={n}
-                          className="press flex min-h-12 cursor-pointer items-center gap-3 rounded-xl bg-fill px-3.5 has-checked:bg-accent-soft has-checked:font-semibold"
+                          className="press flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl bg-fill px-3.5 has-checked:bg-accent-soft has-checked:font-semibold"
                         >
                           <input
                             type="radio"
@@ -198,7 +198,7 @@ export default async function PlanNeuPage({
                       ergebnis.fehlendeMuster.map((m) => MUSTER_NAMEN[m]).join(", "),
                     )}
                   </p>
-                  <p className="mt-1 text-[15px]">{t.fehlendeMusterHilfe}</p>
+                  <p className="mt-1 text-sm">{t.fehlendeMusterHilfe}</p>
                   <button
                     type="submit"
                     name="aktion"
@@ -227,7 +227,7 @@ export default async function PlanNeuPage({
                       {f.neu}
                     </button>
                   </div>
-                  <p className="mb-4 text-[15px] text-ink-3">{f.auswahlHilfe}</p>
+                  <p className="mb-4 text-sm text-ink-3">{f.auswahlHilfe}</p>
                   <PlanAnsicht
                     slots={slots}
                     uebungen={uebungenNachId}
@@ -235,7 +235,7 @@ export default async function PlanNeuPage({
                     kandidaten={kandidaten}
                     rasterKlasse="2xl:grid-cols-2"
                   />
-                  <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-6 bg-overlay px-4 py-3 backdrop-blur-xl backdrop-saturate-150 sm:-mx-6 sm:px-6 lg:bottom-4 lg:mx-0 lg:rounded-card lg:border lg:border-line/50 lg:px-5 lg:shadow-card">
+                  <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-6 bg-overlay px-4 py-3 backdrop-blur-xl backdrop-saturate-150 sm:-mx-6 sm:px-6 lg:bottom-4 lg:mx-0 lg:rounded-card lg:border lg:border-line lg:px-5 lg:shadow-card">
                     <p className="mb-2 text-sm text-ink-3">{f.speichernHilfe}</p>
                     <button
                       type="submit"

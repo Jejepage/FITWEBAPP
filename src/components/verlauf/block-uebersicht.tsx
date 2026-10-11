@@ -48,7 +48,7 @@ export function BlockUebersicht({ bloecke }: { bloecke: BlockZeile[] }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-lg font-semibold">{t.blockTitel(datumKurz(aktuell.startDatum))}</p>
-            <p className="text-[15px] text-ink-2">
+            <p className="text-sm text-ink-2">
               {t.blockStand(aktuell.absolviert, aktuell.geplant)}
             </p>
           </div>
@@ -61,7 +61,7 @@ export function BlockUebersicht({ bloecke }: { bloecke: BlockZeile[] }) {
       {frueher.length > 0 && (
         <ul className={`${gruppe} mt-3`}>
           {frueher.map((b) => (
-            <li key={b.planId} className="flex min-h-12 items-center gap-3 px-4 py-3 text-[15px]">
+            <li key={b.planId} className="flex min-h-12 items-center gap-3 px-4 py-3 text-sm">
               <IconHakenKreis
                 className={`size-5 shrink-0 ${b.absolviert >= b.geplant ? "text-ok-ink" : "text-ink-3"}`}
               />

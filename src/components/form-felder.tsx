@@ -58,12 +58,12 @@ export function Feld({
 
 /** Ganze Zeile als Tippfläche; gewählte Zeile wird akzentfarbig getönt. */
 const AUSWAHL_ZEILE =
-  "press flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-line bg-fill px-4 py-2.5 has-[:checked]:border-accent has-[:checked]:bg-accent-soft has-[:disabled]:cursor-default has-[:disabled]:opacity-75";
+  "press flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-line bg-fill px-4 py-2.5 has-[:checked]:border-accent-ink has-[:checked]:bg-accent-soft has-[:disabled]:cursor-default has-[:disabled]:opacity-75";
 
 function AuswahlText({ label, hilfe }: { label: string; hilfe?: string }) {
   return (
     <span className="min-w-0 flex-1">
-      <span className="block text-[17px] leading-snug text-ink">{label}</span>
+      <span className="block text-base leading-snug text-ink">{label}</span>
       {hilfe && <span className="mt-0.5 block text-sm leading-snug text-ink-3">{hilfe}</span>}
     </span>
   );
@@ -145,7 +145,7 @@ export function FehlerBanner({ children }: { children: ReactNode }) {
   return (
     <div
       role="alert"
-      className={`${bannerFehler} mb-4 flex items-start gap-3 text-[15px] font-medium`}
+      className={`${bannerFehler} mb-4 flex items-start gap-3 text-sm font-medium`}
     >
       <IconWarnung className="mt-0.5 size-5 shrink-0 text-bad-ink" />
       <div className="min-w-0 flex-1">{children}</div>
@@ -157,7 +157,7 @@ export function ErfolgBanner({ children }: { children: ReactNode }) {
   return (
     <div
       role="status"
-      className={`${bannerOk} mb-4 flex items-start gap-3 text-[15px] font-medium`}
+      className={`${bannerOk} mb-4 flex items-start gap-3 text-sm font-medium`}
     >
       <IconKreisHaken className="mt-0.5 size-5 shrink-0 text-ok-ink" />
       <div className="min-w-0 flex-1">{children}</div>

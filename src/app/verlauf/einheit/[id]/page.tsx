@@ -45,7 +45,7 @@ export default async function EinheitPage({
         ) : (
           <Link
             href="/verlauf"
-            className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-[17px] font-medium text-accent-ink hover:underline"
+            className="press -ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-base font-medium text-accent-ink hover:underline"
           >
             <IconZurueck className="size-5" />
             {t.zurueck}
@@ -64,7 +64,7 @@ export default async function EinheitPage({
         }
       >
         {e.notiz && (
-          <p className={`${karte} mb-5 text-[15px]`}>
+          <p className={`${karte} mb-5 text-sm`}>
             <span className="font-semibold">{t.notiz}:</span> {e.notiz}
           </p>
         )}
@@ -101,7 +101,7 @@ export default async function EinheitPage({
                       {g.ersetzt ? ` · ${t.ersetzt}` : ""}
                     </span>
                   </p>
-                  <ol className="mt-3 divide-y divide-line text-[15px]">
+                  <ol className="mt-3 divide-y divide-line text-sm">
                     {g.saetze.map((s) => (
                       <li key={s.runde} className="flex items-baseline gap-2 py-2">
                         <span className="text-ink-3">{t.runde(s.runde)}:</span>

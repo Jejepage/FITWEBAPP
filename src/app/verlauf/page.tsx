@@ -40,7 +40,7 @@ export default async function VerlaufPage({
             {liste.length === 0 ? (
               <div className={`${karte} text-center`}>
                 <p className="font-semibold">{t.keineEinheiten}</p>
-                <p className="text-[15px] text-ink-2">{t.keineEinheitenHilfe}</p>
+                <p className="text-sm text-ink-2">{t.keineEinheitenHilfe}</p>
               </div>
             ) : (
               <EinheitenListe einheiten={liste} />
@@ -57,9 +57,9 @@ export default async function VerlaufPage({
           <h2 id="uebungen-titel" className={abschnittTitel}>
             {t.uebungen}
           </h2>
-          <p className="mb-3 mt-1 text-[15px] text-ink-3">{t.uebungenHilfe}</p>
+          <p className="mb-3 mt-1 text-sm text-ink-3">{t.uebungenHilfe}</p>
           {uebungen.length === 0 ? (
-            <p className="text-[15px] text-ink-3">{t.keineUebungen}</p>
+            <p className="text-sm text-ink-3">{t.keineUebungen}</p>
           ) : (
             MUSTER.map((m) => {
               const liste = uebungen.filter((u) => u.muster === m);

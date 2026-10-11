@@ -143,7 +143,7 @@ export default async function KatalogPage({
       }
     >
       <p
-        className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[15px] text-ink-3"
+        className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-3"
         aria-live="polite"
       >
         <span className="font-medium">{t.anzahl(items.length, gesamt)}</span>

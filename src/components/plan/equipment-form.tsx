@@ -43,7 +43,7 @@ export function EquipmentForm({
           fehler={fehler}
           texte={t}
         />
-        <p className="text-[15px] text-ink-2">{t.wirkung}</p>
+        <p className="text-sm text-ink-2">{t.wirkung}</p>
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">

@@ -21,7 +21,7 @@ export function VideoKnopf({
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`press inline-flex min-h-12 select-none items-center justify-center gap-2.5 rounded-xl bg-gradient-to-br from-hero-from to-hero-to px-5 py-2.5 text-[17px] font-semibold leading-tight text-on-accent shadow-card hover:brightness-110 ${className}`}
+      className={`press inline-flex min-h-12 select-none items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-br from-hero-from to-hero-to px-5 py-2.5 text-base font-semibold leading-tight text-on-accent shadow-card hover:brightness-110 ${className}`}
     >
       <span
         aria-hidden="true"

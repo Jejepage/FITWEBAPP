@@ -15,7 +15,7 @@ export function NaechstesMalAnsicht({ daten }: { daten: NaechstesMal }) {
     return (
       <section className="rounded-card bg-fill p-5">
         <h2 className={`${abschnittTitel} mb-1`}>{t.naechstesMal}</h2>
-        <p className="text-[15px] text-ink-2">{t.keineVorschlaege[daten.grund]}</p>
+        <p className="text-sm text-ink-2">{t.keineVorschlaege[daten.grund]}</p>
       </section>
     );
   }
@@ -26,7 +26,7 @@ export function NaechstesMalAnsicht({ daten }: { daten: NaechstesMal }) {
         {t.naechstesMal}
       </h2>
       {woche !== undefined && (
-        <p className="mb-3 mt-1 text-[15px] text-ink-2">{t.naechstesMalHilfe(woche)}</p>
+        <p className="mb-3 mt-1 text-sm text-ink-2">{t.naechstesMalHilfe(woche)}</p>
       )}
       <ul className="space-y-2.5">
         {daten.eintraege.map((e) => {

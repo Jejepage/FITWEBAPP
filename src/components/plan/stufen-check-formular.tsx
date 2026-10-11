@@ -32,7 +32,7 @@ export function StufenCheckFormular({
       <h2 id="stufencheck-titel" className="text-xl font-semibold tracking-tight lg:text-2xl">
         {t.titel}
       </h2>
-      <p className="mb-4 mt-1 max-w-3xl text-[15px] text-ink-2">{t.hilfe}</p>
+      <p className="mb-4 mt-1 max-w-3xl text-sm text-ink-2">{t.hilfe}</p>
       <form method="get" action="/plan/neu">
         <input type="hidden" name="vorgaenger" value={planId} />
         <ul className="grid gap-3 lg:grid-cols-2">
@@ -44,7 +44,7 @@ export function StufenCheckFormular({
                     <MusterPunkt muster={e.muster} klasse="size-3" />
                   </span>
                   <div>
-                    <p className="text-[17px] font-semibold">{MUSTER_NAMEN[e.muster]}</p>
+                    <p className="text-base font-semibold">{MUSTER_NAMEN[e.muster]}</p>
                     <p className="flex flex-wrap items-center gap-x-2 text-sm text-ink-2">
                       <StufenPunkte stufe={e.aktuell} muster={e.muster} klasse="size-1.5" />
                       <span>

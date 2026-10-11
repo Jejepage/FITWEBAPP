@@ -23,10 +23,10 @@ export function InstallierenKarte({ passwortSchutz }: { passwortSchutz: boolean 
           </h2>
         </div>
         <ul className="mb-4 space-y-2">
-          <li className="rounded-xl bg-fill px-4 py-3 text-[15px] leading-snug text-ink">
+          <li className="rounded-2xl bg-fill px-4 py-3 text-sm leading-snug text-ink">
             {t.iphone}
           </li>
-          <li className="rounded-xl bg-fill px-4 py-3 text-[15px] leading-snug text-ink">
+          <li className="rounded-2xl bg-fill px-4 py-3 text-sm leading-snug text-ink">
             {t.android}
           </li>
         </ul>

@@ -47,8 +47,8 @@ export default function EinstellungenPage() {
               {de.training.anstrengungTitel}
             </h2>
             <div className={karte}>
-              <p className="mb-3 text-[15px] text-ink-2">{de.training.anstrengungHilfe}</p>
-              <ul className="space-y-1.5 text-[15px]">
+              <p className="mb-3 text-sm text-ink-2">{de.training.anstrengungHilfe}</p>
+              <ul className="space-y-1.5 text-sm">
                 {STUFEN.map((st) => (
                   <li key={st.key}>
                     <span className="font-semibold">{st.text}:</span> {st.reserveSatz}
@@ -73,7 +73,7 @@ export default function EinstellungenPage() {
                   <SymbolKachel>
                     <IconHantel />
                   </SymbolKachel>
-                  <span className="min-w-0 flex-1 text-[17px] font-semibold text-ink">
+                  <span className="min-w-0 flex-1 text-base font-semibold text-ink">
                     {t.zumPlan}
                   </span>
                   <IconPfeilRechts className="size-5 shrink-0 text-ink-3" />
@@ -93,7 +93,7 @@ export default function EinstellungenPage() {
                   <SymbolKachel ton="ok">
                     <IconDatenbank />
                   </SymbolKachel>
-                  <span className="min-w-0 flex-1 text-[17px] font-semibold text-ink">
+                  <span className="min-w-0 flex-1 text-base font-semibold text-ink">
                     {de.daten.link}
                   </span>
                   <IconPfeilRechts className="size-5 shrink-0 text-ink-3" />
@@ -113,8 +113,8 @@ export default function EinstellungenPage() {
                 {t.hinweisTitel}
               </h2>
             </div>
-            <p className="mb-3 text-[15px] leading-snug text-ink">{de.hinweis.text}</p>
-            <ul className="list-disc space-y-1.5 pl-5 text-[15px] leading-snug text-ink-2">
+            <p className="mb-3 text-sm leading-snug text-ink">{de.hinweis.text}</p>
+            <ul className="list-disc space-y-1.5 pl-5 text-sm leading-snug text-ink-2">
               {de.hinweis.zusatz.map((z) => (
                 <li key={z}>{z}</li>
               ))}

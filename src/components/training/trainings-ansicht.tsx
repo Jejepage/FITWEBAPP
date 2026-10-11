@@ -424,7 +424,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
         {hinweise}
         <section
           aria-labelledby="aufwaermen-titel"
-          className="rounded-[1.75rem] bg-surface p-6 shadow-card sm:p-8"
+          className="rounded-card bg-surface p-6 shadow-card sm:p-8"
         >
           <div className="mb-5 flex items-center gap-4">
             <span
@@ -692,7 +692,7 @@ export function TrainingsAnsicht({ daten }: { daten: TrainingsDaten }) {
               offen={grossBildschirm}
               klasse="lg:order-last"
             >
-              <div className="space-y-4 p-4 text-[15px] leading-relaxed">
+              <div className="space-y-4 p-4 text-sm leading-relaxed">
                 <ol className="list-decimal space-y-1.5 pl-5 marker:font-semibold marker:text-ink-3">
                   {info.ausfuehrung.map((a, i) => (
                     <li key={i}>{a}</li>

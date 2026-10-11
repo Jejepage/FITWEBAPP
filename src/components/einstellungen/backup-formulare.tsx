@@ -19,7 +19,7 @@ import { de } from "@/i18n/de";
 const t = de.daten;
 
 const dateiFeld =
-  "block w-full min-h-12 rounded-xl border border-line bg-fill px-3 py-1.5 text-base text-ink file:mr-3 file:min-h-9 file:cursor-pointer file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-1.5 file:text-[15px] file:font-semibold file:text-on-accent";
+  "block w-full min-h-12 rounded-2xl border border-line bg-fill px-3 py-1.5 text-base text-ink file:mr-3 file:min-h-9 file:cursor-pointer file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-1.5 file:text-sm file:font-semibold file:text-on-accent";
 
 /** Export-Links und Import-Formulare (Datei-Upload per POST an /api/import, ohne JavaScript). */
 export function BackupFormulare() {
@@ -35,7 +35,7 @@ export function BackupFormulare() {
               <SymbolKachel gross>
                 <IconDownload />
               </SymbolKachel>
-              <p className="pt-0.5 text-[15px] leading-snug text-ink-2">{t.exportAllesHilfe}</p>
+              <p className="pt-0.5 text-sm leading-snug text-ink-2">{t.exportAllesHilfe}</p>
             </div>
             <a href="/api/export?art=alles" download className={`${knopfPrimaer} w-full`}>
               {t.exportAlles}
@@ -46,7 +46,7 @@ export function BackupFormulare() {
               <SymbolKachel gross ton="grau">
                 <IconDownload />
               </SymbolKachel>
-              <p className="pt-0.5 text-[15px] leading-snug text-ink-2">{t.exportKatalogHilfe}</p>
+              <p className="pt-0.5 text-sm leading-snug text-ink-2">{t.exportKatalogHilfe}</p>
             </div>
             <a href="/api/export?art=katalog" download className={`${knopfSekundaer} w-full`}>
               {t.exportKatalog}
@@ -96,7 +96,7 @@ export function BackupFormulare() {
                 <h3 className="text-lg font-semibold tracking-tight text-ink">{t.importAlles}</h3>
               </div>
             </div>
-            <p className={`${bannerWarn} mb-4 flex items-start gap-3 text-[15px] leading-snug`}>
+            <p className={`${bannerWarn} mb-4 flex items-start gap-3 text-sm leading-snug`}>
               <IconWarnung className="mt-0.5 size-5 shrink-0 text-warn-ink" />
               <span>{t.importAllesHilfe}</span>
             </p>

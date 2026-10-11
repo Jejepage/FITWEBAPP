@@ -18,15 +18,15 @@ export const dynamic = "force-dynamic";
 const t = de.start;
 const FEHLER_CODES = ["kein_plan", "block_fertig", "equipment_unmoeglich"] as const;
 
-/** Hero-Fläche: Farbverlauf mit weicher Dekoration; Text darauf immer in on-accent (Weiß) */
+/** Hero-Fläche: hell dunkle Karte, dunkel Pastellverlauf (Akzent → Lavendel); Text darauf immer in on-accent */
 const heroRahmen =
-  "fade-up relative isolate overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-hero-from to-hero-to p-6 text-on-accent shadow-card sm:p-8 lg:p-10";
-/** Weißer Knopf auf dem Hero, Schrift in der Verlaufsfarbe (in Hell und Dunkel über 4,5:1) */
+  "fade-up relative isolate overflow-hidden rounded-card bg-gradient-to-br from-hero-from to-hero-to p-6 text-on-accent shadow-card sm:p-8 lg:p-10";
+/** Knopf auf dem Hero in on-accent, Schrift in der Verlaufsfarbe (in Hell und Dunkel über 4,5:1) */
 const heroKnopf =
-  "press flex min-h-[4.5rem] w-full select-none items-center justify-center gap-3 rounded-2xl bg-on-accent px-6 text-2xl font-bold text-hero-from shadow-lg hover:brightness-95";
+  "press flex min-h-[4.5rem] w-full select-none items-center justify-center gap-3 rounded-2xl bg-on-accent px-6 text-xl font-bold text-hero-from shadow-lg hover:brightness-95";
 /** Ruhige Karte für Zustände ohne Hero */
 const zustandKarte =
-  "fade-up rounded-[1.75rem] bg-surface p-8 text-center shadow-card sm:p-10 lg:p-12";
+  "fade-up rounded-card border border-line bg-surface p-8 text-center shadow-card sm:p-10 lg:p-12";
 
 function HeroDeko() {
   return (

@@ -25,6 +25,8 @@ const paare = (t: Record<string, string>): [string, string, string, number][] =>
   add("on-accent", "accent");
   add("on-accent", "hero-from");
   add("on-accent", "hero-to");
+  add("on-tint", "tint");
+  add("on-tint-2", "tint-2");
   add("accent-ink", "accent-soft");
   add("ink", "accent-soft");
   for (const s of ["ok", "warn", "bad"]) {
@@ -76,7 +78,7 @@ describe("Aufbau der Tokens", () => {
       expect(hell[k], `${k} fehlt im Hell-Block`).toBeDefined();
     }
   });
-  it("Dunkel nutzt echtes Schwarz als Grund", () => {
-    expect(dunkel.bg).toBe("#000000");
+  it("Dunkel nutzt das Grau der Designvorlage als Grund", () => {
+    expect(dunkel.bg).toBe("#121619");
   });
 });
